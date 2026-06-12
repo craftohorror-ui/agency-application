@@ -46,6 +46,7 @@ export interface LeadInput {
   stage?: LeadStage
   score?: number
   owner_id?: string | null
+  converted_client_id?: string | null
 }
 
 export type LeadUpdateInput = Partial<LeadInput>
@@ -93,6 +94,7 @@ function normalizeLeadInput(input: LeadInput) {
     stage: input.stage ?? 'new_lead',
     score: normalizeScore(input.score),
     owner_id: input.owner_id ?? null,
+    converted_client_id: input.converted_client_id ?? null,
   }
 }
 
@@ -193,6 +195,7 @@ export async function updateLead(id: string, input: LeadUpdateInput): Promise<Le
   if (input.stage !== undefined) payload.stage = input.stage
   if (input.score !== undefined) payload.score = normalizeScore(input.score)
   if (input.owner_id !== undefined) payload.owner_id = input.owner_id
+  if (input.converted_client_id !== undefined) payload.converted_client_id = input.converted_client_id
 
   if (Object.keys(payload).length === 0) {
     throw new Error('No lead fields provided')

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLead } from '@/lib/leads'
+import { deleteLeadAction, convertLeadToClientAction } from '@/app/dashboard/leads/actions'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -35,10 +36,21 @@ export default async function LeadDetailPage({ params }: PageProps) {
           <Badge variant="muted">{formatStage(lead.stage)}</Badge>
         </div>
         <div className="flex items-center space-x-2">
+          {!lead.converted_client_id ? (
+            <form action={convertLeadToClientAction.bind(null, lead.id)}>
+              <Button type="submit">Convert to Client</Button>
+            </form>
+          ) : (
+            <Link href={`/dashboard/clients/${lead.converted_client_id}`}>
+              <Button>View Client</Button>
+            </Link>
+          )}
           <Link href={`/dashboard/leads/${lead.id}/edit`}>
             <Button variant="outline">Edit</Button>
           </Link>
-          <Button variant="destructive">Delete</Button>
+          <form action={deleteLeadAction.bind(null, lead.id)}>
+            <Button variant="destructive" type="submit">Delete</Button>
+          </form>
         </div>
       </div>
 

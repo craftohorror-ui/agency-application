@@ -8,9 +8,11 @@ import {
   deleteLead,
   updateLead,
   updateLeadStage,
+  getLead,
   type LeadInput,
   type LeadUpdateInput,
 } from '@/lib/leads'
+import { createClient } from '@/lib/clients'
 import type { LeadStage } from '@/lib/types'
 
 const LEADS_PATH = '/dashboard/leads'
@@ -44,20 +46,7 @@ export interface LeadCreateFormState {
   values: LeadCreateFormValues
 }
 
-export const initialLeadCreateFormState: LeadCreateFormState = {
-  errors: {},
-  values: {
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    source: '',
-    notes: '',
-    value_estimate: '',
-    assigned_to: '',
-    stage: 'new_lead',
-  },
-}
+// removed initialLeadCreateFormState from here to avoid exporting objects from use server file
 
 function revalidateLeadPaths(leadId?: string) {
   revalidatePath(LEADS_PATH)
@@ -238,5 +227,30 @@ export async function updateLeadStageAction(id: string, stage: LeadStage) {
 
 export async function deleteLeadAction(id: string) {
   await deleteLead(id)
-  revalidateLeadPaths(id)
+  revalidateLeadPaths()
+  redirect(LEADS_PATH)
+}
+
+export async function convertLeadToClientAction(leadId: string) {
+  const lead = await getLead(leadId)
+  if (!lead) throw new Error('Lead not found')
+  if (lead.converted_client_id) {
+    throw new Error('Lead has already been converted to a client')
+  }
+
+  const client = await createClient({
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    company: lead.company,
+    notes: lead.notes,
+    lead_id: lead.id,
+  })
+
+  await updateLead(leadId, {
+    stage: 'won',
+    converted_client_id: client.id,
+  })
+
+  redirect(`/dashboard/clients/${client.id}`)
 }
