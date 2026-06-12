@@ -141,10 +141,9 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
               >
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
-                <option value="partial">Partial</option>
+                <option value="partially_paid">Partially Paid</option>
                 <option value="paid">Paid</option>
                 <option value="overdue">Overdue</option>
-                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </CardContent>

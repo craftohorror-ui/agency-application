@@ -126,3 +126,10 @@ export async function updateInvoiceStatusAction(id: string, status: InvoiceStatu
   revalidatePath(`/dashboard/invoices/${id}`)
   revalidatePath('/dashboard/invoices')
 }
+
+export async function generateInvoiceFromProjectAction(projectId: string) {
+  const invoiceId = await generateInvoiceFromProject(projectId)
+  revalidatePath(`/dashboard/projects/${projectId}`)
+  revalidatePath('/dashboard/invoices')
+  redirect(`/dashboard/invoices/${invoiceId}`)
+}

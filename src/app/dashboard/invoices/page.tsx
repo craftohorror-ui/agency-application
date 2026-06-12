@@ -25,11 +25,11 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
 
   function getStatusColor(s: string) {
     if (s === 'paid') return 'default'
-    if (s === 'sent') return 'secondary'
-    if (s === 'partial') return 'outline'
+    if (s === 'sent') return 'muted'
+    if (s === 'partially_paid') return 'outline'
     if (s === 'overdue') return 'destructive'
     if (s === 'draft') return 'outline'
-    return 'destructive' // cancelled
+    return 'outline'
   }
 
   const formatCurrency = (amount: number) => {
@@ -68,12 +68,11 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
               <option value=''>All Statuses</option>
               <option value='draft'>Draft</option>
               <option value='sent'>Sent</option>
-              <option value='partial'>Partial</option>
+              <option value='partially_paid'>Partially Paid</option>
               <option value='paid'>Paid</option>
               <option value='overdue'>Overdue</option>
-              <option value='cancelled'>Cancelled</option>
             </select>
-            <Button type='submit' variant='secondary'>Filter</Button>
+            <Button type='submit' variant='outline'>Filter</Button>
             {hasFilters && (
               <Link href='/dashboard/invoices'>
                 <Button variant='ghost'>Clear</Button>

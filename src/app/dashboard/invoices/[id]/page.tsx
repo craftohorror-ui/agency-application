@@ -29,11 +29,11 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
 
   function getStatusColor(s: string) {
     if (s === 'paid') return 'default'
-    if (s === 'sent') return 'secondary'
-    if (s === 'partial') return 'outline'
+    if (s === 'sent') return 'muted'
+    if (s === 'partially_paid') return 'outline'
     if (s === 'overdue') return 'destructive'
     if (s === 'draft') return 'outline'
-    return 'destructive'
+    return 'outline'
   }
 
   const formatCurrency = (amount: number) => {

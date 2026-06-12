@@ -13,11 +13,11 @@ export default async function PortalInvoicesPage() {
 
   function getStatusColor(s: string) {
     if (s === 'paid') return 'default'
-    if (s === 'sent') return 'secondary'
-    if (s === 'partial') return 'outline'
+    if (s === 'sent') return 'muted'
+    if (s === 'partially_paid') return 'outline'
     if (s === 'overdue') return 'destructive'
     if (s === 'draft') return 'outline'
-    return 'destructive'
+    return 'outline'
   }
 
   const formatCurrency = (amount: number) => {
@@ -25,7 +25,7 @@ export default async function PortalInvoicesPage() {
   }
 
   const totalOutstanding = invoices.reduce((sum, inv) => {
-    if (inv.status !== 'cancelled' && inv.status !== 'draft') {
+    if (inv.status !== 'draft') {
       return sum + Math.max(0, inv.total - inv.amount_paid)
     }
     return sum
@@ -74,8 +74,8 @@ export default async function PortalInvoicesPage() {
                     </div>
                     <div className='col-span-2 text-right'>
                       <Link href={`/portal/invoices/${invoice.id}`}>
-                        <Button variant={invoice.status === 'sent' || invoice.status === 'partial' || invoice.status === 'overdue' ? 'default' : 'outline'} size='sm'>
-                          {invoice.status === 'sent' || invoice.status === 'partial' || invoice.status === 'overdue' ? 'Pay Now' : 'View'}
+                        <Button variant={invoice.status === 'sent' || invoice.status === 'partially_paid' || invoice.status === 'overdue' ? 'default' : 'outline'} size='sm'>
+                          {invoice.status === 'sent' || invoice.status === 'partially_paid' || invoice.status === 'overdue' ? 'Pay Now' : 'View'}
                         </Button>
                       </Link>
                     </div>

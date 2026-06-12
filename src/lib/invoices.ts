@@ -21,10 +21,10 @@ function calculateTotals(items: { qty: number; unit_price: number }[], taxRate: 
 }
 
 function determineStatus(amountPaid: number, total: number, dueDate: string, currentStatus: InvoiceStatus): InvoiceStatus {
-  if (currentStatus === 'draft' || currentStatus === 'cancelled') return currentStatus
+  if (currentStatus === 'draft') return currentStatus
   
   if (amountPaid >= total && total > 0) return 'paid'
-  if (amountPaid > 0 && amountPaid < total) return 'partial'
+  if (amountPaid > 0 && amountPaid < total) return 'partially_paid'
   
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -208,7 +208,7 @@ export async function listPortalInvoices() {
   const { data, error } = await supabase
     .from('invoices')
     .select('*, project:projects(id, name)')
-    .in('status', ['sent', 'partial', 'paid', 'overdue', 'cancelled']) // hide drafts
+    .in('status', ['sent', 'partially_paid', 'paid', 'overdue']) // hide drafts
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -227,9 +227,56 @@ export async function getPortalInvoice(id: string): Promise<InvoiceWithRelations
       project:projects(id, name)
     `)
     .eq('id', id)
-    .in('status', ['sent', 'partial', 'paid', 'overdue', 'cancelled'])
+    .in('status', ['sent', 'partially_paid', 'paid', 'overdue'])
     .maybeSingle()
 
   if (error) throw new Error(error.message)
   return data as InvoiceWithRelations | null
+}
+
+export async function generateInvoiceFromProject(projectId: string) {
+  const { supabase } = await requireStaff()
+  
+  const { data: project, error: pErr } = await supabase.from('projects').select('*, milestones(*)').eq('id', projectId).single()
+  if (pErr) throw new Error(pErr.message)
+  if (!project || !project.client_id) throw new Error('Project has no linked client')
+
+  const items = []
+  if (project.milestones && project.milestones.length > 0) {
+    for (const m of project.milestones) {
+      if (m.amount > 0) {
+        items.push({ description: `Milestone: ${m.title}`, qty: 1, unit_price: m.amount })
+      }
+    }
+  }
+
+  if (items.length === 0 && project.budget > 0) {
+    items.push({ description: `Project Implementation: ${project.name}`, qty: 1, unit_price: project.budget })
+  }
+
+  const { subtotal, taxAmount, total } = calculateTotals(items, 0)
+  
+  const issue_date = new Date().toISOString().split('T')[0]
+  const due_date = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+  const { data: invoice, error } = await supabase.from('invoices').insert({
+    client_id: project.client_id,
+    project_id: project.id,
+    issue_date,
+    due_date,
+    tax_rate: 0,
+    subtotal,
+    tax_amount: taxAmount,
+    total,
+    amount_paid: 0,
+    status: 'draft'
+  }).select('id').single()
+
+  if (error) throw new Error(error.message)
+
+  if (items.length > 0) {
+    await supabase.from('invoice_items').insert(items.map(item => ({ ...item, invoice_id: invoice.id })))
+  }
+
+  return invoice.id
 }
