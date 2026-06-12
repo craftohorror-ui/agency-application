@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { globalSearchAction, type SearchResult } from '@/app/dashboard/search-actions'
 import { useDebounce } from '@/hooks/use-debounce'
@@ -70,11 +71,12 @@ export function GlobalSearch() {
     <>
       <Button
         variant="outline"
-        className="relative h-9 w-full justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-64 lg:w-80"
+        className="relative h-9 w-9 p-0 sm:w-full sm:px-4 sm:justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-64 lg:w-80"
         onClick={() => setOpen(true)}
       >
+        <span className="hidden sm:inline-flex lg:hidden">Search...</span>
         <span className="hidden lg:inline-flex">Search AgencyOS...</span>
-        <span className="inline-flex lg:hidden">Search...</span>
+        <Search className="h-4 w-4 sm:hidden" />
         <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.45rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>

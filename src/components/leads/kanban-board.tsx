@@ -208,8 +208,8 @@ export function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead[] }) {
     setIsUpdating(true)
     try {
       await updateLeadStageAction(activeId, targetStage)
-    } catch {
-      alert('Failed to update lead stage.')
+    } catch (err) {
+      console.error('Failed to update lead stage', err)
       setLeads(initialLeads) 
     } finally {
       setIsUpdating(false)
