@@ -5,7 +5,6 @@ import { useFormStatus } from 'react-dom'
 import {
   createLeadFormAction,
   updateLeadFormAction,
-  initialLeadCreateFormState,
   type LeadCreateFormState,
 } from '@/app/dashboard/leads/actions'
 import { Button } from '@/components/ui/button'
@@ -13,6 +12,21 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { LeadOwnerOption } from '@/lib/leads'
 import type { LeadStage } from '@/lib/types'
+
+const initialLeadCreateFormState: LeadCreateFormState = {
+  errors: {},
+  values: {
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    source: '',
+    notes: '',
+    value_estimate: '',
+    assigned_to: '',
+    stage: 'new_lead',
+  },
+}
 
 type LeadFormProps = {
   owners: LeadOwnerOption[]

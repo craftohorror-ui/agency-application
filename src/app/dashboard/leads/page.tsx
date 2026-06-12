@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getLeadStageOptions, getLeadsQuery } from '@/app/dashboard/leads/queries'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -64,7 +65,12 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
             Review and triage incoming leads. Sorted by newest first.
           </p>
         </div>
-        <Badge variant='outline'>{count ?? leads.length} total</Badge>
+        <div className='flex items-center gap-2'>
+          <Badge variant='outline'>{count ?? leads.length} total</Badge>
+          <Link href='/dashboard/leads/new'>
+            <Button>New Lead</Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -96,12 +102,12 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                 Apply
               </Button>
               {hasFilters ? (
-                <a
+                <Link
                   href='/dashboard/leads'
                   className='inline-flex h-9 flex-1 items-center justify-center rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted sm:flex-none'
                 >
                   Reset
-                </a>
+                </Link>
               ) : null}
             </div>
           </form>
@@ -123,7 +129,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                   <div key={lead.id} className='rounded-lg border p-4'>
                     <div className='flex items-start justify-between gap-3'>
                       <div className='min-w-0'>
-                        <p className='truncate font-medium'>{lead.name}</p>
+                        <Link href={`/dashboard/leads/${lead.id}`} className='truncate font-medium hover:underline'>{lead.name}</Link>
                         <p className='text-sm text-muted-foreground'>
                           {lead.company || 'No company'}
                         </p>
@@ -166,10 +172,10 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                   </thead>
                   <tbody>
                     {leads.map((lead) => (
-                      <tr key={lead.id} className='border-b last:border-b-0'>
+                      <tr key={lead.id} className='border-b last:border-b-0 hover:bg-muted/50'>
                         <td className='py-4 pr-4'>
                           <div>
-                            <p className='font-medium'>{lead.name}</p>
+                            <Link href={`/dashboard/leads/${lead.id}`} className='font-medium hover:underline'>{lead.name}</Link>
                             <p className='text-muted-foreground'>{lead.company || 'No company'}</p>
                           </div>
                         </td>
