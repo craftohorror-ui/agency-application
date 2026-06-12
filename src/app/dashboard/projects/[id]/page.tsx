@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProjectQuery } from '@/app/dashboard/projects/queries'
 import { getProjectMembersQuery, getTeamQuery } from '@/app/dashboard/team/queries'
+import { listProjectTasks } from '@/lib/tasks'
 import { AssignMemberForm } from './assign-member-form'
+import { ProjectTasks } from './project-tasks'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -20,10 +22,11 @@ function formatStage(stage: string) {
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const resolvedParams = await params
-  const [project, projectMembers, { members: allTeamMembers }] = await Promise.all([
+  const [project, projectMembers, { members: allTeamMembers }, tasks] = await Promise.all([
     getProjectQuery(resolvedParams.id),
     getProjectMembersQuery(resolvedParams.id),
     getTeamQuery({ is_suspended: false, limit: 1000 }),
+    listProjectTasks(resolvedParams.id),
   ])
 
   if (!project) {
@@ -121,6 +124,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
         </div>
+        
+        <ProjectTasks 
+          projectId={project.id} 
+          tasks={tasks} 
+          teamMembers={allTeamMembers} 
+        />
       </div>
     </div>
   )

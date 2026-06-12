@@ -166,6 +166,7 @@ export interface Task {
   assignee_id: string | null
   due_date: string | null
   position: number
+  comments: string | null
   created_at: string
   updated_at: string
 }

@@ -5,6 +5,7 @@ import { listProjects } from '@/lib/projects'
 import { listLeads } from '@/lib/leads'
 import { listClients } from '@/lib/clients'
 import { listTeam, getTeamMember } from '@/lib/team'
+import { getDashboardTasksStats } from '@/lib/tasks'
 
 export default async function DashboardPage() {
   const [
@@ -12,11 +13,13 @@ export default async function DashboardPage() {
     { leads: recentLeads, count: totalLeads },
     { clients: recentClients, count: totalClients },
     { members: allTeamMembers, count: totalTeamMembers },
+    taskStats,
   ] = await Promise.all([
     listProjects({ limit: 1000 }),
     listLeads({ limit: 5 }),
     listClients({ limit: 5 }),
     listTeam({ limit: 1000 }),
+    getDashboardTasksStats(),
   ])
 
   // Process Projects
@@ -56,7 +59,7 @@ export default async function DashboardPage() {
         <p className='text-sm text-muted-foreground'>Agency overview and operational metrics.</p>
       </div>
 
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-5'>
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <Card>
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>Total Leads</CardTitle>
@@ -75,14 +78,6 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>Total Projects</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-2xl font-bold'>{totalProjects || 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>Active Projects</CardTitle>
           </CardHeader>
           <CardContent>
@@ -95,6 +90,38 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <p className='text-2xl font-bold'>{totalTeamMembers || 0}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>Active Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-2xl font-bold'>{taskStats.active}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-destructive'>Overdue Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-2xl font-bold text-destructive'>{taskStats.overdue}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-orange-600'>Tasks Due This Week</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-2xl font-bold text-orange-600'>{taskStats.dueThisWeek}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>Total Projects</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-2xl font-bold'>{totalProjects || 0}</p>
           </CardContent>
         </Card>
       </div>
