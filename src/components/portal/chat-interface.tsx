@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { sendPortalMessageAction } from '@/app/portal/messages/actions'
+import { sendAgencyMessageAction } from '@/app/dashboard/messages/actions'
 
 type Participant = {
   profile: {
@@ -41,9 +42,10 @@ interface ChatInterfaceProps {
   conversations: Conversation[]
   initialMessages: Message[]
   currentUserId: string
+  actionRoute?: 'portal' | 'agency'
 }
 
-export function ChatInterface({ conversations, initialMessages, currentUserId }: ChatInterfaceProps) {
+export function ChatInterface({ conversations, initialMessages, currentUserId, actionRoute = 'portal' }: ChatInterfaceProps) {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
     conversations.length > 0 ? conversations[0].id : null
   )
@@ -147,7 +149,11 @@ export function ChatInterface({ conversations, initialMessages, currentUserId }:
       }
       setMessages(prev => [...prev, optimisticMessage])
 
-      await sendPortalMessageAction(activeConversationId, body)
+      if (actionRoute === 'agency') {
+        await sendAgencyMessageAction(activeConversationId, body)
+      } else {
+        await sendPortalMessageAction(activeConversationId, body)
+      }
     } catch (err) {
       console.error('Failed to send message:', err)
       // Ideally show a toast

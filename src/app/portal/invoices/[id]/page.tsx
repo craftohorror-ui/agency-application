@@ -51,7 +51,7 @@ export default async function PortalInvoiceDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className='flex gap-2'>
-          <Button variant="outline" className="hidden sm:flex" disabled>Download PDF (Coming Soon)</Button>
+
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default async function PortalInvoiceDetailPage({ params }: PageProps) {
                     <div className="text-sm text-muted-foreground">Amount Due</div>
                     <div className="text-2xl font-bold">{formatCurrency(outstandingBalance)}</div>
                   </div>
-                  <Button className="w-full" disabled>Pay Online (Coming Soon)</Button>
+
                   <p className="text-xs text-center text-muted-foreground mt-2">
                     Please refer to the notes section for manual payment instructions (Wire/ACH).
                   </p>
