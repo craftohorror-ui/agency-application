@@ -55,6 +55,13 @@ export interface LeadListResult {
   count: number | null
 }
 
+export interface LeadOwnerOption {
+  id: Profile['id']
+  full_name: Profile['full_name']
+  email: Profile['email']
+  role: Profile['role']
+}
+
 function normalizeNullableText(value: string | null | undefined) {
   if (value == null) return null
   const trimmed = value.trim()
@@ -138,6 +145,19 @@ export async function getLead(id: string): Promise<LeadWithOwner | null> {
 
   if (error) throw new Error(error.message)
   return (data as LeadWithOwner | null) ?? null
+}
+
+export async function listLeadOwners(): Promise<LeadOwnerOption[]> {
+  const { supabase } = await requireStaff()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, role')
+    .in('role', ['owner', 'manager', 'member'])
+    .eq('is_suspended', false)
+    .order('full_name', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as LeadOwnerOption[]
 }
 
 export async function createLead(input: LeadInput): Promise<LeadWithOwner> {
