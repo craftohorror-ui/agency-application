@@ -265,6 +265,7 @@ export interface FileRecord {
   size_bytes: number | null
   project_id: string | null
   client_id: string | null
+  lead_id: string | null
   uploaded_by: string | null
   created_at: string
 }
