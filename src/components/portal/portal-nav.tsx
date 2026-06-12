@@ -8,6 +8,7 @@ const navItems = [
   { href: '/portal', label: 'Dashboard' },
   { href: '/portal/projects', label: 'Projects' },
   { href: '/portal/contracts', label: 'Contracts' },
+  { href: '/portal/invoices', label: 'Invoices' },
   { href: '/portal/files', label: 'Files' },
   { href: '/portal/messages', label: 'Messages' },
 ]

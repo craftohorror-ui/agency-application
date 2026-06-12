@@ -8,6 +8,7 @@ import { ProjectTasks } from './project-tasks'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { generateInvoiceFromProjectAction } from '@/app/dashboard/invoices/actions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -121,6 +122,23 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 assignedProfiles={projectMembers || []}
                 availableProfiles={allTeamMembers}
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Workflows</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {project.client ? (
+                <form action={generateInvoiceFromProjectAction.bind(null, project.id)}>
+                  <Button type="submit" variant="secondary" className="w-full">
+                    Generate Invoice
+                  </Button>
+                </form>
+              ) : (
+                <p className="text-sm text-muted-foreground">Attach a client to generate invoices.</p>
+              )}
             </CardContent>
           </Card>
         </div>
