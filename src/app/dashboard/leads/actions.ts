@@ -24,7 +24,6 @@ type LeadCreateFormField =
   | 'company'
   | 'source'
   | 'notes'
-  | 'value_estimate'
   | 'assigned_to'
   | 'stage'
 
@@ -35,7 +34,6 @@ export interface LeadCreateFormValues {
   company: string
   source: string
   notes: string
-  value_estimate: string
   assigned_to: string
   stage: string
 }
@@ -85,7 +83,6 @@ export async function createLeadFormAction(
     company: getFormValue(formData, 'company'),
     source: getFormValue(formData, 'source'),
     notes: getFormValue(formData, 'notes'),
-    value_estimate: getFormValue(formData, 'value_estimate'),
     assigned_to: getFormValue(formData, 'assigned_to'),
     stage: getFormValue(formData, 'stage') || 'new_lead',
   }
@@ -104,10 +101,7 @@ export async function createLeadFormAction(
     errors.stage = 'Select a valid lead stage.'
   }
 
-  if (values.value_estimate) {
-    errors.value_estimate =
-      'Value estimate is not available in the current leads schema yet. Leave this blank for now.'
-  }
+
 
   if (Object.keys(errors).length > 0) {
     return {
@@ -152,7 +146,6 @@ export async function updateLeadFormAction(
     company: getFormValue(formData, 'company'),
     source: getFormValue(formData, 'source'),
     notes: getFormValue(formData, 'notes'),
-    value_estimate: getFormValue(formData, 'value_estimate'),
     assigned_to: getFormValue(formData, 'assigned_to'),
     stage: getFormValue(formData, 'stage') || 'new_lead',
   }
@@ -171,10 +164,7 @@ export async function updateLeadFormAction(
     errors.stage = 'Select a valid lead stage.'
   }
 
-  if (values.value_estimate) {
-    errors.value_estimate =
-      'Value estimate is not available in the current leads schema yet. Leave this blank for now.'
-  }
+
 
   if (Object.keys(errors).length > 0) {
     return {

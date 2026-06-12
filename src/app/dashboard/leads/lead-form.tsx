@@ -22,7 +22,6 @@ const initialLeadCreateFormState: LeadCreateFormState = {
     company: '',
     source: '',
     notes: '',
-    value_estimate: '',
     assigned_to: '',
     stage: 'new_lead',
   },
@@ -80,7 +79,6 @@ export function LeadForm({ owners, stageOptions, lead }: LeadFormProps) {
           company: lead.company || '',
           source: lead.source || '',
           notes: lead.notes || '',
-          value_estimate: '',
           assigned_to: lead.owner_id || '',
           stage: lead.stage || 'new_lead',
         },
@@ -166,16 +164,7 @@ export function LeadForm({ owners, stageOptions, lead }: LeadFormProps) {
           <FieldError state={state} field='stage' />
         </div>
 
-        <div className='space-y-1 sm:col-span-2'>
-          <Label htmlFor='value_estimate'>Value Estimate</Label>
-          <Input
-            id='value_estimate'
-            name='value_estimate'
-            inputMode='decimal'
-            defaultValue={state.values.value_estimate}
-          />
-          <FieldError state={state} field='value_estimate' />
-        </div>
+
 
         <div className='space-y-1 sm:col-span-2'>
           <Label htmlFor='notes'>Notes</Label>
