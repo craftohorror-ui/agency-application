@@ -4,15 +4,17 @@ import { Badge } from '@/components/ui/badge'
 import { listProjects } from '@/lib/projects'
 import { listLeads } from '@/lib/leads'
 import { listClients } from '@/lib/clients'
-import { listTeam, getTeamMember } from '@/lib/team'
+import { listTeam } from '@/lib/team'
 import { getDashboardTasksStats } from '@/lib/tasks'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function DashboardPage() {
+  const supabase = await createClient()
   const [
     { projects: allProjects, count: totalProjects },
     { leads: recentLeads, count: totalLeads },
     { clients: recentClients, count: totalClients },
-    { members: allTeamMembers, count: totalTeamMembers },
+    { count: totalTeamMembers },
     taskStats,
   ] = await Promise.all([
     listProjects({ limit: 1000 }),
@@ -45,10 +47,12 @@ export default async function DashboardPage() {
   const recentProjects = allProjects.slice(0, 5)
   const recentlyCompleted = completedProjects.slice(0, 5)
 
-  // Fetch team member details for workload
-  const detailedMembers = await Promise.all(
-    allTeamMembers.map(m => getTeamMember(m.id))
-  )
+  // Fetch team member details for workload using a single query to avoid N+1
+  const { data: detailedMembers } = await supabase
+    .from('profiles')
+    .select('*, project_members(role_in_project, project:projects(stage))')
+    .in('role', ['owner', 'manager', 'member'])
+    .eq('is_suspended', false)
 
   const formatStage = (s: string) => s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 
@@ -284,7 +288,7 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground">Assigned active projects per member</p>
           </CardHeader>
           <CardContent>
-            {detailedMembers.length === 0 ? (
+            {!detailedMembers || detailedMembers.length === 0 ? (
               <p className="text-sm text-muted-foreground">No team members found.</p>
             ) : (
               <div className="space-y-4">
