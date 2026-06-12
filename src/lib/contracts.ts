@@ -1,6 +1,8 @@
 import 'server-only'
 
 import { requireStaff, requireClient } from '@/lib/auth'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { insertAuditLog } from '@/lib/audit'
 import type { Contract, ContractStatus } from '@/lib/types'
 
 export interface ContractWithRelations extends Contract {
@@ -127,4 +129,21 @@ export async function signPortalContract(id: string, signatureName: string, ipAd
   }).eq('id', id)
 
   if (error) throw new Error(error.message)
+
+  // Auto-create project
+  // We need to fetch the contract to get the client_id
+  const { data: contract } = await supabase.from('contracts').select('client_id, title').eq('id', id).single()
+  
+  if (contract?.client_id) {
+    const adminSupabase = createAdminClient()
+    await adminSupabase.from('projects').insert({
+      name: contract.title,
+      client_id: contract.client_id,
+      stage: 'planning',
+      description: 'Auto-generated from signed contract.',
+    })
+  }
+  
+  const { user } = await requireClient()
+  await insertAuditLog(user.id, 'contract.signed', 'contract', id, { ipAddress, signatureName })
 }

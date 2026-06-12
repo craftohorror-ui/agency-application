@@ -143,3 +143,9 @@ export async function updateClient(id: string, input: ClientUpdateInput): Promis
   return data as Client
 }
 
+export async function deleteClient(id: string): Promise<void> {
+  const { supabase } = await requireStaff()
+  const { error } = await supabase.from('clients').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+

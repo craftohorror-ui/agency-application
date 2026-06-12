@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTeamMemberQuery } from '@/app/dashboard/team/queries'
+import { deleteTeamMemberAction, resetMemberPasswordAction } from '@/app/dashboard/team/actions'
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 
 interface PageProps {
@@ -101,6 +103,43 @@ export default async function TeamMemberDetailPage({ params }: PageProps) {
                 })}
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-destructive">Reset Password</CardTitle>
+            <CardDescription>Manually set a new password for this user.</CardDescription>
+          </CardHeader>
+          <form action={resetMemberPasswordAction.bind(null, member.id)}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">New Password</label>
+                <Input name="password" type="text" required placeholder="Enter new password" />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" variant="destructive">Update Password</Button>
+            </CardFooter>
+          </form>
+        </Card>
+
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            <CardDescription>Permanently delete this team member.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={async () => {
+              'use server'
+              await deleteTeamMemberAction(member.id)
+            }}>
+              <Button type="submit" variant="destructive" className="w-full">
+                Delete Member
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>

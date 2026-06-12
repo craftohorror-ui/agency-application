@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createInvoice, updateInvoice, deleteInvoice, generateInvoiceFromProject } from '@/lib/invoices'
+import { requireStaff } from '@/lib/auth'
+import { insertAuditLog } from '@/lib/audit'
 import { recordPayment, deletePayment } from '@/lib/payments'
 import type { InvoiceStatus } from '@/lib/types'
 
@@ -87,6 +89,9 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
       status
     }, items)
 
+    const { user } = await requireStaff()
+    await insertAuditLog(user.id, 'invoice.updated', 'invoice', id, { status, due_date })
+
     revalidatePath('/dashboard/invoices')
     redirect(`/dashboard/invoices/${id}`)
   } catch (err: unknown) {
@@ -95,7 +100,10 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
 }
 
 export async function deleteInvoiceAction(id: string) {
+  const { user } = await requireStaff()
   await deleteInvoice(id)
+  await insertAuditLog(user.id, 'invoice.deleted', 'invoice', id)
+  
   revalidatePath('/dashboard/invoices')
   redirect('/dashboard/invoices')
 }

@@ -45,6 +45,32 @@ export async function middleware(req: NextRequest) {
     })
     return redirectRes
   }
+
+  // Strict Middleware Protection for Owner-only routes
+  if (user && path.startsWith('/dashboard')) {
+    const ownerOnlyPaths = [
+      '/dashboard/admin',
+      '/dashboard/team',
+      '/dashboard/analytics'
+    ]
+    
+    const isOwnerRoute = ownerOnlyPaths.some(p => path === p || path.startsWith(`${p}/`))
+    
+    if (isOwnerRoute) {
+      // Fetch user profile to check role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+        
+      if (profile?.role !== 'owner') {
+        // Members receive 403 Forbidden or redirect. We'll return 403.
+        return new NextResponse('403 Forbidden', { status: 403 })
+      }
+    }
+  }
+
   return res
 }
 

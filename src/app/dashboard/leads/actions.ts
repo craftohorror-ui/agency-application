@@ -13,6 +13,8 @@ import {
   type LeadUpdateInput,
 } from '@/lib/leads'
 import { createClient } from '@/lib/clients'
+import { getProfile, requireStaff } from '@/lib/auth'
+import { insertAuditLog } from '@/lib/audit'
 import type { LeadStage } from '@/lib/types'
 
 const LEADS_PATH = '/dashboard/leads'
@@ -216,8 +218,11 @@ export async function updateLeadStageAction(id: string, stage: LeadStage) {
 }
 
 export async function deleteLeadAction(id: string) {
+  const { user } = await requireStaff()
   await deleteLead(id)
-  revalidateLeadPaths()
+  await insertAuditLog(user.id, 'lead.deleted', 'lead', id)
+  
+  revalidatePath(LEADS_PATH)
   redirect(LEADS_PATH)
 }
 

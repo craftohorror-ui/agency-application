@@ -1,6 +1,8 @@
 import 'server-only'
 
 import { requireStaff } from '@/lib/auth'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { insertAuditLog } from '@/lib/audit'
 import type { Profile, UserRole } from '@/lib/types'
 
 export interface ProjectMemberWithProfile {
@@ -112,6 +114,47 @@ export async function updateTeamMember(id: string, input: TeamUpdateInput): Prom
 
   if (error) throw new Error(error.message)
   return data as Profile
+}
+
+export async function createTeamMember(input: { full_name: string, email: string, password?: string, role: UserRole }): Promise<Profile> {
+  const adminSupabase = createAdminClient()
+  const { data: { user }, error: authError } = await adminSupabase.auth.admin.createUser({
+    email: input.email,
+    password: input.password || 'Temporary123!',
+    email_confirm: true,
+    user_metadata: {
+      full_name: input.full_name,
+      role: input.role,
+    }
+  })
+
+  if (authError) throw new Error(authError.message)
+  if (!user) throw new Error('User creation failed')
+
+  // The profile is auto-created by the trigger, but we ensure role is set correctly by trigger meta.
+  // Wait a tiny bit for the trigger to finish just in case, then fetch the profile.
+  const { data: profile, error: profileError } = await adminSupabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError) throw new Error(profileError.message)
+  return profile as Profile
+}
+
+export async function deleteTeamMember(id: string): Promise<void> {
+  const adminSupabase = createAdminClient()
+  const { error } = await adminSupabase.auth.admin.deleteUser(id)
+  if (error) throw new Error(error.message)
+}
+
+export async function resetMemberPassword(id: string, newPassword?: string): Promise<void> {
+  const adminSupabase = createAdminClient()
+  const { error } = await adminSupabase.auth.admin.updateUserById(id, {
+    password: newPassword || 'Temporary123!'
+  })
+  if (error) throw new Error(error.message)
 }
 
 export async function assignToProject(projectId: string, profileId: string, roleInProject: string = 'contributor'): Promise<void> {

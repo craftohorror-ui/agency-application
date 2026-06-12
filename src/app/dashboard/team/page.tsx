@@ -49,6 +49,9 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
         </div>
         <div className='flex items-center gap-2'>
           <Badge variant='outline'>{count ?? members.length} total</Badge>
+          <Link href="/dashboard/team/new">
+            <Button>Add Member</Button>
+          </Link>
         </div>
       </div>
 

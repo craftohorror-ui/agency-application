@@ -4,8 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import {
   updateClient,
+  deleteClient,
   type ClientUpdateInput,
 } from '@/lib/clients'
+import { requireStaff } from '@/lib/auth'
+import { insertAuditLog } from '@/lib/audit'
 
 const CLIENTS_PATH = '/dashboard/clients'
 
@@ -34,6 +37,15 @@ export interface ClientFormState {
   errors: Partial<Record<ClientFormField, string>>
   message?: string
   values: ClientFormValues
+}
+
+export async function deleteClientAction(id: string) {
+  const { user } = await requireStaff()
+  await deleteClient(id)
+  await insertAuditLog(user.id, 'client.deleted', 'client', id)
+
+  revalidatePath(CLIENTS_PATH)
+  redirect(CLIENTS_PATH)
 }
 
 function revalidateClientPaths(clientId?: string) {
