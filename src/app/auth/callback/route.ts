@@ -14,5 +14,9 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL('/login?error=Authentication failed', requestUrl.origin))
+  const error = requestUrl.searchParams.get('error')
+  const error_description = requestUrl.searchParams.get('error_description')
+  const errorMessage = error_description || error || 'Authentication failed'
+
+  return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(errorMessage)}`, requestUrl.origin))
 }

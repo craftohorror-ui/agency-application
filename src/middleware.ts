@@ -32,10 +32,18 @@ export async function middleware(req: NextRequest) {
   if (!user && isProtected) {
     const url = new URL('/login', req.url)
     url.searchParams.set('next', path)
-    return NextResponse.redirect(url)
+    const redirectRes = NextResponse.redirect(url)
+    res.cookies.getAll().forEach(cookie => {
+      redirectRes.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectRes
   }
   if (user && (path === '/login' || path === '/signup')) {
-    return NextResponse.redirect(new URL('/', req.url))
+    const redirectRes = NextResponse.redirect(new URL('/', req.url))
+    res.cookies.getAll().forEach(cookie => {
+      redirectRes.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectRes
   }
   return res
 }
