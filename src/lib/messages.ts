@@ -74,7 +74,6 @@ export async function getOrCreatePrivateChat(memberId: string) {
   const { data: newConv, error: createError } = await supabase
     .from('conversations')
     .insert({
-      agency_id: profile.agency_id,
       type: 'private',
       title: 'Private Chat',
       is_default: false
