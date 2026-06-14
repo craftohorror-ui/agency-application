@@ -3,23 +3,35 @@ import 'server-only'
 import { requireStaff } from '@/lib/auth'
 import type { FileRecord, FileFolder } from '@/lib/types'
 
-export interface FileInput {
-  name: string
-  folder?: FileFolder
-  storage_path: string
-  mime_type?: string
-  size_bytes?: number
-  project_id?: string
-  client_id?: string
-  lead_id?: string
-}
-
 export interface FileListFilters {
-  folder?: FileFolder
+  folder?: string
   projectId?: string
   clientId?: string
   leadId?: string
   limit?: number
+  page?: number
+  query?: string
+  sortBy?: string
+}
+
+export async function getFileCounts() {
+  const { supabase } = await requireStaff()
+  
+  const folders = ['assets', 'contracts', 'invoices', 'deliverables', 'client_files'] as const
+  const counts: Record<string, number> = { all: 0 }
+  
+  const promises = folders.map(async (folder) => {
+    const { count, error } = await supabase.from('files').select('*', { count: 'exact', head: true }).eq('folder', folder)
+    if (!error && count !== null) {
+      counts[folder] = count
+      counts.all += count
+    } else {
+      counts[folder] = 0
+    }
+  })
+  
+  await Promise.all(promises)
+  return counts
 }
 
 export async function listFiles(filters: FileListFilters = {}) {
@@ -27,24 +39,55 @@ export async function listFiles(filters: FileListFilters = {}) {
 
   let query = supabase
     .from('files')
-    .select('*, uploader:profiles!uploaded_by(full_name)')
-    .order('created_at', { ascending: false })
+    .select('*, uploader:profiles!uploaded_by(full_name)', { count: 'exact' })
 
-  if (filters.folder) query = query.eq('folder', filters.folder)
+  if (filters.folder && filters.folder !== 'all') {
+    query = query.eq('folder', filters.folder)
+  }
   if (filters.projectId) query = query.eq('project_id', filters.projectId)
   if (filters.clientId) query = query.eq('client_id', filters.clientId)
   if (filters.leadId) query = query.eq('lead_id', filters.leadId)
-  if (typeof filters.limit === 'number') query = query.limit(filters.limit)
+  
+  if (filters.query) {
+    query = query.or(`display_name.ilike.%${filters.query}%,name.ilike.%${filters.query}%`)
+  }
 
-  const { data, error } = await query
+  switch (filters.sortBy) {
+    case 'oldest':
+      query = query.order('created_at', { ascending: true })
+      break
+    case 'name-asc':
+      query = query.order('display_name', { ascending: true })
+      break
+    case 'name-desc':
+      query = query.order('display_name', { ascending: false })
+      break
+    case 'size-desc':
+      query = query.order('size_bytes', { ascending: false })
+      break
+    case 'size-asc':
+      query = query.order('size_bytes', { ascending: true })
+      break
+    case 'newest':
+    default:
+      query = query.order('created_at', { ascending: false })
+      break
+  }
+
+  const limit = filters.limit || 25
+  const page = filters.page || 1
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+  query = query.range(from, to)
+
+  const { data, count, error } = await query
   if (error) throw new Error(error.message)
-  return data
+  return { data: data as unknown as (FileRecord & { uploader: { full_name: string } | null })[], count }
 }
 
 export async function deleteFile(id: string) {
   const { supabase } = await requireStaff()
   
-  // Get file record to know storage_path
   const { data: file, error: fetchError } = await supabase
     .from('files')
     .select('storage_path')
@@ -54,18 +97,15 @@ export async function deleteFile(id: string) {
   if (fetchError) throw new Error(fetchError.message)
   if (!file) throw new Error('File not found')
 
-  // Remove from storage
   const { error: storageError } = await supabase.storage.from('files').remove([file.storage_path])
   if (storageError) throw new Error(storageError.message)
 
-  // Remove DB record
   const { error: dbError } = await supabase.from('files').delete().eq('id', id)
   if (dbError) throw new Error(dbError.message)
 }
 
 export async function getFileDownloadUrl(storagePath: string) {
   const { supabase } = await requireStaff()
-  // Generate a short-lived signed URL for download
   const { data, error } = await supabase.storage.from('files').createSignedUrl(storagePath, 60 * 60, {
     download: true
   })
@@ -84,16 +124,20 @@ export async function uploadFileServer(formData: FormData) {
     throw new Error('No file provided')
   }
 
-  console.log(`[uploadFileServer] Received file: ${file.name}, size: ${file.size}, type: ${file.type}`)
+  const displayNameRaw = formData.get('display_name') as string
+  const displayName = displayNameRaw?.trim() || file.name
+  if (displayName.length > 100) {
+    throw new Error('Document Name must be 100 characters or less.')
+  }
 
-  // 1. File Size Validation (Max 50MB)
+  console.log(`[uploadFileServer] Received file: ${file.name}, display_name: ${displayName}, size: ${file.size}, type: ${file.type}`)
+
   const MAX_FILE_SIZE = 50 * 1024 * 1024
   if (file.size > MAX_FILE_SIZE) {
     console.error(`[uploadFileServer] Error: File size ${file.size} exceeds 50MB limit`)
     throw new Error('File size exceeds the 50 MB upload limit.')
   }
 
-  // 2. Allowed Extensions Validation
   const allowedExtensions = ['pdf', 'doc', 'docx', 'xlsx', 'csv', 'png', 'jpg', 'jpeg', 'zip']
   const ext = file.name.split('.').pop()?.toLowerCase()
   if (!ext || !allowedExtensions.includes(ext)) {
@@ -111,7 +155,6 @@ export async function uploadFileServer(formData: FormData) {
   
   console.log(`[uploadFileServer] Generated storage path: ${storagePath}`)
 
-  // 3. Convert ArrayBuffer to Node Buffer to prevent undici/fetch hanging
   console.log('[uploadFileServer] Converting File to ArrayBuffer...')
   const arrayBuffer = await file.arrayBuffer()
   console.log('[uploadFileServer] Converting ArrayBuffer to Node Buffer...')
@@ -136,6 +179,7 @@ export async function uploadFileServer(formData: FormData) {
     .from('files')
     .insert({
       name: file.name,
+      display_name: displayName,
       folder,
       storage_path: storagePath,
       mime_type: file.type,
@@ -144,7 +188,6 @@ export async function uploadFileServer(formData: FormData) {
       client_id: clientId || null,
       lead_id: leadId || null,
       uploaded_by: user.id
-      // agency_id is omitted here because it defaults to public.current_agency_id() at the database level!
     })
     .select()
     .single()

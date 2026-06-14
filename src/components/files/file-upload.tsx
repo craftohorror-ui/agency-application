@@ -25,7 +25,16 @@ export function FileUpload({
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const file = formData.get('file') as File
-    if (!file || file.size === 0) return toast.error('Please select a file')
+    const displayName = formData.get('display_name') as string
+
+    if (!displayName || displayName.trim().length === 0) {
+      return toast.error('Document Name is required.')
+    }
+    if (displayName.length > 100) {
+      return toast.error('Document Name must be 100 characters or less.')
+    }
+
+    if (!file || file.size === 0) return toast.error('Please select a file.')
 
     const MAX_FILE_SIZE = 50 * 1024 * 1024
     if (file.size > MAX_FILE_SIZE) {
@@ -44,10 +53,10 @@ export function FileUpload({
       if (res?.error) {
         toast.error(res.error)
       } else {
-        toast.success('File uploaded successfully')
+        toast.success('File uploaded successfully.')
         formRef.current?.reset()
       }
-    } catch (error) {
+    } catch {
       toast.error('Upload failed. Please try again.')
     } finally {
       setIsUploading(false)
@@ -66,6 +75,18 @@ export function FileUpload({
           {leadId && <input type="hidden" name="leadId" value={leadId} />}
           
           <div className="space-y-2">
+            <Label htmlFor="display_name">Document Name</Label>
+            <Input 
+              id="display_name" 
+              name="display_name" 
+              type="text" 
+              placeholder="e.g. Website Contract - Acme Corp"
+              maxLength={100}
+              required 
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="file">Select File</Label>
             <Input id="file" name="file" type="file" required />
           </div>
@@ -77,6 +98,7 @@ export function FileUpload({
               name="folder" 
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               defaultValue="assets"
+              required
             >
               <option value="assets">Assets</option>
               <option value="contracts">Contracts</option>
@@ -86,8 +108,8 @@ export function FileUpload({
             </select>
           </div>
 
-          <Button type="submit" disabled={isUploading}>
-            {isUploading ? 'Uploading...' : 'Upload'}
+          <Button type="submit" disabled={isUploading} className="w-full">
+            {isUploading ? 'Uploading...' : 'Upload File'}
           </Button>
         </form>
       </CardContent>

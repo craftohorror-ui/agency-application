@@ -261,6 +261,7 @@ export interface Notification {
 export interface FileRecord {
   id: string
   name: string
+  display_name: string
   folder: FileFolder
   storage_path: string
   mime_type: string | null
