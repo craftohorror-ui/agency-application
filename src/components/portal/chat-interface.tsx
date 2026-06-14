@@ -298,8 +298,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       } else {
         await sendPortalMessageAction(activeConversationId, body)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send message:', err)
+      alert(`Message sending failed: ${err.message || err}`)
+      // Revert optimistic update so the user knows it failed
+      setMessages(prev => prev.filter(m => m.body !== body || m.sender_id !== currentUserId))
     } finally {
       setIsSending(false)
     }

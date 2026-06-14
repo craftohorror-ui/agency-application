@@ -9,6 +9,8 @@ export async function sendAgencyMessageAction(conversationId: string, body: stri
     throw new Error('Message body is required')
   }
 
+  console.log('[sendAgencyMessageAction] ATTEMPTING INSERT', { conversation_id: conversationId, sender_id: profile.id, body: body.trim() })
+
   const { data, error } = await supabase
     .from('messages')
     .insert({
@@ -21,7 +23,9 @@ export async function sendAgencyMessageAction(conversationId: string, body: stri
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
+  console.log('[sendAgencyMessageAction] INSERT RESULT', { data, error })
+
+  if (error) throw new Error(error.message || JSON.stringify(error))
   return data
 }
 
