@@ -16,9 +16,7 @@ export async function sendAgencyMessageAction(conversationId: string, body: stri
     .insert({
       conversation_id: conversationId,
       sender_id: profile.id,
-      body: body.trim(),
-      topic: 'chat',
-      extension: 'text'
+      body: body.trim()
     })
     .select()
     .single()

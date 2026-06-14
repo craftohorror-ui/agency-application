@@ -14,9 +14,7 @@ export async function sendPortalMessageAction(conversationId: string, body: stri
     .insert({
       conversation_id: conversationId,
       sender_id: user.id,
-      body: body.trim(),
-      topic: 'chat',
-      extension: 'text'
+      body: body.trim()
     })
     .select()
     .single()
