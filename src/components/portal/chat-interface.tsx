@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, UserIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 import { sendPortalMessageAction } from '@/app/portal/messages/actions'
 import { sendAgencyMessageAction } from '@/app/dashboard/messages/actions'
+
 export interface ChatConversation {
   id: string
   title: string
@@ -16,7 +17,7 @@ export interface ChatConversation {
   unread_count?: number
   last_message_body?: string | null
   last_message_created_at?: string | null
-  participants?: Array<{ profile_id: string; full_name: string; avatar_url: string | null; role: string }>
+  participants?: Array<{ profile_id: string; full_name: string; avatar_url: string | null; role: string; presence_status?: string; last_seen?: string }>
 }
 
 export interface ChatMessage {
@@ -40,9 +41,11 @@ interface ChatInterfaceProps {
   actionRoute?: 'portal' | 'agency'
 }
 
-export function ChatInterface({ conversations, initialMessages, currentUserId, actionRoute = 'portal' }: ChatInterfaceProps) {
+export function ChatInterface({ conversations: initialConversations, initialMessages, currentUserId, actionRoute = 'portal' }: ChatInterfaceProps) {
+  // Step 0.5: Local conversation state for Realtime Sidebar
+  const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
-    conversations.length > 0 ? conversations[0].id : null
+    initialConversations.length > 0 ? initialConversations[0].id : null
   )
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputValue, setInputValue] = useState('')
@@ -68,35 +71,78 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
     }
   }, [messages])
 
-  // Subscribe to real-time messages
+  // Step 0.5 & 1: Global Realtime Listener for Sidebar & Messages
   useEffect(() => {
-    if (!activeConversationId) return
-
     const channel = supabase
-      .channel(`messages:${activeConversationId}`)
+      .channel('global_messages_listener')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConversationId}` },
+        { event: 'INSERT', schema: 'public', table: 'messages' },
         async (payload) => {
+          const newMsg = payload.new
+
+          // Fetch sender details asynchronously
           const { data: sender } = await supabase
             .from('profiles')
             .select('id, full_name, avatar_url, role')
-            .eq('id', payload.new.sender_id)
+            .eq('id', newMsg.sender_id)
             .single()
 
-          const newMessage = {
-            id: payload.new.id,
-            conversation_id: payload.new.conversation_id,
-            sender_id: payload.new.sender_id,
-            body: payload.new.body,
-            created_at: payload.new.created_at,
-            sender: sender || { id: payload.new.sender_id, full_name: 'Unknown', avatar_url: null, role: 'member' }
+          const messageObj: ChatMessage = {
+            id: newMsg.id,
+            conversation_id: newMsg.conversation_id,
+            sender_id: newMsg.sender_id,
+            body: newMsg.body,
+            created_at: newMsg.created_at,
+            sender: sender || { id: newMsg.sender_id, full_name: 'Unknown', avatar_url: null, role: 'member' }
           }
-          
-          setMessages(prev => {
-            if (prev.find(m => m.id === newMessage.id)) return prev
-            return [...prev, newMessage]
+
+          // 1. Update conversations sidebar immediately
+          setConversations(prev => {
+            // Check if this conversation exists in our list
+            const exists = prev.find(c => c.id === newMsg.conversation_id)
+            if (!exists) return prev // If it's a new conversation not fetched, ignore for now (requires page reload or separate conv listener)
+
+            return prev.map(c => {
+              if (c.id === newMsg.conversation_id) {
+                // Determine if we should increment unread count
+                const isActive = c.id === activeConversationId
+                const isMine = newMsg.sender_id === currentUserId
+                const shouldIncrement = !isActive && !isMine
+
+                return {
+                  ...c,
+                  last_message_body: newMsg.body,
+                  last_message_created_at: newMsg.created_at,
+                  unread_count: shouldIncrement ? (c.unread_count || 0) + 1 : (c.unread_count || 0)
+                }
+              }
+              return c
+            })
           })
+
+          // 2. Append to active chat if it matches, avoiding optimistic duplicate
+          if (newMsg.conversation_id === activeConversationId) {
+            setMessages(prev => {
+              // Optimistic UI prevention: check if message with this exact body & close timestamp exists, or just rely on UUID if generated client-side
+              // Since we don't generate UUID on client in optimistic right now, we check by body & recent time (hacky), OR we can just rely on the fact that optimistic appends don't have the exact same UUID.
+              // A better way is to check if we already have it. 
+              const duplicate = prev.find(m => m.id === newMsg.id)
+              if (duplicate) return prev
+
+              // If it's from me, we might already have an optimistic bubble.
+              // To handle this perfectly, we replace the optimistic bubble.
+              // But for Step 1, we will just add it if it doesn't exist by ID.
+              const isOptimisticDuplicate = prev.some(m => m.sender_id === currentUserId && m.body === newMsg.body && new Date(newMsg.created_at).getTime() - new Date(m.created_at).getTime() < 5000)
+              
+              if (isOptimisticDuplicate) {
+                 // Replace the optimistic one with the real one
+                 return prev.map(m => (m.sender_id === currentUserId && m.body === newMsg.body) ? messageObj : m)
+              }
+
+              return [...prev, messageObj]
+            })
+          }
         }
       )
       .subscribe()
@@ -104,7 +150,7 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [activeConversationId, supabase])
+  }, [activeConversationId, currentUserId, supabase])
 
   // Refetch initial messages if conversation changes
   useEffect(() => {
@@ -130,7 +176,7 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
       fetchMessages()
     }
 
-    // Mark as read immediately on open
+    // Step 2 placeholder (we will debounce this later)
     async function markRead() {
       const msgs = messages.length > 0 ? messages : initialMessages
       if (msgs.length > 0) {
@@ -144,21 +190,24 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
     }
     if (activeConversationId) {
       markRead()
+      // Clear unread count locally when opened
+      setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, unread_count: 0 } : c))
     }
 
-  }, [activeConversationId, initialMessages, supabase, currentUserId, messages, messages.length]) // only trigger when length changes to avoid loops
+  }, [activeConversationId, supabase, currentUserId])
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleSend(e?: React.FormEvent) {
+    if (e) e.preventDefault()
     if (!inputValue.trim() || !activeConversationId || isSending) return
 
-    const body = inputValue
+    const body = inputValue.trim()
     setInputValue('')
     setIsSending(true)
 
     try {
-      const optimisticMessage = {
-        id: crypto.randomUUID(),
+      // Optimistic UI update
+      const optimisticMessage: ChatMessage = {
+        id: crypto.randomUUID(), // Temp ID
         conversation_id: activeConversationId,
         sender_id: currentUserId,
         body: body,
@@ -166,6 +215,13 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
         sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' }
       }
       setMessages(prev => [...prev, optimisticMessage])
+
+      // Sidebar immediate optimistic update
+      setConversations(prev => prev.map(c => c.id === activeConversationId ? {
+        ...c,
+        last_message_body: body,
+        last_message_created_at: optimisticMessage.created_at
+      } : c))
 
       if (actionRoute === 'agency') {
         await sendAgencyMessageAction(activeConversationId, body)
@@ -179,6 +235,14 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
     }
   }
 
+  // Handle Enter to send, Shift+Enter for new line
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
   function formatTime(dateStr: string) {
     return new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
@@ -187,19 +251,30 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
     }).format(new Date(dateStr))
   }
 
-  // Filter conversations
-  const filteredConversations = useMemo(() => {
-    if (!searchQuery) return conversations
-    const lowerQ = searchQuery.toLowerCase()
-    return conversations.filter(c => {
-      if (typeof c.title === 'string' && c.title.toLowerCase().includes(lowerQ)) return true
-      const parts = (c.participants || []) as Array<{ full_name?: string }>
-      return parts.some(p => p.full_name?.toLowerCase().includes(lowerQ))
+  // Filter & Sort conversations (Step 0.5)
+  const sortedAndFilteredConversations = useMemo(() => {
+    let result = [...conversations]
+    
+    // Sort by last_message_created_at descending
+    result.sort((a, b) => {
+      const timeA = a.last_message_created_at ? new Date(a.last_message_created_at).getTime() : 0
+      const timeB = b.last_message_created_at ? new Date(b.last_message_created_at).getTime() : 0
+      return timeB - timeA
     })
+
+    if (searchQuery) {
+      const lowerQ = searchQuery.toLowerCase()
+      result = result.filter(c => {
+        if (typeof c.title === 'string' && c.title.toLowerCase().includes(lowerQ)) return true
+        const parts = (c.participants || []) as Array<{ full_name?: string }>
+        return parts.some(p => p.full_name?.toLowerCase().includes(lowerQ))
+      })
+    }
+    return result
   }, [conversations, searchQuery])
 
-  const groups = filteredConversations.filter(c => c.type === 'group' || c.is_default)
-  const dms = filteredConversations.filter(c => c.type === 'private')
+  const groups = sortedAndFilteredConversations.filter(c => c.type === 'group' || c.is_default)
+  const dms = sortedAndFilteredConversations.filter(c => c.type === 'private')
 
   function getConversationName(c: ChatConversation) {
     if (c.type === 'group' || c.is_default) return c.title
@@ -291,11 +366,12 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
                   >
                     <div className="h-10 w-10 shrink-0 rounded-full bg-secondary flex items-center justify-center font-bold text-secondary-foreground text-sm overflow-hidden relative">
                       {other?.avatar_url ? (
-                        <img src={other.avatar_url} alt={other.full_name} className="w-full h-full object-cover" />
+                        <img src={other.avatar_url} alt={other?.full_name || 'User'} className="w-full h-full object-cover" />
                       ) : (
                         other?.full_name?.charAt(0) || 'U'
                       )}
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full"></div>
+                      {/* Step 3 Placeholder: Presence Indicator */}
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full hidden"></div>
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <div className="flex justify-between items-baseline">
@@ -339,7 +415,7 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
               <div className="text-xs text-muted-foreground truncate">
                 {activeConversation.type === 'group' || activeConversation.is_default 
                   ? `${activeConversation.participants?.length || 0} members`
-                  : 'Online'}
+                  : 'Offline'} {/* Placeholder for Step 3 */}
               </div>
             </div>
           </div>
@@ -381,7 +457,7 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
                       )}
                       
                       <div 
-                        className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm ${
+                        className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
                           isMe 
                             ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
                             : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
@@ -394,6 +470,7 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
                         <span className="text-[10px] text-muted-foreground">
                           {formatTime(msg.created_at)}
                         </span>
+                        {/* Step 2 Placeholder: Read Receipts */}
                       </div>
                     </div>
                   </div>
@@ -407,19 +484,20 @@ export function ChatInterface({ conversations, initialMessages, currentUserId, a
         <div className="p-3 bg-background border-t z-10">
           <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
             <div className="flex-1 relative">
-              <Input
+              <textarea
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
-                placeholder="Type a message..."
-                className="w-full rounded-full pl-4 pr-12 bg-muted/50 border-muted-foreground/20 focus-visible:ring-1"
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message... (Shift+Enter for new line)"
+                className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm"
                 disabled={isSending || !activeConversationId}
-                autoComplete="off"
+                rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}
               />
             </div>
             <Button 
               type="submit" 
               size="icon" 
-              className="h-10 w-10 shrink-0 rounded-full shadow-sm transition-all"
+              className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
               disabled={!inputValue.trim() || isSending || !activeConversationId}
             >
               {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
