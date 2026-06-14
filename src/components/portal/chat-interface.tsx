@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
-import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, UserIcon } from 'lucide-react'
+import { useEffect, useState, useRef, useMemo } from 'react'
+import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, UserIcon, MessageSquareIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClient } from '@/lib/supabase/client'
 import { sendPortalMessageAction } from '@/app/portal/messages/actions'
-import { sendAgencyMessageAction } from '@/app/dashboard/messages/actions'
+import { sendAgencyMessageAction, getAgencyMembersAction, startPrivateChatAction } from '@/app/dashboard/messages/actions'
 
 export interface ChatConversation {
   id: string
@@ -56,6 +57,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [readStates, setReadStates] = useState<Record<string, string>>({}) // profile_id -> message_id
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
 
+  // Step 4 State (Private Chats)
+  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
+  const [agencyMembers, setAgencyMembers] = useState<any[]>([])
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const readDebounceTimer = useRef<NodeJS.Timeout | null>(null)
   const supabase = createClient()
@@ -76,7 +82,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   // STEP 3: ONLINE PRESENCE
   // ==========================================
   useEffect(() => {
-    // 1. Supabase Realtime Presence Channel
     const room = supabase.channel('agency_presence', {
       config: { presence: { key: currentUserId } }
     })
@@ -93,13 +98,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       }
     })
 
-    // 2. Persist to Database on Mount (Login/Active)
     supabase.from('profiles').update({ 
       presence_status: 'online', 
       last_seen: new Date().toISOString() 
     }).eq('id', currentUserId).then()
 
-    // 3. Persist to Database on Unmount (Logout/Inactive)
     const handleUnload = () => {
       supabase.from('profiles').update({ 
         presence_status: 'offline', 
@@ -133,7 +136,12 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
           setConversations(prev => {
             const exists = prev.find(c => c.id === newMsg.conversation_id)
-            if (!exists) return prev
+            if (!exists) {
+              // We should probably fetch the new conversation so it appears in the sidebar!
+              // For now we will rely on a hard refresh or realtime conv listener, 
+              // but to prevent breaking the map loop we just return prev.
+              return prev
+            }
             return prev.map(c => {
               if (c.id === newMsg.conversation_id) {
                 const isActive = c.id === activeConversationId
@@ -171,7 +179,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   useEffect(() => {
     if (!activeConversationId) return
 
-    // 1. Fetch Messages
     async function fetchMessages() {
       const { data } = await supabase.from('messages').select('*, sender:profiles(id, full_name, avatar_url, role)').eq('conversation_id', activeConversationId).order('created_at', { ascending: true })
       if (data) setMessages(data)
@@ -185,7 +192,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       fetchMessages()
     }
 
-    // 2. Fetch Initial Read States
     async function fetchReadStates() {
       const { data } = await supabase.from('conversation_participants').select('profile_id, last_read_message_id').eq('conversation_id', activeConversationId)
       if (data) {
@@ -196,7 +202,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     }
     fetchReadStates()
 
-    // 3. Listen to other participants' read state updates
     const partChannel = supabase.channel(`participants_${activeConversationId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_participants', filter: `conversation_id=eq.${activeConversationId}` }, (payload) => {
         const newRecord = payload.new
@@ -220,14 +225,55 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       
       readDebounceTimer.current = setTimeout(async () => {
         await supabase.from('conversation_participants').update({ last_read_message_id: latestId }).eq('conversation_id', activeConversationId).eq('profile_id', currentUserId)
-      }, 1500) // Debounce by 1.5 seconds
+      }, 1500)
     }
 
     triggerMarkRead()
-    // Clear local unread counts
     setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, unread_count: 0 } : c))
 
   }, [activeConversationId, messages, currentUserId, supabase])
+
+
+  // ==========================================
+  // STEP 4: PRIVATE CONVERSATION HELPERS
+  // ==========================================
+  async function handleOpenNewChat() {
+    setIsNewChatModalOpen(true)
+    setIsLoadingMembers(true)
+    try {
+      if (actionRoute === 'agency') {
+        const members = await getAgencyMembersAction()
+        setAgencyMembers(members)
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsLoadingMembers(false)
+    }
+  }
+
+  async function handleStartPrivateChat(memberId: string) {
+    try {
+      if (actionRoute === 'agency') {
+        const convId = await startPrivateChatAction(memberId)
+        
+        // We must fetch the conversation if it's new so we can add it to the sidebar
+        const exists = conversations.find(c => c.id === convId)
+        if (!exists) {
+          // Fetch the conversation and participants to inject into local state
+          const { data } = await supabase.from('agency_conversations_with_unreads').select('*').eq('id', convId).eq('participant_id', currentUserId).single()
+          if (data) {
+             setConversations(prev => [data, ...prev])
+          }
+        }
+        
+        setActiveConversationId(convId)
+        setIsNewChatModalOpen(false)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
 
   async function handleSend(e?: React.FormEvent) {
@@ -298,21 +344,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     return other ? other.full_name : 'Direct Message'
   }
 
-  if (conversations.length === 0) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground border rounded-xl bg-background shadow-sm h-full p-8">
-        <UserIcon className="h-12 w-12 mb-4 opacity-20" />
-        <h3 className="text-xl font-medium text-foreground mb-2">Team Messaging</h3>
-        <p className="text-center max-w-sm">Collaborate with your team in real time. Start a conversation or select a chat to begin messaging.</p>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-1 h-full overflow-hidden border-t md:border md:rounded-xl bg-background shadow-sm relative">
       
       {/* Sidebar: Conversation List */}
-      <div className={`w-full md:w-[320px] flex-shrink-0 flex flex-col border-r bg-muted/10 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
+      <div className={`w-full md:w-[320px] flex-shrink-0 flex flex-col border-r bg-muted/10 ${mobileView === 'chat' && activeConversationId ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b bg-background">
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -351,7 +387,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             <div className="py-2 border-t">
               <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-between items-center">
                 Direct Messages
-                {actionRoute === 'agency' && <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full" title="New Message"><PlusIcon className="h-3 w-3" /></Button>}
+                {actionRoute === 'agency' && (
+                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full" title="New Message" onClick={handleOpenNewChat}>
+                    <PlusIcon className="h-3 w-3" />
+                  </Button>
+                )}
               </h3>
               {dms.map(conv => {
                 const parts = conv.participants || []
@@ -388,138 +428,202 @@ export function ChatInterface({ conversations: initialConversations, initialMess
               })}
             </div>
           )}
+
+          {dms.length === 0 && actionRoute === 'agency' && (
+             <div className="p-4 text-center">
+               <Button variant="outline" size="sm" className="w-full text-xs" onClick={handleOpenNewChat}>
+                 <PlusIcon className="h-3 w-3 mr-1" /> Start Private Chat
+               </Button>
+             </div>
+          )}
         </div>
       </div>
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col bg-background relative ${mobileView === 'list' ? 'hidden md:flex' : 'flex'}`}>
-        {activeConversation && (
-          <div className="px-4 py-3 border-b bg-background/95 backdrop-blur z-10 flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="md:hidden -ml-2 h-8 w-8" onClick={() => setMobileView('list')}>
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Button>
-            
-            <div className={`h-10 w-10 shrink-0 flex items-center justify-center font-bold text-sm overflow-hidden ${activeConversation.type === 'group' || activeConversation.is_default ? 'rounded-md bg-primary/10 text-primary' : 'rounded-full bg-secondary text-secondary-foreground'}`}>
-               {getConversationName(activeConversation).charAt(0)}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <h2 className="font-semibold text-sm truncate">{getConversationName(activeConversation)}</h2>
-              <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
-                {activeConversation.type === 'group' || activeConversation.is_default 
-                  ? `${activeConversation.participants?.length || 0} members`
-                  : (
-                    <>
-                      <span className={`w-1.5 h-1.5 rounded-full ${onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'bg-green-500' : 'bg-slate-400'}`}></span>
-                      {onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'Online' : 'Offline'}
-                    </>
-                  )}
-              </div>
-            </div>
+      <div className={`flex-1 flex flex-col bg-background relative ${mobileView === 'list' && activeConversationId ? 'hidden md:flex' : 'flex'}`}>
+        {/* Placeholder if no chat selected */}
+        {!activeConversationId && (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
+            <MessageSquareIcon className="h-12 w-12 mb-4 opacity-20" />
+            <h3 className="text-xl font-medium text-foreground mb-2">Team Messaging</h3>
+            <p className="text-center max-w-sm">Collaborate with your team in real time. Select a chat from the sidebar or start a new private conversation.</p>
+            {actionRoute === 'agency' && (
+              <Button className="mt-4" onClick={handleOpenNewChat}>
+                <PlusIcon className="h-4 w-4 mr-2" /> Start Conversation
+              </Button>
+            )}
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto relative bg-slate-50/50 dark:bg-slate-900/20">
-          <div ref={scrollRef} className="absolute inset-0 p-4 space-y-6 overflow-y-auto">
-            {messages.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm flex-col gap-2">
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">💬</div>
-                <p>No messages yet.</p>
-                <p className="text-xs opacity-70">Say hello to start the conversation.</p>
+        {activeConversation && (
+          <>
+            <div className="px-4 py-3 border-b bg-background/95 backdrop-blur z-10 flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="md:hidden -ml-2 h-8 w-8" onClick={() => setMobileView('list')}>
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Button>
+              
+              <div className={`h-10 w-10 shrink-0 flex items-center justify-center font-bold text-sm overflow-hidden ${activeConversation.type === 'group' || activeConversation.is_default ? 'rounded-md bg-primary/10 text-primary' : 'rounded-full bg-secondary text-secondary-foreground'}`}>
+                 {getConversationName(activeConversation).charAt(0)}
               </div>
-            ) : (
-              messages.map((msg, i) => {
-                const isMe = msg.sender_id === currentUserId
-                const showAvatar = i === 0 || messages[i-1].sender_id !== msg.sender_id
-                
-                // Determine Read Receipts for this message
-                const readersOfThisMessage = Object.entries(readStates)
-                  .filter(([pid, mid]) => mid === msg.id && pid !== currentUserId)
-                  .map(([pid]) => {
-                    const participant = activeConversation?.participants?.find(p => p.profile_id === pid)
-                    return participant?.full_name?.split(' ')[0] || 'Someone'
-                  })
-                
-                return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2 max-w-full group`}>
-                    {!isMe && (
-                      <div className="w-8 shrink-0 flex items-end">
-                        {showAvatar && (
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary overflow-hidden">
-                            {msg.sender?.avatar_url ? (
-                              <img src={msg.sender.avatar_url} alt={msg.sender.full_name} className="w-full h-full object-cover" />
-                            ) : (
-                              msg.sender?.full_name?.charAt(0) || 'U'
+              
+              <div className="flex-1 min-w-0">
+                <h2 className="font-semibold text-sm truncate">{getConversationName(activeConversation)}</h2>
+                <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+                  {activeConversation.type === 'group' || activeConversation.is_default 
+                    ? `${activeConversation.participants?.length || 0} members`
+                    : (
+                      <>
+                        <span className={`w-1.5 h-1.5 rounded-full ${onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'bg-green-500' : 'bg-slate-400'}`}></span>
+                        {onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'Online' : 'Offline'}
+                      </>
+                    )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto relative bg-slate-50/50 dark:bg-slate-900/20">
+              <div ref={scrollRef} className="absolute inset-0 p-4 space-y-6 overflow-y-auto">
+                {messages.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm flex-col gap-2">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">💬</div>
+                    <p>No messages yet.</p>
+                    <p className="text-xs opacity-70">Say hello to start the conversation.</p>
+                  </div>
+                ) : (
+                  messages.map((msg, i) => {
+                    const isMe = msg.sender_id === currentUserId
+                    const showAvatar = i === 0 || messages[i-1].sender_id !== msg.sender_id
+                    
+                    const readersOfThisMessage = Object.entries(readStates)
+                      .filter(([pid, mid]) => mid === msg.id && pid !== currentUserId)
+                      .map(([pid]) => {
+                        const participant = activeConversation?.participants?.find(p => p.profile_id === pid)
+                        return participant?.full_name?.split(' ')[0] || 'Someone'
+                      })
+                    
+                    return (
+                      <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2 max-w-full group`}>
+                        {!isMe && (
+                          <div className="w-8 shrink-0 flex items-end">
+                            {showAvatar && (
+                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary overflow-hidden">
+                                {msg.sender?.avatar_url ? (
+                                  <img src={msg.sender.avatar_url} alt={msg.sender.full_name} className="w-full h-full object-cover" />
+                                ) : (
+                                  msg.sender?.full_name?.charAt(0) || 'U'
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-                      </div>
-                    )}
-                    
-                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                      {!isMe && showAvatar && (
-                        <span className="text-[11px] font-medium text-muted-foreground mb-1 ml-1">{msg.sender?.full_name}</span>
-                      )}
-                      
-                      <div 
-                        className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
-                          isMe 
-                            ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
-                            : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
-                        }`}
-                      >
-                        {msg.body}
-                      </div>
-                      
-                      <div className={`flex flex-col items-end gap-0.5 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                        <span className="text-[10px] text-muted-foreground">
-                          {formatTime(msg.created_at)}
-                        </span>
                         
-                        {/* Read Receipt Indicator */}
-                        {isMe && readersOfThisMessage.length > 0 && (
-                          <div className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-80">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[12px] w-[12px] text-blue-500">
-                              <path d="M18 6 7 17l-5-5" />
-                              <path d="m22 10-7.5 7.5L13 16" />
-                            </svg>
-                            {activeConversation?.type === 'group' || activeConversation?.is_default 
-                               ? `Seen by ${readersOfThisMessage.join(', ')}` 
-                               : 'Seen'}
+                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                          {!isMe && showAvatar && (
+                            <span className="text-[11px] font-medium text-muted-foreground mb-1 ml-1">{msg.sender?.full_name}</span>
+                          )}
+                          
+                          <div 
+                            className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
+                              isMe 
+                                ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
+                                : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
+                            }`}
+                          >
+                            {msg.body}
                           </div>
-                        )}
+                          
+                          <div className={`flex flex-col items-end gap-0.5 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatTime(msg.created_at)}
+                            </span>
+                            
+                            {isMe && readersOfThisMessage.length > 0 && (
+                              <div className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-80">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[12px] w-[12px] text-blue-500">
+                                  <path d="M18 6 7 17l-5-5" />
+                                  <path d="m22 10-7.5 7.5L13 16" />
+                                </svg>
+                                {activeConversation?.type === 'group' || activeConversation?.is_default 
+                                   ? `Seen by ${readersOfThisMessage.join(', ')}` 
+                                   : 'Seen'}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className="p-3 bg-background border-t z-10">
+              <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
+                <div className="flex-1 relative">
+                  <textarea
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a message... (Shift+Enter for new line)"
+                    className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm"
+                    disabled={isSending || !activeConversationId}
+                    rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}
+                  />
+                </div>
+                <Button 
+                  type="submit" size="icon" 
+                  className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
+                  disabled={!inputValue.trim() || isSending || !activeConversationId}
+                >
+                  {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
+                </Button>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* New Chat Modal */}
+      <Dialog open={isNewChatModalOpen} onOpenChange={setIsNewChatModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Private Message</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[400px] overflow-y-auto pr-2 mt-4 space-y-2">
+            {isLoadingMembers ? (
+              <div className="flex justify-center p-8 text-muted-foreground">
+                <Loader2Icon className="h-6 w-6 animate-spin" />
+              </div>
+            ) : agencyMembers.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground p-4">No team members found.</p>
+            ) : (
+              agencyMembers.map(member => {
+                const isOnline = onlineUsers.has(member.id)
+                return (
+                  <button
+                    key={member.id}
+                    onClick={() => handleStartPrivateChat(member.id)}
+                    className="w-full flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors text-left"
+                  >
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-secondary flex items-center justify-center font-bold text-secondary-foreground text-sm overflow-hidden relative">
+                      {member.avatar_url ? (
+                        <img src={member.avatar_url} alt={member.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        member.full_name?.charAt(0) || 'U'
+                      )}
+                      <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-background rounded-full ${isOnline ? 'bg-green-500' : 'bg-slate-400'}`}></div>
                     </div>
-                  </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{member.full_name}</div>
+                      <div className="text-xs text-muted-foreground capitalize">{member.role}</div>
+                    </div>
+                  </button>
                 )
               })
             )}
           </div>
-        </div>
-
-        <div className="p-3 bg-background border-t z-10">
-          <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
-            <div className="flex-1 relative">
-              <textarea
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message... (Shift+Enter for new line)"
-                className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm"
-                disabled={isSending || !activeConversationId}
-                rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}
-              />
-            </div>
-            <Button 
-              type="submit" size="icon" 
-              className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
-              disabled={!inputValue.trim() || isSending || !activeConversationId}
-            >
-              {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
-            </Button>
-          </form>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
