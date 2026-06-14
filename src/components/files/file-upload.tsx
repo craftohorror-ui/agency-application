@@ -56,8 +56,9 @@ export function FileUpload({
         toast.success('File uploaded successfully.')
         formRef.current?.reset()
       }
-    } catch {
-      toast.error('Upload failed. Please try again.')
+    } catch (error: unknown) {
+      console.error('[FileUpload] Caught exception:', error)
+      toast.error(`Upload crashed: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setIsUploading(false)
     }

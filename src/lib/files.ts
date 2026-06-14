@@ -155,15 +155,10 @@ export async function uploadFileServer(formData: FormData) {
   
   console.log(`[uploadFileServer] Generated storage path: ${storagePath}`)
 
-  console.log('[uploadFileServer] Converting File to ArrayBuffer...')
-  const arrayBuffer = await file.arrayBuffer()
-  console.log('[uploadFileServer] Converting ArrayBuffer to Node Buffer...')
-  const buffer = Buffer.from(arrayBuffer)
-  
-  console.log('[uploadFileServer] Uploading buffer to Supabase Storage bucket: "files"...')
+  console.log('[uploadFileServer] Uploading file directly to Supabase Storage bucket: "files"...')
   const { error: storageError } = await supabase.storage
     .from('files')
-    .upload(storagePath, buffer, {
+    .upload(storagePath, file, {
       contentType: file.type,
       upsert: false
     })
