@@ -293,10 +293,15 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       setMessages(prev => [...prev, optimisticMessage])
       setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, last_message_body: body, last_message_created_at: optimisticMessage.created_at } : c))
 
+      let result
       if (actionRoute === 'agency') {
-        await sendAgencyMessageAction(activeConversationId, body)
+        result = await sendAgencyMessageAction(activeConversationId, body)
       } else {
-        await sendPortalMessageAction(activeConversationId, body)
+        result = await sendPortalMessageAction(activeConversationId, body)
+      }
+      
+      if (result && result.error) {
+        throw new Error(result.error)
       }
     } catch (err) {
       const error = err as Error

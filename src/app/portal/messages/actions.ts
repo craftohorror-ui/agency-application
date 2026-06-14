@@ -23,6 +23,9 @@ export async function sendPortalMessageAction(conversationId: string, body: stri
 
   console.log('[sendPortalMessageAction] INSERT RESULT', { data, error })
 
-  if (error) throw new Error(error.message || JSON.stringify(error))
-  return data
+  if (error) {
+    console.error('SEND MESSAGE ERROR:', error)
+    return { error: error.message || JSON.stringify(error) }
+  }
+  return { success: true, data }
 }
