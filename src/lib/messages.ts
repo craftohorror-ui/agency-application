@@ -75,29 +75,30 @@ export async function getOrCreatePrivateChat(memberId: string) {
 
   console.log('[getOrCreatePrivateChat] CREATING NEW CONVERSATION')
 
-  const { data: newConv, error: createError } = await supabase
+  const newConversationId = crypto.randomUUID()
+
+  const { error: createError } = await supabase
     .from('conversations')
     .insert({
+      id: newConversationId,
       type: 'private',
       title: 'Private Chat',
       is_default: false
     })
-    .select('id')
-    .single()
 
   if (createError) {
     console.error('[getOrCreatePrivateChat] createError', createError)
     throw new Error(createError.message || JSON.stringify(createError))
   }
 
-  console.log('[getOrCreatePrivateChat] INSERTING PARTICIPANTS', { conversation_id: newConv.id })
+  console.log('[getOrCreatePrivateChat] INSERTING PARTICIPANTS', { conversation_id: newConversationId })
 
   // Add participants
   const { error: partError } = await supabase
     .from('conversation_participants')
     .insert([
-      { conversation_id: newConv.id, profile_id: user.id },
-      { conversation_id: newConv.id, profile_id: memberId }
+      { conversation_id: newConversationId, profile_id: user.id },
+      { conversation_id: newConversationId, profile_id: memberId }
     ])
 
   if (partError) {
@@ -105,8 +106,8 @@ export async function getOrCreatePrivateChat(memberId: string) {
     throw new Error(partError.message || JSON.stringify(partError))
   }
 
-  console.log('[getOrCreatePrivateChat] SUCCESS', newConv.id)
-  return newConv.id
+  console.log('[getOrCreatePrivateChat] SUCCESS', newConversationId)
+  return newConversationId
 }
 
 export async function addMemberToDefaultGroup(profileId: string, agencyId: string) {
