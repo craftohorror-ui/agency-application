@@ -27,15 +27,30 @@ export function FileUpload({
     const file = formData.get('file') as File
     if (!file || file.size === 0) return toast.error('Please select a file')
 
-    setIsUploading(true)
-    const res = await uploadFileAction(formData)
-    setIsUploading(false)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024
+    if (file.size > MAX_FILE_SIZE) {
+      return toast.error('File size exceeds the 50 MB upload limit.')
+    }
 
-    if (res?.error) {
-      toast.error(res.error)
-    } else {
-      toast.success('File uploaded successfully')
-      formRef.current?.reset()
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'xlsx', 'csv', 'png', 'jpg', 'jpeg', 'zip']
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    if (!ext || !allowedExtensions.includes(ext)) {
+      return toast.error('Unsupported file type. Please upload a valid document or image.')
+    }
+
+    setIsUploading(true)
+    try {
+      const res = await uploadFileAction(formData)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('File uploaded successfully')
+        formRef.current?.reset()
+      }
+    } catch (error) {
+      toast.error('Upload failed. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
