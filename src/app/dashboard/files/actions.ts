@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { uploadFileServer, deleteFile, getFileDownloadUrl } from '@/lib/files'
+import { unstable_rethrow } from 'next/navigation'
 
 export async function uploadFileAction(formData: FormData) {
   try {
@@ -12,6 +13,7 @@ export async function uploadFileAction(formData: FormData) {
     revalidatePath('/dashboard/clients')
     return { success: true }
   } catch (error: unknown) {
+    unstable_rethrow(error)
     if (error instanceof Error) return { error: error.message }
     return { error: 'Unknown error' }
   }
@@ -26,6 +28,7 @@ export async function deleteFileAction(id: string) {
     revalidatePath('/dashboard/clients')
     return { success: true }
   } catch (error: unknown) {
+    unstable_rethrow(error)
     if (error instanceof Error) return { error: error.message }
     return { error: 'Unknown error' }
   }
@@ -36,6 +39,7 @@ export async function getDownloadUrlAction(storagePath: string) {
     const url = await getFileDownloadUrl(storagePath)
     return { url }
   } catch (error: unknown) {
+    unstable_rethrow(error)
     if (error instanceof Error) return { error: error.message }
     return { error: 'Unknown error' }
   }

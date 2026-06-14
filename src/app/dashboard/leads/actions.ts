@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import {
   LEAD_STAGES,
   createLead,
@@ -125,6 +125,7 @@ export async function createLeadFormAction(
       stage: values.stage as LeadStage,
     })
   } catch (error) {
+    unstable_rethrow(error)
     const message = error instanceof Error ? error.message : 'Unable to create lead.'
 
     return {
@@ -134,7 +135,7 @@ export async function createLeadFormAction(
     }
   }
 
-  redirect(`${LEADS_PATH}?success=Lead+deleted+successfully`)
+  redirect(`${LEADS_PATH}?success=Lead+created+successfully`)
 }
 
 export async function updateLeadFormAction(
@@ -193,6 +194,7 @@ export async function updateLeadFormAction(
       stage: values.stage as LeadStage,
     })
   } catch (error) {
+    unstable_rethrow(error)
     const message = error instanceof Error ? error.message : 'Unable to update lead.'
 
     return {

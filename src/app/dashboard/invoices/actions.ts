@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import { createInvoice, updateInvoice, deleteInvoice, generateInvoiceFromProject } from '@/lib/invoices'
 import { requireStaff } from '@/lib/auth'
 import { insertAuditLog } from '@/lib/audit'
@@ -39,6 +39,7 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
     return { errors: { items: 'Invalid items format' } }
   }
 
+  let invoiceId: string
   try {
     const invoice = await createInvoice({
       client_id,
@@ -49,12 +50,16 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
       notes,
       status
     }, items)
+    if (!invoice) throw new Error('Failed to create invoice')
+    invoiceId = invoice.id
 
     revalidatePath('/dashboard/invoices')
-    redirect(`/dashboard/invoices/${invoice?.id}?success=Invoice+created+successfully`)
   } catch (err: unknown) {
-    return { errors: { server: err instanceof Error ? err.message : String(err) } }
+    unstable_rethrow(err)
+    return { errors: { server: err instanceof Error ? err.message : 'Unable to create invoice.' } }
   }
+
+  redirect(`/dashboard/invoices/${invoiceId}?success=Invoice+created+successfully`)
 }
 
 export async function updateInvoiceAction(id: string, prevState: InvoiceFormState, formData: FormData): Promise<InvoiceFormState> {
@@ -93,10 +98,12 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
     await insertAuditLog(user.id, 'invoice.updated', 'invoice', id, { status, due_date })
 
     revalidatePath('/dashboard/invoices')
-    redirect(`/dashboard/invoices/${id}?success=Invoice+updated+successfully`)
   } catch (err: unknown) {
-    return { errors: { server: err instanceof Error ? err.message : String(err) } }
+    unstable_rethrow(err)
+    return { errors: { server: err instanceof Error ? err.message : 'Unable to update invoice.' } }
   }
+
+  redirect(`/dashboard/invoices/${id}?success=Invoice+updated+successfully`)
 }
 
 export async function deleteInvoiceAction(id: string) {

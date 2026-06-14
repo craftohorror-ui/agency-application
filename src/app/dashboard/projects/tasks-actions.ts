@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createTask, updateTask, deleteTask, type TaskInput, type TaskUpdateInput } from '@/lib/tasks'
+import { unstable_rethrow } from 'next/navigation'
 
 export async function createProjectTaskAction(input: TaskInput) {
   try {
@@ -9,6 +10,7 @@ export async function createProjectTaskAction(input: TaskInput) {
     revalidatePath(`/dashboard/projects/${input.project_id}`)
     return { success: true, task }
   } catch (error) {
+    unstable_rethrow(error)
     return { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -19,6 +21,7 @@ export async function updateProjectTaskAction(id: string, projectId: string, inp
     revalidatePath(`/dashboard/projects/${projectId}`)
     return { success: true, task }
   } catch (error) {
+    unstable_rethrow(error)
     return { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -29,6 +32,7 @@ export async function deleteProjectTaskAction(id: string, projectId: string) {
     revalidatePath(`/dashboard/projects/${projectId}`)
     return { success: true }
   } catch (error) {
+    unstable_rethrow(error)
     return { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createProposal, updateProposal, deleteProposal, convertProposalToContract, convertProposalToProject } from '@/lib/proposals'
 import type { ProposalStatus } from '@/lib/types'
@@ -39,6 +39,7 @@ export async function createProposalAction(prevState: ProposalFormState, formDat
 
   if (Object.keys(errors).length > 0) return { errors }
 
+  let proposalId: string
   try {
     const proposal = await createProposal({
       title,
@@ -50,12 +51,16 @@ export async function createProposalAction(prevState: ProposalFormState, formDat
       terms,
       status
     }, parsedItems)
+    if (!proposal) throw new Error('Failed to create proposal')
+    proposalId = proposal.id
 
     revalidatePath('/dashboard/proposals')
-    redirect(`/dashboard/proposals/${proposal?.id}?success=Proposal+created+successfully`)
   } catch (err: unknown) {
-    return { errors: { server: err instanceof Error ? err.message : String(err) } }
+    unstable_rethrow(err)
+    return { errors: { server: err instanceof Error ? err.message : 'Unable to create proposal.' } }
   }
+
+  redirect(`/dashboard/proposals/${proposalId}?success=Proposal+created+successfully`)
 }
 
 export async function updateProposalAction(id: string, prevState: ProposalFormState, formData: FormData): Promise<ProposalFormState> {
@@ -96,10 +101,12 @@ export async function updateProposalAction(id: string, prevState: ProposalFormSt
     }, parsedItems)
 
     revalidatePath('/dashboard/proposals')
-    redirect(`/dashboard/proposals/${id}?success=Proposal+updated+successfully`)
   } catch (err: unknown) {
-    return { errors: { server: err instanceof Error ? err.message : String(err) } }
+    unstable_rethrow(err)
+    return { errors: { server: err instanceof Error ? err.message : 'Unable to update proposal.' } }
   }
+
+  redirect(`/dashboard/proposals/${id}?success=Proposal+updated+successfully`)
 }
 
 export async function deleteProposalAction(id: string) {

@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import {
   createProject,
   updateProject,
@@ -87,6 +87,7 @@ export async function createProjectFormAction(
     project = await createProject(input)
     revalidateProjectPaths()
   } catch (error) {
+    unstable_rethrow(error)
     return {
       errors: {},
       values,
@@ -142,6 +143,7 @@ export async function updateProjectFormAction(
     await updateProject(projectId, input)
     revalidateProjectPaths(projectId)
   } catch (error) {
+    unstable_rethrow(error)
     return {
       errors: {},
       values,

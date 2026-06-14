@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import {
   updateTeamMember,
   createTeamMember,
@@ -60,6 +60,7 @@ export async function updateTeamMemberAction(
     revalidateTeamPaths()
     return { errors: {}, success: true, profileId: id }
   } catch (error) {
+    unstable_rethrow(error)
     return {
       errors: {},
       message: error instanceof Error ? error.message : 'Unable to update team member.',
@@ -121,6 +122,7 @@ export async function createTeamMemberAction(
     revalidateTeamPaths()
     return { errors: {}, success: true, profileId: profile.id }
   } catch (error) {
+    unstable_rethrow(error)
     return {
       errors: {},
       message: error instanceof Error ? error.message : 'Unable to create team member.',

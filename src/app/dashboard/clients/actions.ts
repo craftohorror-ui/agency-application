@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import {
   updateClient,
   deleteClient,
@@ -117,6 +117,7 @@ export async function updateClientFormAction(
     await updateClient(clientId, input)
     revalidateClientPaths(clientId)
   } catch (error) {
+    unstable_rethrow(error)
     const message = error instanceof Error ? error.message : 'Unable to update client.'
 
     return {
