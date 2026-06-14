@@ -33,8 +33,13 @@ export async function sendAgencyMessageAction(conversationId: string, body: stri
 import { getOrCreatePrivateChat } from '@/lib/messages'
 
 export async function startPrivateChatAction(memberId: string) {
-  const conversationId = await getOrCreatePrivateChat(memberId)
-  return conversationId
+  try {
+    const conversationId = await getOrCreatePrivateChat(memberId)
+    return { success: true, conversationId }
+  } catch (err: any) {
+    console.error('START PRIVATE CHAT ACTION ERROR:', err)
+    return { error: err.message || JSON.stringify(err) }
+  }
 }
 
 export async function getAgencyMembersAction() {

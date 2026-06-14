@@ -48,6 +48,8 @@ export async function getAgencyConversationMessages(conversationId: string) {
 
 export async function getOrCreatePrivateChat(memberId: string) {
   const { supabase, user } = await requireStaff()
+  
+  console.log('[getOrCreatePrivateChat] START', { currentUser: user.id, selectedMember: memberId })
 
   // Find if private chat already exists
   const { data: existingConvs, error: existingError } = await supabase
@@ -55,7 +57,10 @@ export async function getOrCreatePrivateChat(memberId: string) {
     .select('id, type, participants:conversation_participants!inner(profile_id)')
     .eq('type', 'private')
   
-  if (existingError) throw new Error(existingError.message)
+  if (existingError) {
+    console.error('[getOrCreatePrivateChat] existingError', existingError)
+    throw new Error(existingError.message || JSON.stringify(existingError))
+  }
 
   // We filter in memory since Supabase JS filtering on nested inner joins is complex for exactly these two IDs
   const existingChat = existingConvs.find(c => {
@@ -64,12 +69,11 @@ export async function getOrCreatePrivateChat(memberId: string) {
   })
 
   if (existingChat) {
+    console.log('[getOrCreatePrivateChat] REUSING EXISTING', existingChat.id)
     return existingChat.id
   }
 
-  // Create new private chat
-  const { data: profile } = await supabase.from('profiles').select('agency_id').eq('id', user.id).single()
-  if (!profile) throw new Error('Profile not found')
+  console.log('[getOrCreatePrivateChat] CREATING NEW CONVERSATION')
 
   const { data: newConv, error: createError } = await supabase
     .from('conversations')
@@ -81,7 +85,12 @@ export async function getOrCreatePrivateChat(memberId: string) {
     .select('id')
     .single()
 
-  if (createError) throw new Error(createError.message)
+  if (createError) {
+    console.error('[getOrCreatePrivateChat] createError', createError)
+    throw new Error(createError.message || JSON.stringify(createError))
+  }
+
+  console.log('[getOrCreatePrivateChat] INSERTING PARTICIPANTS', { conversation_id: newConv.id })
 
   // Add participants
   const { error: partError } = await supabase
@@ -91,8 +100,12 @@ export async function getOrCreatePrivateChat(memberId: string) {
       { conversation_id: newConv.id, profile_id: memberId }
     ])
 
-  if (partError) throw new Error(partError.message)
+  if (partError) {
+    console.error('[getOrCreatePrivateChat] partError', partError)
+    throw new Error(partError.message || JSON.stringify(partError))
+  }
 
+  console.log('[getOrCreatePrivateChat] SUCCESS', newConv.id)
   return newConv.id
 }
 

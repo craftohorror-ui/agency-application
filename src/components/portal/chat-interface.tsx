@@ -255,12 +255,18 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   async function handleStartPrivateChat(memberId: string) {
     try {
       if (actionRoute === 'agency') {
-        const convId = await startPrivateChatAction(memberId)
+        const { startPrivateChatAction } = await import('@/app/dashboard/messages/actions')
+        const result = await startPrivateChatAction(memberId)
         
-        // We must fetch the conversation if it's new so we can add it to the sidebar
+        if (result && result.error) {
+          alert(`Private Chat Failed: ${result.error}`)
+          return
+        }
+
+        const convId = result.conversationId!
+        
         const exists = conversations.find(c => c.id === convId)
         if (!exists) {
-          // Fetch the conversation and participants to inject into local state
           const { data } = await supabase.from('agency_conversations_with_unreads').select('*').eq('id', convId).eq('participant_id', currentUserId).single()
           if (data) {
              setConversations(prev => [data, ...prev])
@@ -271,7 +277,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
         setIsNewChatModalOpen(false)
       }
     } catch (e) {
-      console.error(e)
+      const error = e as Error
+      console.error(error)
+      alert(`Private Chat Error: ${error.message || error}`)
     }
   }
 
