@@ -42,7 +42,6 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ conversations: initialConversations, initialMessages, currentUserId, actionRoute = 'portal' }: ChatInterfaceProps) {
-  // Step 0.5: Local conversation state for Realtime Sidebar
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
     initialConversations.length > 0 ? initialConversations[0].id : null
@@ -52,120 +51,130 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list')
+  
+  // Step 2 & 3 State
+  const [readStates, setReadStates] = useState<Record<string, string>>({}) // profile_id -> message_id
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
+
   const scrollRef = useRef<HTMLDivElement>(null)
+  const readDebounceTimer = useRef<NodeJS.Timeout | null>(null)
   const supabase = createClient()
 
   const activeConversation = conversations.find(c => c.id === activeConversationId)
 
-  // Handle mobile view transitions
+  // Mobile View Transitions
   useEffect(() => {
-    if (activeConversationId) {
-      setMobileView('chat')
-    }
+    if (activeConversationId) setMobileView('chat')
   }, [activeConversationId])
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }, [messages, readStates])
 
-  // Step 0.5 & 1: Global Realtime Listener for Sidebar & Messages
+  // ==========================================
+  // STEP 3: ONLINE PRESENCE
+  // ==========================================
+  useEffect(() => {
+    // 1. Supabase Realtime Presence Channel
+    const room = supabase.channel('agency_presence', {
+      config: { presence: { key: currentUserId } }
+    })
+
+    room.on('presence', { event: 'sync' }, () => {
+      const state = room.presenceState()
+      const onlineIds = new Set<string>()
+      Object.keys(state).forEach(key => onlineIds.add(key))
+      setOnlineUsers(onlineIds)
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await room.track({ online_at: new Date().toISOString() })
+      }
+    })
+
+    // 2. Persist to Database on Mount (Login/Active)
+    supabase.from('profiles').update({ 
+      presence_status: 'online', 
+      last_seen: new Date().toISOString() 
+    }).eq('id', currentUserId).then()
+
+    // 3. Persist to Database on Unmount (Logout/Inactive)
+    const handleUnload = () => {
+      supabase.from('profiles').update({ 
+        presence_status: 'offline', 
+        last_seen: new Date().toISOString() 
+      }).eq('id', currentUserId).then()
+    }
+    window.addEventListener('beforeunload', handleUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload)
+      supabase.from('profiles').update({ presence_status: 'offline', last_seen: new Date().toISOString() }).eq('id', currentUserId).then()
+      supabase.removeChannel(room)
+    }
+  }, [supabase, currentUserId])
+
+  // ==========================================
+  // STEP 0.5 & 1: GLOBAL MESSAGES LISTENER
+  // ==========================================
   useEffect(() => {
     const channel = supabase
       .channel('global_messages_listener')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        async (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
           const newMsg = payload.new
 
-          // Fetch sender details asynchronously
-          const { data: sender } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url, role')
-            .eq('id', newMsg.sender_id)
-            .single()
+          const { data: sender } = await supabase.from('profiles').select('id, full_name, avatar_url, role').eq('id', newMsg.sender_id).single()
 
           const messageObj: ChatMessage = {
-            id: newMsg.id,
-            conversation_id: newMsg.conversation_id,
-            sender_id: newMsg.sender_id,
-            body: newMsg.body,
-            created_at: newMsg.created_at,
+            id: newMsg.id, conversation_id: newMsg.conversation_id, sender_id: newMsg.sender_id, body: newMsg.body, created_at: newMsg.created_at,
             sender: sender || { id: newMsg.sender_id, full_name: 'Unknown', avatar_url: null, role: 'member' }
           }
 
-          // 1. Update conversations sidebar immediately
           setConversations(prev => {
-            // Check if this conversation exists in our list
             const exists = prev.find(c => c.id === newMsg.conversation_id)
-            if (!exists) return prev // If it's a new conversation not fetched, ignore for now (requires page reload or separate conv listener)
-
+            if (!exists) return prev
             return prev.map(c => {
               if (c.id === newMsg.conversation_id) {
-                // Determine if we should increment unread count
                 const isActive = c.id === activeConversationId
                 const isMine = newMsg.sender_id === currentUserId
-                const shouldIncrement = !isActive && !isMine
-
                 return {
                   ...c,
                   last_message_body: newMsg.body,
                   last_message_created_at: newMsg.created_at,
-                  unread_count: shouldIncrement ? (c.unread_count || 0) + 1 : (c.unread_count || 0)
+                  unread_count: (!isActive && !isMine) ? (c.unread_count || 0) + 1 : (c.unread_count || 0)
                 }
               }
               return c
             })
           })
 
-          // 2. Append to active chat if it matches, avoiding optimistic duplicate
           if (newMsg.conversation_id === activeConversationId) {
             setMessages(prev => {
-              // Optimistic UI prevention: check if message with this exact body & close timestamp exists, or just rely on UUID if generated client-side
-              // Since we don't generate UUID on client in optimistic right now, we check by body & recent time (hacky), OR we can just rely on the fact that optimistic appends don't have the exact same UUID.
-              // A better way is to check if we already have it. 
               const duplicate = prev.find(m => m.id === newMsg.id)
               if (duplicate) return prev
-
-              // If it's from me, we might already have an optimistic bubble.
-              // To handle this perfectly, we replace the optimistic bubble.
-              // But for Step 1, we will just add it if it doesn't exist by ID.
               const isOptimisticDuplicate = prev.some(m => m.sender_id === currentUserId && m.body === newMsg.body && new Date(newMsg.created_at).getTime() - new Date(m.created_at).getTime() < 5000)
-              
-              if (isOptimisticDuplicate) {
-                 // Replace the optimistic one with the real one
-                 return prev.map(m => (m.sender_id === currentUserId && m.body === newMsg.body) ? messageObj : m)
-              }
-
+              if (isOptimisticDuplicate) return prev.map(m => (m.sender_id === currentUserId && m.body === newMsg.body) ? messageObj : m)
               return [...prev, messageObj]
             })
           }
         }
-      )
-      .subscribe()
+      ).subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [activeConversationId, currentUserId, supabase])
 
-  // Refetch initial messages if conversation changes
+
+  // ==========================================
+  // STEP 2: ACTIVE CONVERSATION DATA (Messages & Read States)
+  // ==========================================
   useEffect(() => {
     if (!activeConversationId) return
 
+    // 1. Fetch Messages
     async function fetchMessages() {
-      const { data } = await supabase
-        .from('messages')
-        .select('*, sender:profiles(id, full_name, avatar_url, role)')
-        .eq('conversation_id', activeConversationId)
-        .order('created_at', { ascending: true })
-
-      if (data) {
-        setMessages(data)
-      }
+      const { data } = await supabase.from('messages').select('*, sender:profiles(id, full_name, avatar_url, role)').eq('conversation_id', activeConversationId).order('created_at', { ascending: true })
+      if (data) setMessages(data)
     }
 
     if (initialMessages.length > 0 && initialMessages[0].conversation_id !== activeConversationId) {
@@ -176,25 +185,50 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       fetchMessages()
     }
 
-    // Step 2 placeholder (we will debounce this later)
-    async function markRead() {
-      const msgs = messages.length > 0 ? messages : initialMessages
-      if (msgs.length > 0) {
-        const latestId = msgs[msgs.length - 1].id
-        await supabase
-          .from('conversation_participants')
-          .update({ last_read_message_id: latestId })
-          .eq('conversation_id', activeConversationId)
-          .eq('profile_id', currentUserId)
+    // 2. Fetch Initial Read States
+    async function fetchReadStates() {
+      const { data } = await supabase.from('conversation_participants').select('profile_id, last_read_message_id').eq('conversation_id', activeConversationId)
+      if (data) {
+        const states: Record<string, string> = {}
+        data.forEach(d => { if (d.last_read_message_id) states[d.profile_id] = d.last_read_message_id })
+        setReadStates(states)
       }
     }
-    if (activeConversationId) {
-      markRead()
-      // Clear unread count locally when opened
-      setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, unread_count: 0 } : c))
+    fetchReadStates()
+
+    // 3. Listen to other participants' read state updates
+    const partChannel = supabase.channel(`participants_${activeConversationId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_participants', filter: `conversation_id=eq.${activeConversationId}` }, (payload) => {
+        const newRecord = payload.new
+        if (newRecord.last_read_message_id) {
+          setReadStates(prev => ({ ...prev, [newRecord.profile_id]: newRecord.last_read_message_id }))
+        }
+      }).subscribe()
+
+    return () => { supabase.removeChannel(partChannel) }
+  }, [activeConversationId, supabase])
+
+
+  // Debounced Read Receipt Writer
+  useEffect(() => {
+    if (!activeConversationId || messages.length === 0) return
+
+    function triggerMarkRead() {
+      const latestId = messages[messages.length - 1].id
+      
+      if (readDebounceTimer.current) clearTimeout(readDebounceTimer.current)
+      
+      readDebounceTimer.current = setTimeout(async () => {
+        await supabase.from('conversation_participants').update({ last_read_message_id: latestId }).eq('conversation_id', activeConversationId).eq('profile_id', currentUserId)
+      }, 1500) // Debounce by 1.5 seconds
     }
 
-  }, [activeConversationId, supabase, currentUserId])
+    triggerMarkRead()
+    // Clear local unread counts
+    setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, unread_count: 0 } : c))
+
+  }, [activeConversationId, messages, currentUserId, supabase])
+
 
   async function handleSend(e?: React.FormEvent) {
     if (e) e.preventDefault()
@@ -205,23 +239,13 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     setIsSending(true)
 
     try {
-      // Optimistic UI update
       const optimisticMessage: ChatMessage = {
-        id: crypto.randomUUID(), // Temp ID
-        conversation_id: activeConversationId,
-        sender_id: currentUserId,
-        body: body,
-        created_at: new Date().toISOString(),
+        id: crypto.randomUUID(),
+        conversation_id: activeConversationId, sender_id: currentUserId, body: body, created_at: new Date().toISOString(),
         sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' }
       }
       setMessages(prev => [...prev, optimisticMessage])
-
-      // Sidebar immediate optimistic update
-      setConversations(prev => prev.map(c => c.id === activeConversationId ? {
-        ...c,
-        last_message_body: body,
-        last_message_created_at: optimisticMessage.created_at
-      } : c))
+      setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, last_message_body: body, last_message_created_at: optimisticMessage.created_at } : c))
 
       if (actionRoute === 'agency') {
         await sendAgencyMessageAction(activeConversationId, body)
@@ -235,7 +259,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     }
   }
 
-  // Handle Enter to send, Shift+Enter for new line
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -244,24 +267,16 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   }
 
   function formatTime(dateStr: string) {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true
-    }).format(new Date(dateStr))
+    return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).format(new Date(dateStr))
   }
 
-  // Filter & Sort conversations (Step 0.5)
   const sortedAndFilteredConversations = useMemo(() => {
     let result = [...conversations]
-    
-    // Sort by last_message_created_at descending
     result.sort((a, b) => {
       const timeA = a.last_message_created_at ? new Date(a.last_message_created_at).getTime() : 0
       const timeB = b.last_message_created_at ? new Date(b.last_message_created_at).getTime() : 0
       return timeB - timeA
     })
-
     if (searchQuery) {
       const lowerQ = searchQuery.toLowerCase()
       result = result.filter(c => {
@@ -301,13 +316,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
         <div className="p-4 border-b bg-background">
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search chats..."
-              className="pl-9 bg-muted/50"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
+            <Input type="search" placeholder="Search chats..." className="pl-9 bg-muted/50" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           </div>
         </div>
         
@@ -317,8 +326,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
               <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Groups</h3>
               {groups.map(conv => (
                 <button
-                  key={conv.id}
-                  onClick={() => setActiveConversationId(conv.id)}
+                  key={conv.id} onClick={() => setActiveConversationId(conv.id)}
                   className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 ${activeConversationId === conv.id ? 'bg-muted/80' : ''}`}
                 >
                   <div className="h-10 w-10 shrink-0 rounded-md bg-primary/10 flex items-center justify-center font-bold text-primary text-sm">
@@ -327,18 +335,12 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                   <div className="flex-1 overflow-hidden">
                     <div className="flex justify-between items-baseline">
                       <div className="truncate font-medium text-sm text-foreground">{conv.title}</div>
-                      {conv.last_message_created_at && (
-                        <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>
-                      )}
+                      {conv.last_message_created_at && <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>}
                     </div>
-                    <div className="truncate text-xs text-muted-foreground mt-0.5">
-                      {conv.last_message_body || 'No messages yet'}
-                    </div>
+                    <div className="truncate text-xs text-muted-foreground mt-0.5">{conv.last_message_body || 'No messages yet'}</div>
                   </div>
                   {!!conv.unread_count && conv.unread_count > 0 && (
-                    <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">
-                      {conv.unread_count}
-                    </Badge>
+                    <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">{conv.unread_count}</Badge>
                   )}
                 </button>
               ))}
@@ -349,19 +351,16 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             <div className="py-2 border-t">
               <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-between items-center">
                 Direct Messages
-                {actionRoute === 'agency' && (
-                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full" title="New Message">
-                    <PlusIcon className="h-3 w-3" />
-                  </Button>
-                )}
+                {actionRoute === 'agency' && <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full" title="New Message"><PlusIcon className="h-3 w-3" /></Button>}
               </h3>
               {dms.map(conv => {
                 const parts = conv.participants || []
                 const other = parts.find(p => p.profile_id !== currentUserId)
+                const isOnline = other ? onlineUsers.has(other.profile_id) : false
+
                 return (
                   <button
-                    key={conv.id}
-                    onClick={() => setActiveConversationId(conv.id)}
+                    key={conv.id} onClick={() => setActiveConversationId(conv.id)}
                     className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 ${activeConversationId === conv.id ? 'bg-muted/80' : ''}`}
                   >
                     <div className="h-10 w-10 shrink-0 rounded-full bg-secondary flex items-center justify-center font-bold text-secondary-foreground text-sm overflow-hidden relative">
@@ -370,24 +369,19 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                       ) : (
                         other?.full_name?.charAt(0) || 'U'
                       )}
-                      {/* Step 3 Placeholder: Presence Indicator */}
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full hidden"></div>
+                      
+                      {/* Presence Indicator */}
+                      <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-background rounded-full ${isOnline ? 'bg-green-500' : 'bg-slate-400'}`}></div>
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <div className="flex justify-between items-baseline">
                         <div className="truncate font-medium text-sm text-foreground">{other?.full_name || 'User'}</div>
-                        {conv.last_message_created_at && (
-                          <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>
-                        )}
+                        {conv.last_message_created_at && <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground mt-0.5">
-                        {conv.last_message_body || 'No messages yet'}
-                      </div>
+                      <div className="truncate text-xs text-muted-foreground mt-0.5">{conv.last_message_body || 'No messages yet'}</div>
                     </div>
                     {!!conv.unread_count && conv.unread_count > 0 && (
-                      <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">
-                        {conv.unread_count}
-                      </Badge>
+                      <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">{conv.unread_count}</Badge>
                     )}
                   </button>
                 )
@@ -399,7 +393,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
       {/* Main Chat Area */}
       <div className={`flex-1 flex flex-col bg-background relative ${mobileView === 'list' ? 'hidden md:flex' : 'flex'}`}>
-        {/* Header */}
         {activeConversation && (
           <div className="px-4 py-3 border-b bg-background/95 backdrop-blur z-10 flex items-center gap-3">
             <Button variant="ghost" size="icon" className="md:hidden -ml-2 h-8 w-8" onClick={() => setMobileView('list')}>
@@ -412,16 +405,20 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold text-sm truncate">{getConversationName(activeConversation)}</h2>
-              <div className="text-xs text-muted-foreground truncate">
+              <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
                 {activeConversation.type === 'group' || activeConversation.is_default 
                   ? `${activeConversation.participants?.length || 0} members`
-                  : 'Offline'} {/* Placeholder for Step 3 */}
+                  : (
+                    <>
+                      <span className={`w-1.5 h-1.5 rounded-full ${onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'bg-green-500' : 'bg-slate-400'}`}></span>
+                      {onlineUsers.has(activeConversation.participants?.find(p => p.profile_id !== currentUserId)?.profile_id || '') ? 'Online' : 'Offline'}
+                    </>
+                  )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Message Feed */}
         <div className="flex-1 overflow-y-auto relative bg-slate-50/50 dark:bg-slate-900/20">
           <div ref={scrollRef} className="absolute inset-0 p-4 space-y-6 overflow-y-auto">
             {messages.length === 0 ? (
@@ -434,6 +431,14 @@ export function ChatInterface({ conversations: initialConversations, initialMess
               messages.map((msg, i) => {
                 const isMe = msg.sender_id === currentUserId
                 const showAvatar = i === 0 || messages[i-1].sender_id !== msg.sender_id
+                
+                // Determine Read Receipts for this message
+                const readersOfThisMessage = Object.entries(readStates)
+                  .filter(([pid, mid]) => mid === msg.id && pid !== currentUserId)
+                  .map(([pid]) => {
+                    const participant = activeConversation?.participants?.find(p => p.profile_id === pid)
+                    return participant?.full_name?.split(' ')[0] || 'Someone'
+                  })
                 
                 return (
                   <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2 max-w-full group`}>
@@ -466,11 +471,23 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                         {msg.body}
                       </div>
                       
-                      <div className={`flex items-center gap-1 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`flex flex-col items-end gap-0.5 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                         <span className="text-[10px] text-muted-foreground">
                           {formatTime(msg.created_at)}
                         </span>
-                        {/* Step 2 Placeholder: Read Receipts */}
+                        
+                        {/* Read Receipt Indicator */}
+                        {isMe && readersOfThisMessage.length > 0 && (
+                          <div className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-80">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[12px] w-[12px] text-blue-500">
+                              <path d="M18 6 7 17l-5-5" />
+                              <path d="m22 10-7.5 7.5L13 16" />
+                            </svg>
+                            {activeConversation?.type === 'group' || activeConversation?.is_default 
+                               ? `Seen by ${readersOfThisMessage.join(', ')}` 
+                               : 'Seen'}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -480,7 +497,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
           </div>
         </div>
 
-        {/* Input Area */}
         <div className="p-3 bg-background border-t z-10">
           <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
             <div className="flex-1 relative">
@@ -495,8 +511,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
               />
             </div>
             <Button 
-              type="submit" 
-              size="icon" 
+              type="submit" size="icon" 
               className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
               disabled={!inputValue.trim() || isSending || !activeConversationId}
             >
