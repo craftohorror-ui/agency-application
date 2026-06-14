@@ -73,8 +73,26 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
     }
   }
 
-  async function handleDownload(storagePath: string, _view = false) {
-    const res = await getDownloadUrlAction(storagePath)
+  async function handleDownload(file: FileRecord, isView = false) {
+    let viewMode = isView
+    
+    if (viewMode) {
+      const allowedMimes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/gif']
+      const allowedExts = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif']
+      
+      const ext = file.name.split('.').pop()?.toLowerCase() || ''
+      const mime = file.mime_type || ''
+      
+      const isMimeAllowed = allowedMimes.includes(mime)
+      const isExtAllowed = allowedExts.includes(ext)
+      
+      if (!isMimeAllowed || !isExtAllowed) {
+        toast.info('This file type cannot be previewed. Downloading instead.')
+        viewMode = false
+      }
+    }
+
+    const res = await getDownloadUrlAction(file.id, viewMode)
     if (res?.error) {
       toast.error(res.error)
     } else if (res?.url) {
@@ -216,10 +234,10 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
                       {new Date(file.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
                     <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
-                      <Button variant="ghost" size="sm" onClick={() => handleDownload(file.storage_path, true)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleDownload(file, true)}>
                         View
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDownload(file.storage_path, false)}>
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(file, false)}>
                         Download
                       </Button>
                       <Button 

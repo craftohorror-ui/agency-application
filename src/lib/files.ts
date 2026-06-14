@@ -104,11 +104,24 @@ export async function deleteFile(id: string) {
   if (dbError) throw new Error(dbError.message)
 }
 
-export async function getFileDownloadUrl(storagePath: string) {
+export async function getFileDownloadUrl(id: string, isView: boolean = false) {
   const { supabase } = await requireStaff()
-  const { data, error } = await supabase.storage.from('files').createSignedUrl(storagePath, 60 * 60, {
-    download: true
-  })
+  
+  // RLS strictly enforces that the user belongs to the agency
+  const { data: file, error: fetchError } = await supabase
+    .from('files')
+    .select('storage_path')
+    .eq('id', id)
+    .single()
+
+  if (fetchError || !file) {
+    throw new Error('File not found or access denied')
+  }
+
+  const options = isView ? undefined : { download: true }
+
+  const { data, error } = await supabase.storage.from('files').createSignedUrl(file.storage_path, 300, options)
+  
   if (error) throw new Error(error.message)
   return data.signedUrl
 }

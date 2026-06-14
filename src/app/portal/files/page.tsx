@@ -95,7 +95,7 @@ export default async function PortalFilesPage({ searchParams }: PortalFilesPageP
                       {formatDate(file.created_at)}
                     </div>
                     <div className='col-span-2 md:col-span-1 text-right'>
-                      <form action={downloadPortalFileAction.bind(null, file.storage_path)}>
+                      <form action={downloadPortalFileAction.bind(null, file.id)}>
                         <Button variant='ghost' size='icon' type='submit' title='Download or Preview'>
                           <DownloadIcon className='h-4 w-4' />
                         </Button>

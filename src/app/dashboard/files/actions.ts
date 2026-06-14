@@ -37,9 +37,9 @@ export async function deleteFileAction(id: string) {
   }
 }
 
-export async function getDownloadUrlAction(storagePath: string) {
+export async function getDownloadUrlAction(id: string, isView: boolean = false) {
   try {
-    const url = await getFileDownloadUrl(storagePath)
+    const url = await getFileDownloadUrl(id, isView)
     return { url }
   } catch (error: unknown) {
     unstable_rethrow(error)
