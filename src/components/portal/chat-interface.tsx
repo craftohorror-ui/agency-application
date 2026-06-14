@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useRef, useMemo } from 'react'
-import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, MessageSquareIcon, SmileIcon } from 'lucide-react'
+import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, MessageSquareIcon, SmileIcon, MicIcon, SquareIcon, XIcon } from 'lucide-react'
+import { VoicePlayer } from './voice-player'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +35,8 @@ export interface ChatMessage {
   sender_id: string
   body: string
   created_at: string
+  file_path?: string | null
+  duration?: number | null
   sender?: {
     id: string
     full_name: string
@@ -63,6 +66,14 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [activePicker, setActivePicker] = useState<string | null>(null)
   const EMOJIS = ['👍', '❤️', '😂', '🔥', '🎉', '👀', '😎']
   
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState(0)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [agencyId, setAgencyId] = useState<string>('')
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+
   // Step 2 & 3 State
   const [readStates, setReadStates] = useState<Record<string, string>>({}) // profile_id -> message_id
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
@@ -87,6 +98,12 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages, readStates])
+
+  useEffect(() => {
+    supabase.from('profiles').select('agency_id').eq('id', currentUserId).single().then(({ data }) => {
+      if (data) setAgencyId(data.agency_id)
+    })
+  }, [currentUserId, supabase])
 
   // ==========================================
   // STEP 3: ONLINE PRESENCE
@@ -141,6 +158,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
           const messageObj: ChatMessage = {
             id: newMsg.id, conversation_id: newMsg.conversation_id, sender_id: newMsg.sender_id, body: newMsg.body, created_at: newMsg.created_at,
+            file_path: newMsg.file_path, duration: newMsg.duration,
             sender: sender || { id: newMsg.sender_id, full_name: 'Unknown', avatar_url: null, role: 'member' }
           }
 
@@ -282,6 +300,52 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
 
   // ==========================================
+  // VOICE MESSAGE HELPERS
+  // ==========================================
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorder.start()
+      setIsRecording(true)
+      setRecordingDuration(0)
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1)
+      }, 1000)
+    } catch (err) {
+      console.error('Mic access denied or error:', err)
+      alert('Microphone access is required to record voice messages.')
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
+    }
+  }
+
+  function cancelRecording() {
+    stopRecording()
+    setAudioBlob(null)
+    setRecordingDuration(0)
+  }
+
+  // ==========================================
   // STEP 4: PRIVATE CONVERSATION HELPERS
   // ==========================================
   async function handleOpenNewChat() {
@@ -353,16 +417,37 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
   async function handleSend(e?: React.FormEvent) {
     if (e) e.preventDefault()
-    if (!inputValue.trim() || !activeConversationId || isSending) return
+    if ((!inputValue.trim() && !audioBlob) || !activeConversationId || isSending) return
 
-    const body = inputValue.trim()
+    const body = inputValue.trim() || '[Voice Message]'
+    const hasAudio = !!audioBlob
+    const currentDuration = recordingDuration
+    const currentBlob = audioBlob
+
     setInputValue('')
+    setAudioBlob(null)
+    setRecordingDuration(0)
     setIsSending(true)
 
     try {
+      let filePath: string | undefined = undefined
+
+      if (hasAudio && currentBlob) {
+        const fileExt = 'webm'
+        const fileName = `${crypto.randomUUID()}.${fileExt}`
+        const path = `voice-messages/${agencyId || 'unknown'}/${activeConversationId}/${fileName}`
+        
+        const { error: uploadError } = await supabase.storage.from('files').upload(path, currentBlob, {
+          contentType: 'audio/webm'
+        })
+        if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
+        filePath = path
+      }
+
       const optimisticMessage: ChatMessage = {
         id: crypto.randomUUID(),
         conversation_id: activeConversationId, sender_id: currentUserId, body: body, created_at: new Date().toISOString(),
+        file_path: filePath, duration: currentDuration,
         sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' }
       }
       setMessages(prev => [...prev, optimisticMessage])
@@ -370,9 +455,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
       let result
       if (actionRoute === 'agency') {
-        result = await sendAgencyMessageAction(activeConversationId, body)
+        result = await sendAgencyMessageAction(activeConversationId, body, filePath, currentDuration)
       } else {
-        result = await sendPortalMessageAction(activeConversationId, body)
+        result = await sendPortalMessageAction(activeConversationId, body, filePath, currentDuration)
       }
       
       if (result && result.error) {
@@ -628,7 +713,13 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                                   : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
                               }`}
                             >
-                              {msg.body}
+                              {msg.file_path ? (
+                                <div className="flex flex-col gap-1">
+                                  {msg.body !== '[Voice Message]' && <span className="mb-1">{msg.body}</span>}
+                                  <span className="opacity-80 text-[11px] uppercase tracking-wider">Voice Message</span>
+                                  <VoicePlayer filePath={msg.file_path} duration={msg.duration || 0} supabase={supabase} />
+                                </div>
+                              ) : msg.body}
                             </div>
 
                             {!isMe && (
@@ -694,26 +785,62 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             </div>
 
             <div className="p-3 bg-background border-t z-10">
-              <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
-                <div className="flex-1 relative">
-                  <textarea
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a message... (Shift+Enter for new line)"
-                    className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm"
-                    disabled={isSending || !activeConversationId}
-                    rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}
-                  />
+              {audioBlob ? (
+                <div className="flex items-center gap-3 bg-muted/50 rounded-2xl p-3 max-w-4xl mx-auto">
+                  <button type="button" onClick={cancelRecording} className="h-8 w-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors">
+                    <XIcon className="h-4 w-4" />
+                  </button>
+                  <div className="flex-1 text-sm font-medium flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    Voice Message ({Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')})
+                  </div>
+                  <Button onClick={() => handleSend()} disabled={isSending} size="sm" className="rounded-full px-4">
+                    {isSending ? <Loader2Icon className="h-4 w-4 animate-spin mr-2" /> : <SendIcon className="h-4 w-4 mr-2" />}
+                    Send
+                  </Button>
                 </div>
-                <Button 
-                  type="submit" size="icon" 
-                  className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
-                  disabled={!inputValue.trim() || isSending || !activeConversationId}
-                >
-                  {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
-                </Button>
-              </form>
+              ) : isRecording ? (
+                <div className="flex items-center gap-3 bg-red-500/10 dark:bg-red-500/20 rounded-2xl p-3 max-w-4xl mx-auto border border-red-500/20">
+                  <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse ml-2" />
+                  <div className="flex-1 text-sm font-medium text-red-600 dark:text-red-400">
+                    Recording... {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                  </div>
+                  <button type="button" onClick={cancelRecording} className="text-sm font-medium px-3 text-muted-foreground hover:text-foreground">Cancel</button>
+                  <Button type="button" onClick={stopRecording} variant="destructive" size="icon" className="h-8 w-8 rounded-full shadow-sm">
+                    <SquareIcon className="h-3.5 w-3.5 fill-current" />
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type a message... (Shift+Enter for new line)"
+                      className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm pr-12"
+                      disabled={isSending || !activeConversationId}
+                      rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}
+                    />
+                    <button 
+                      type="button"
+                      onClick={startRecording}
+                      disabled={isSending || !activeConversationId || inputValue.trim().length > 0}
+                      className="absolute right-3 bottom-3 h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:hover:text-muted-foreground transition-colors"
+                      title="Record voice message"
+                    >
+                      <MicIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <Button 
+                    type="submit" size="icon" 
+                    className="h-[44px] w-[44px] shrink-0 rounded-full shadow-sm transition-all"
+                    disabled={(!inputValue.trim() && !audioBlob) || isSending || !activeConversationId}
+                  >
+                    {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
+                  </Button>
+                </form>
+              )}
             </div>
           </>
         )}

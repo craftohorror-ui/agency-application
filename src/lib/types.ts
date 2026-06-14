@@ -255,6 +255,8 @@ export interface Message {
   sender_id: string
   body: string
   created_at: string
+  file_path?: string | null
+  duration?: number | null
 }
 
 export interface MessageReaction {

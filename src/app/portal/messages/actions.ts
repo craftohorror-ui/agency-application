@@ -2,19 +2,21 @@
 
 import { requireClient } from '@/lib/auth'
 
-export async function sendPortalMessageAction(conversationId: string, body: string) {
+export async function sendPortalMessageAction(conversationId: string, body: string, filePath?: string, duration?: number) {
   const { supabase, user } = await requireClient()
   
   if (!body.trim()) return
 
-  console.log('[sendPortalMessageAction] ATTEMPTING INSERT', { conversation_id: conversationId, sender_id: user.id, body: body.trim() })
+  console.log('[sendPortalMessageAction] ATTEMPTING INSERT', { conversation_id: conversationId, sender_id: user.id, body: body.trim(), file_path: filePath, duration })
 
   const { data, error } = await supabase
     .from('messages')
     .insert({
       conversation_id: conversationId,
       sender_id: user.id,
-      body: body.trim()
+      body: body.trim(),
+      ...(filePath ? { file_path: filePath } : {}),
+      ...(duration !== undefined ? { duration } : {})
     })
     .select()
     .single()
