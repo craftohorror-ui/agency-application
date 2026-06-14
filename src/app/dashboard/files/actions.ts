@@ -14,24 +14,25 @@ export async function uploadFileAction(formData: FormData) {
     
     console.log('[uploadFileAction] Calling uploadFileServer...')
     const result = await uploadFileServer(formData)
-    console.log('[uploadFileAction] uploadFileServer completed successfully!', result)
+    console.log('[uploadFileAction] uploadFileServer completed successfully! Return type:', typeof result)
+    console.log('[uploadFileAction] JSON.stringify(result):', JSON.stringify(result))
     
     console.log('[uploadFileAction] Triggering revalidations...')
     revalidatePath('/dashboard/files')
     revalidatePath('/dashboard/projects')
     revalidatePath('/dashboard/leads')
     revalidatePath('/dashboard/clients')
-    console.log('[uploadFileAction] Revalidations done. Returning success.')
-    return { success: true }
+    console.log('[uploadFileAction] Revalidations done. Returning success object.')
+    return { success: true, message: 'Upload successful' }
   } catch (error: unknown) {
     console.error('================= UPLOAD ACTION CRASHED =================')
     console.error('[uploadFileAction] Caught error in outer action block:', error)
     if (error instanceof Error) {
       console.error('[uploadFileAction] Error Message:', error.message)
       console.error('[uploadFileAction] Stack Trace:', error.stack)
+      return { success: false, error: error.message }
     }
-    if (error instanceof Error) return { error: error.message }
-    return { error: String(error) }
+    return { success: false, error: String(error) }
   }
 }
 

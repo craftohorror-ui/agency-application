@@ -48,20 +48,35 @@ export function FileUpload({
     }
 
     setIsUploading(true)
+    console.log('[FileUpload] Starting upload process...')
     try {
+      console.log('[FileUpload] Calling uploadFileAction(formData)')
       const res = await uploadFileAction(formData)
-      if (res?.error) {
+      console.log('[FileUpload] Action returned successfully.')
+      console.log('[FileUpload] typeof res:', typeof res)
+      console.log('[FileUpload] Raw return value:', res)
+      console.log('[FileUpload] JSON.stringify(res):', JSON.stringify(res))
+
+      if (res && typeof res === 'object' && res.error) {
+        console.error('[FileUpload] Server Action returned an error:', res.error)
         toast.error(res.error)
-        window.alert(res.error)
-      } else {
+        window.alert(`Server Action Error: ${res.error}`)
+      } else if (res && typeof res === 'object' && res.success) {
         toast.success('File uploaded successfully.')
         formRef.current?.reset()
+      } else {
+        console.error('[FileUpload] Unknown response shape:', res)
+        toast.error('Unknown response shape received.')
+        window.alert(`Unknown response shape: ${JSON.stringify(res)}`)
       }
     } catch (error: unknown) {
-      console.error('[FileUpload] Caught exception:', error)
+      console.error('[FileUpload] Caught exception during uploadFileAction call:', error)
+      console.error('[FileUpload] typeof error:', typeof error)
+      console.error('[FileUpload] JSON.stringify(error):', JSON.stringify(error, Object.getOwnPropertyNames(error)))
+      
       const msg = error instanceof Error ? error.message : String(error)
       toast.error(`Upload crashed: ${msg}`)
-      window.alert(`Upload crashed: ${msg}`)
+      window.alert(`Upload crashed (Promise Rejected): \n\n${msg}\n\nFull error object: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`)
     } finally {
       setIsUploading(false)
     }
