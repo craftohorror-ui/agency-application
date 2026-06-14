@@ -26,6 +26,7 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
   const searchParams = useSearchParams()
 
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [processingState, setProcessingState] = useState<{ id: string, action: 'view' | 'download' } | null>(null)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '')
 
   const currentFolder = searchParams.get('folder') || 'all'
@@ -74,6 +75,8 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
   }
 
   async function handleDownload(file: FileRecord, isView = false) {
+    if (processingState) return // Prevent double-clicks globally for actions
+
     let viewMode = isView
     
     if (viewMode) {
@@ -92,11 +95,36 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
       }
     }
 
-    const res = await getDownloadUrlAction(file.id, viewMode)
-    if (res?.error) {
-      toast.error(res.error)
-    } else if (res?.url) {
-      window.open(res.url, '_blank')
+    setProcessingState({ id: file.id, action: viewMode ? 'view' : 'download' })
+
+    // Open blank tab immediately to avoid popup blockers (only for View mode)
+    let previewWindow: Window | null = null
+    if (viewMode) {
+      previewWindow = window.open('', '_blank')
+      if (previewWindow) {
+        previewWindow.document.write('Loading preview...')
+      }
+    }
+
+    try {
+      const res = await getDownloadUrlAction(file.id, viewMode)
+      if (res?.error) {
+        toast.error(res.error)
+        if (previewWindow) previewWindow.close()
+      } else if (res?.url) {
+        if (viewMode && previewWindow) {
+          previewWindow.location.href = res.url
+        } else {
+          window.open(res.url, '_blank') // For download, opening a new tab triggers the download
+        }
+      } else if (previewWindow) {
+        previewWindow.close()
+      }
+    } catch (error) {
+      toast.error('An error occurred while generating the secure link.')
+      if (previewWindow) previewWindow.close()
+    } finally {
+      setProcessingState(null)
     }
   }
 
@@ -234,16 +262,26 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
                       {new Date(file.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
                     <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
-                      <Button variant="ghost" size="sm" onClick={() => handleDownload(file, true)}>
-                        View
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        disabled={processingState !== null}
+                        onClick={() => handleDownload(file, true)}
+                      >
+                        {processingState?.id === file.id && processingState.action === 'view' ? '⏳ Opening...' : 'View'}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDownload(file, false)}>
-                        Download
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        disabled={processingState !== null}
+                        onClick={() => handleDownload(file, false)}
+                      >
+                        {processingState?.id === file.id && processingState.action === 'download' ? '⏳ Downloading...' : 'Download'}
                       </Button>
                       <Button 
                         variant="destructive" 
                         size="sm" 
-                        disabled={isDeleting === file.id}
+                        disabled={isDeleting === file.id || processingState !== null}
                         onClick={() => handleDelete(file.id)}
                       >
                         {isDeleting === file.id ? '...' : 'Delete'}
