@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { deleteFileAction, getDownloadUrlAction } from '@/app/dashboard/files/actions'
+import { getPreviewLoadingHTML } from './preview-loading-screen'
 import type { FileRecord } from '@/lib/types'
 import { toast } from 'sonner'
 import { Search } from 'lucide-react'
@@ -102,7 +103,7 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
     if (viewMode) {
       previewWindow = window.open('', '_blank')
       if (previewWindow) {
-        previewWindow.document.write('Loading preview...')
+        previewWindow.document.write(getPreviewLoadingHTML(file.name, file.folder))
       }
     }
 
@@ -113,7 +114,15 @@ export function FileList({ files, counts, totalCount, currentPage, limit }: File
         if (previewWindow) previewWindow.close()
       } else if (res?.url) {
         if (viewMode && previewWindow) {
-          previewWindow.location.href = res.url
+          interface PreviewWindow extends Window {
+            redirectTo?: (url: string) => void
+          }
+          const w = previewWindow as PreviewWindow
+          if (w.redirectTo) {
+            w.redirectTo(res.url)
+          } else {
+            w.location.href = res.url
+          }
         } else {
           window.open(res.url, '_blank') // For download, opening a new tab triggers the download
         }
