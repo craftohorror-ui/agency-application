@@ -13,7 +13,7 @@ export async function uploadFileAction(formData: FormData) {
     revalidatePath('/dashboard/projects')
     revalidatePath('/dashboard/leads')
     revalidatePath('/dashboard/clients')
-    return { success: true }
+    return { success: true, message: 'File uploaded successfully.' }
   } catch (error: unknown) {
     console.error('[uploadFileAction] Caught error:', error)
     unstable_rethrow(error)

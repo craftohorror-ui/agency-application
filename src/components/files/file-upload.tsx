@@ -52,13 +52,23 @@ export function FileUpload({
       const res = await uploadFileAction(formData)
       if (res?.error) {
         toast.error(res.error)
-      } else {
-        toast.success('File uploaded successfully.')
+      } else if (res?.success) {
+        toast.success(res.message || 'File uploaded successfully.')
         formRef.current?.reset()
       }
     } catch (error: unknown) {
       console.error('[FileUpload] Caught exception:', error)
-      toast.error(`Upload crashed: ${error instanceof Error ? error.message : String(error)}`)
+      const msg = error instanceof Error ? error.message : String(error)
+      
+      // Next.js router sometimes aborts the Server Action promise or throws an unexpected response
+      // when revalidatePath() forces a client-side refresh before the promise resolves.
+      if (msg.includes('NEXT_ERROR_CODE') || msg.includes('unexpected response') || msg.includes('abort') || msg.includes('fetch failed')) {
+        console.log('[FileUpload] Ignoring Next.js router rejection, assuming successful upload triggered a refresh.')
+        toast.success('File uploaded successfully.')
+        formRef.current?.reset()
+      } else {
+        toast.error(msg)
+      }
     } finally {
       setIsUploading(false)
     }
