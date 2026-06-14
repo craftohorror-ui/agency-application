@@ -1,27 +1,19 @@
 import { requireStaff } from '@/lib/auth'
 import { listAgencyConversations, getAgencyConversationMessages } from '@/lib/messages'
-import { ChatInterface } from '@/components/portal/chat-interface'
-import type { Message } from '@/lib/types'
+import { ChatInterface, ChatMessage } from '@/components/portal/chat-interface'
 
 export default async function MessagesPage() {
   const { user } = await requireStaff()
   
   const conversations = await listAgencyConversations()
   
-  let initialMessages: (Message & { sender: { id: string, full_name: string, avatar_url: string | null, role: string } })[] = []
+  let initialMessages: ChatMessage[] = []
   if (conversations.length > 0) {
     initialMessages = await getAgencyConversationMessages(conversations[0].id)
   }
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold tracking-tight'>Messages</h1>
-        <p className='text-sm text-muted-foreground'>
-          Communicate with clients and team members.
-        </p>
-      </div>
-
+    <div className='h-[calc(100vh-theme(spacing.16))] -m-8 flex flex-col'>
       <ChatInterface 
         conversations={conversations} 
         initialMessages={initialMessages} 

@@ -25,7 +25,8 @@ export type ActivityType =
   | 'payment'
   | 'deliverable'
   | 'status_change'
-export type ConversationType = 'internal' | 'client'
+export type ConversationType = 'internal' | 'client' | 'group' | 'private'
+export type PresenceStatus = 'online' | 'away' | 'offline'
 
 export interface Profile {
   id: string
@@ -233,11 +234,19 @@ export interface TimeEntry {
 
 export interface Conversation {
   id: string
+  agency_id: string
   type: ConversationType
   title: string
+  is_default: boolean
   project_id: string | null
   client_id: string | null
   created_at: string
+}
+
+export interface ConversationParticipant {
+  conversation_id: string
+  profile_id: string
+  last_read_message_id: string | null
 }
 
 export interface Message {
@@ -246,6 +255,39 @@ export interface Message {
   sender_id: string
   body: string
   created_at: string
+}
+
+export interface MessageReaction {
+  id: string
+  agency_id: string
+  message_id: string
+  user_id: string
+  emoji: string
+  created_at: string
+}
+
+export interface MessageRead {
+  id: string
+  agency_id: string
+  message_id: string
+  user_id: string
+  read_at: string
+}
+
+export interface VoiceMessage {
+  id: string
+  agency_id: string
+  message_id: string
+  storage_path: string
+  duration: number
+  created_at: string
+}
+
+export interface UserPresence {
+  user_id: string
+  agency_id: string
+  status: PresenceStatus
+  last_seen: string
 }
 
 export interface Notification {

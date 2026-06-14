@@ -14,6 +14,7 @@ import {
 } from '@/lib/team'
 import { requireOwner } from '@/lib/auth'
 import { insertAuditLog } from '@/lib/audit'
+import { addMemberToDefaultGroup } from '@/lib/messages'
 import type { UserRole } from '@/lib/types'
 
 const TEAM_PATH = '/dashboard/team'
@@ -118,6 +119,7 @@ export async function createTeamMemberAction(
       agency_id: ownerProfile.agency_id
     })
     profileId = profile.id
+    await addMemberToDefaultGroup(profile.id, ownerProfile.agency_id)
     await insertAuditLog(owner.id, 'user.created', 'profile', profile.id, { email, role })
     revalidateTeamPaths()
     return { errors: {}, success: true, profileId: profile.id }

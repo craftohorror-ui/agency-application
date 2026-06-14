@@ -10,7 +10,9 @@ export async function sendPortalMessageAction(conversationId: string, body: stri
   const { error } = await supabase.from('messages').insert({
     conversation_id: conversationId,
     sender_id: user.id,
-    body: body.trim()
+    body: body.trim(),
+    topic: 'chat',
+    extension: 'text'
   })
 
   if (error) {
