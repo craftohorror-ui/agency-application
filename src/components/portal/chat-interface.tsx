@@ -227,6 +227,14 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       fetchMessages()
     } else if (initialMessages.length === 0 || (initialMessages.length > 0 && initialMessages[0].conversation_id === activeConversationId)) {
       setMessages(initialMessages)
+      if (initialMessages.length > 0) {
+        const messageIds = initialMessages.map(m => m.id)
+        supabase.from('message_reactions').select('*').in('message_id', messageIds).then(({ data }) => {
+          if (data) setReactions(data as Reaction[])
+        })
+      } else {
+        setReactions([])
+      }
     } else {
       fetchMessages()
     }
