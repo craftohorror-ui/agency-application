@@ -1,7 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
+import { toast } from 'sonner'
 import {
   updateClientFormAction,
   type ClientFormState,
@@ -64,6 +65,12 @@ export function ClientForm({ client }: ClientFormProps) {
   }
 
   const [state, formAction] = useActionState(updateClientFormAction, initialState)
+
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message)
+    }
+  }, [state])
 
   return (
     <form action={formAction} className='space-y-6'>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
+import { toast } from 'sonner'
 import {
   createProjectFormAction,
   updateProjectFormAction,
@@ -81,6 +82,12 @@ export function ProjectForm({ clients, stages, project }: ProjectFormProps) {
     isEdit ? updateProjectFormAction : createProjectFormAction,
     initialState
   )
+
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message)
+    }
+  }, [state])
 
   return (
     <form action={formAction} className='space-y-6'>

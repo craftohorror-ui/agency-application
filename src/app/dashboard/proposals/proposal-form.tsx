@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,6 +30,12 @@ export function ProposalForm({ proposal, clients, leads }: ProposalFormProps) {
   
   // Need to bind state properly for Next.js 15 useActionState
   const [state, formAction, pending] = useActionState(action, initialState)
+
+  useEffect(() => {
+    if (state?.errors?.server) {
+      toast.error(state.errors.server)
+    }
+  }, [state])
 
   function addItem() {
     setItems([...items, { description: '', qty: 1, unit_price: 0 }])

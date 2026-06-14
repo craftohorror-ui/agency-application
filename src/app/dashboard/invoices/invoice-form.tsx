@@ -2,6 +2,7 @@
 
 import { useState, useActionState, useEffect } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +22,12 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
   const isEditing = !!invoice
   const action = isEditing ? updateInvoiceAction.bind(null, invoice.id) : createInvoiceAction
   const [state, formAction, isPending] = useActionState<InvoiceFormState, FormData>(action, {})
+
+  useEffect(() => {
+    if (state?.errors?.server) {
+      toast.error(state.errors.server)
+    }
+  }, [state])
 
   const [items, setItems] = useState<CreateInvoiceItemInput[]>(
     invoice?.items?.map(i => ({ description: i.description, qty: i.qty, unit_price: i.unit_price })) || []

@@ -51,7 +51,7 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
     }, items)
 
     revalidatePath('/dashboard/invoices')
-    redirect(`/dashboard/invoices/${invoice?.id}`)
+    redirect(`/dashboard/invoices/${invoice?.id}?success=Invoice+created+successfully`)
   } catch (err: unknown) {
     return { errors: { server: err instanceof Error ? err.message : String(err) } }
   }
@@ -93,7 +93,7 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
     await insertAuditLog(user.id, 'invoice.updated', 'invoice', id, { status, due_date })
 
     revalidatePath('/dashboard/invoices')
-    redirect(`/dashboard/invoices/${id}`)
+    redirect(`/dashboard/invoices/${id}?success=Invoice+updated+successfully`)
   } catch (err: unknown) {
     return { errors: { server: err instanceof Error ? err.message : String(err) } }
   }
@@ -105,7 +105,7 @@ export async function deleteInvoiceAction(id: string) {
   await insertAuditLog(user.id, 'invoice.deleted', 'invoice', id)
   
   revalidatePath('/dashboard/invoices')
-  redirect('/dashboard/invoices')
+  redirect('/dashboard/invoices?success=Invoice+deleted+successfully')
 }
 
 export async function recordPaymentAction(invoiceId: string, formData: FormData) {
@@ -139,5 +139,5 @@ export async function generateInvoiceFromProjectAction(projectId: string) {
   const invoiceId = await generateInvoiceFromProject(projectId)
   revalidatePath(`/dashboard/projects/${projectId}`)
   revalidatePath('/dashboard/invoices')
-  redirect(`/dashboard/invoices/${invoiceId}`)
+  redirect(`/dashboard/invoices/${invoiceId}?success=Invoice+marked+as+paid`)
 }

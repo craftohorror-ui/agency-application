@@ -36,6 +36,7 @@ export interface Profile {
   avatar_url: string | null
   hourly_rate: number | null
   is_suspended: boolean
+  agency_id: string
   created_at: string
   updated_at: string
 }

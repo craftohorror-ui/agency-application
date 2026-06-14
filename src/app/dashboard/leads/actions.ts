@@ -134,7 +134,7 @@ export async function createLeadFormAction(
     }
   }
 
-  redirect(LEADS_PATH)
+  redirect(`${LEADS_PATH}?success=Lead+deleted+successfully`)
 }
 
 export async function updateLeadFormAction(
@@ -202,7 +202,7 @@ export async function updateLeadFormAction(
     }
   }
 
-  redirect(`${LEADS_PATH}/${leadId}`)
+  redirect(`${LEADS_PATH}/${leadId}?success=Lead+saved+successfully`)
 }
 
 export async function updateLeadAction(id: string, input: LeadUpdateInput) {
@@ -247,5 +247,5 @@ export async function convertLeadToClientAction(leadId: string) {
     converted_client_id: client.id,
   })
 
-  redirect(`/dashboard/clients/${client.id}`)
+  redirect(`/dashboard/clients/${client.id}?success=Lead+converted+to+client`)
 }

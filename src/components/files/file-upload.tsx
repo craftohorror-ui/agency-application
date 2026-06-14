@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { uploadFileAction } from '@/app/dashboard/files/actions'
 
+import { toast } from 'sonner'
+
 export function FileUpload({ 
   projectId, 
   clientId, 
@@ -23,15 +25,16 @@ export function FileUpload({
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const file = formData.get('file') as File
-    if (!file || file.size === 0) return alert('Please select a file')
+    if (!file || file.size === 0) return toast.error('Please select a file')
 
     setIsUploading(true)
     const res = await uploadFileAction(formData)
     setIsUploading(false)
 
     if (res?.error) {
-      alert(res.error)
+      toast.error(res.error)
     } else {
+      toast.success('File uploaded successfully')
       formRef.current?.reset()
     }
   }

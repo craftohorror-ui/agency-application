@@ -52,7 +52,7 @@ export async function createProposalAction(prevState: ProposalFormState, formDat
     }, parsedItems)
 
     revalidatePath('/dashboard/proposals')
-    redirect(`/dashboard/proposals/${proposal?.id}`)
+    redirect(`/dashboard/proposals/${proposal?.id}?success=Proposal+created+successfully`)
   } catch (err: unknown) {
     return { errors: { server: err instanceof Error ? err.message : String(err) } }
   }
@@ -96,7 +96,7 @@ export async function updateProposalAction(id: string, prevState: ProposalFormSt
     }, parsedItems)
 
     revalidatePath('/dashboard/proposals')
-    redirect(`/dashboard/proposals/${id}`)
+    redirect(`/dashboard/proposals/${id}?success=Proposal+updated+successfully`)
   } catch (err: unknown) {
     return { errors: { server: err instanceof Error ? err.message : String(err) } }
   }
@@ -105,19 +105,19 @@ export async function updateProposalAction(id: string, prevState: ProposalFormSt
 export async function deleteProposalAction(id: string) {
   await deleteProposal(id)
   revalidatePath('/dashboard/proposals')
-  redirect('/dashboard/proposals')
+  redirect('/dashboard/proposals?success=Proposal+deleted+successfully')
 }
 
 export async function convertProposalToContractAction(id: string) {
   const contract = await convertProposalToContract(id)
   revalidatePath('/dashboard/proposals')
   revalidatePath('/dashboard/contracts')
-  redirect(`/dashboard/contracts/${contract.id}`)
+  redirect(`/dashboard/contracts/${contract.id}?success=Proposal+converted+to+contract`)
 }
 
 export async function convertProposalToProjectAction(id: string) {
   const project = await convertProposalToProject(id)
   revalidatePath('/dashboard/proposals')
   revalidatePath('/dashboard/projects')
-  redirect(`/dashboard/projects/${project.id}`)
+  redirect(`/dashboard/projects/${project.id}?success=Contract+converted+to+project`)
 }

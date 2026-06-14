@@ -116,7 +116,7 @@ export async function updateTeamMember(id: string, input: TeamUpdateInput): Prom
   return data as Profile
 }
 
-export async function createTeamMember(input: { full_name: string, email: string, password?: string, role: UserRole }): Promise<Profile> {
+export async function createTeamMember(input: { full_name: string, email: string, password?: string, role: UserRole, agency_id: string }): Promise<Profile> {
   const adminSupabase = createAdminClient()
   const { data: { user }, error: authError } = await adminSupabase.auth.admin.createUser({
     email: input.email,
@@ -125,6 +125,7 @@ export async function createTeamMember(input: { full_name: string, email: string
     user_metadata: {
       full_name: input.full_name,
       role: input.role,
+      agency_id: input.agency_id,
     }
   })
 

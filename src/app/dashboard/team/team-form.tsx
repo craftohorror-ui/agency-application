@@ -1,7 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   updateTeamMemberAction,
   type TeamFormState,
@@ -33,11 +36,21 @@ function SubmitButton() {
 }
 
 export function TeamForm({ member }: TeamFormProps) {
+  const router = useRouter()
   const initialState: TeamFormState = {
     errors: {},
   }
 
   const [state, formAction] = useActionState(updateTeamMemberAction, initialState)
+
+  useEffect(() => {
+    if (state.success && state.profileId) {
+      toast.success('Team member updated successfully')
+      router.push(`/dashboard/team/${state.profileId}`)
+    } else if (state.message) {
+      toast.error(state.message)
+    }
+  }, [state, router])
 
   return (
     <form action={formAction} className='space-y-6'>

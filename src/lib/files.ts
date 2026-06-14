@@ -87,9 +87,11 @@ export async function uploadFileServer(formData: FormData) {
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
   const storagePath = `${folder}/${fileName}`
 
+  const buffer = await file.arrayBuffer()
+
   const { error: storageError } = await supabase.storage
     .from('files')
-    .upload(storagePath, file, {
+    .upload(storagePath, buffer, {
       contentType: file.type,
       upsert: false
     })

@@ -45,7 +45,7 @@ export async function deleteClientAction(id: string) {
   await insertAuditLog(user.id, 'client.deleted', 'client', id)
 
   revalidatePath(CLIENTS_PATH)
-  redirect(CLIENTS_PATH)
+  redirect(`${CLIENTS_PATH}?success=Client+deleted+successfully`)
 }
 
 function revalidateClientPaths(clientId?: string) {
@@ -126,5 +126,5 @@ export async function updateClientFormAction(
     }
   }
 
-  redirect(`${CLIENTS_PATH}/${clientId}`)
+  redirect(`${CLIENTS_PATH}/${clientId}?success=Client+saved+successfully`)
 }

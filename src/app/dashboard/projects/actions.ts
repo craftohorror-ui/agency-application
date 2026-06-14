@@ -94,7 +94,7 @@ export async function createProjectFormAction(
     }
   }
 
-  redirect(`${PROJECTS_PATH}/${project.id}`)
+  redirect(`${PROJECTS_PATH}/${project.id}?success=Project+created+successfully`)
 }
 
 export async function updateProjectFormAction(
@@ -149,5 +149,5 @@ export async function updateProjectFormAction(
     }
   }
 
-  redirect(`${PROJECTS_PATH}/${projectId}`)
+  redirect(`${PROJECTS_PATH}/${projectId}?success=Project+updated+successfully`)
 }

@@ -9,6 +9,7 @@ import {
   resetMemberPassword,
   assignToProject,
   removeFromProject,
+  getTeamMember,
   type TeamUpdateInput,
 } from '@/lib/team'
 import { requireOwner } from '@/lib/auth'
@@ -17,9 +18,11 @@ import type { UserRole } from '@/lib/types'
 
 const TEAM_PATH = '/dashboard/team'
 
-export interface TeamFormState {
+export type TeamFormState = {
   errors: Record<string, string>
   message?: string
+  success?: boolean
+  profileId?: string
 }
 
 function revalidateTeamPaths(profileId?: string) {
@@ -33,6 +36,7 @@ export async function updateTeamMemberAction(
   _prevState: TeamFormState,
   formData: FormData
 ): Promise<TeamFormState> {
+  const { user: owner } = await requireOwner()
   const id = String(formData.get('id') || '')
   if (!id) return { errors: {}, message: 'Missing profile ID' }
 
@@ -51,24 +55,16 @@ export async function updateTeamMemberAction(
   }
 
   try {
-    const input: TeamUpdateInput = {
-      full_name,
-      title: title || null,
-      role: role || 'member',
-      hourly_rate,
-      is_suspended,
-    }
-
-    await updateTeamMember(id, input)
-    revalidateTeamPaths(id)
+    await updateTeamMember(id, { full_name, title, role, hourly_rate, is_suspended })
+    await insertAuditLog(owner.id, 'user.updated', 'profile', id, { role, is_suspended })
+    revalidateTeamPaths()
+    return { errors: {}, success: true, profileId: id }
   } catch (error) {
     return {
       errors: {},
       message: error instanceof Error ? error.message : 'Unable to update team member.',
     }
   }
-
-  redirect(`${TEAM_PATH}/${id}`)
 }
 
 export async function assignToProjectAction(projectId: string, profileId: string, roleInProject: string) {
@@ -85,7 +81,10 @@ export async function removeFromProjectAction(projectId: string, profileId: stri
   revalidatePath(`/dashboard/team/${profileId}`)
 }
 
-export async function createTeamMemberAction(formData: FormData) {
+export async function createTeamMemberAction(
+  _prevState: TeamFormState,
+  formData: FormData
+): Promise<TeamFormState> {
   const { user: owner } = await requireOwner()
   
   const full_name = String(formData.get('full_name') || '').trim()
@@ -93,14 +92,40 @@ export async function createTeamMemberAction(formData: FormData) {
   const password = String(formData.get('password') || '').trim()
   const role = String(formData.get('role') || 'member') as UserRole
   
-  if (!full_name || !email) throw new Error('Missing required fields')
+  const errors: Record<string, string> = {}
+  if (!full_name) errors.full_name = 'Full name is required'
+  if (!email) errors.email = 'Email is required'
+  if (!password || password.length < 6) errors.password = 'Password must be at least 6 characters'
+  
+  if (Object.keys(errors).length > 0) {
+    return { errors, message: 'Please correct the highlighted fields.' }
+  }
 
-  const profile = await createTeamMember({ full_name, email, password, role })
-  
-  await insertAuditLog(owner.id, 'user.created', 'profile', profile.id, { email, role })
-  
-  revalidateTeamPaths()
-  redirect(`${TEAM_PATH}/${profile.id}`)
+  let profileId = ''
+
+  try {
+    const ownerProfile = await getTeamMember(owner.id)
+    if (!ownerProfile || !ownerProfile.agency_id) {
+      throw new Error('Owner agency not found')
+    }
+
+    const profile = await createTeamMember({ 
+      full_name, 
+      email, 
+      password, 
+      role,
+      agency_id: ownerProfile.agency_id
+    })
+    profileId = profile.id
+    await insertAuditLog(owner.id, 'user.created', 'profile', profile.id, { email, role })
+    revalidateTeamPaths()
+    return { errors: {}, success: true, profileId: profile.id }
+  } catch (error) {
+    return {
+      errors: {},
+      message: error instanceof Error ? error.message : 'Unable to create team member.',
+    }
+  }
 }
 
 export async function deleteTeamMemberAction(id: string) {
@@ -112,7 +137,7 @@ export async function deleteTeamMemberAction(id: string) {
   await insertAuditLog(owner.id, 'user.deleted', 'profile', id)
   
   revalidateTeamPaths()
-  redirect(TEAM_PATH)
+  redirect(`${TEAM_PATH}?success=Member+deleted+successfully`)
 }
 
 export async function resetMemberPasswordAction(id: string, formData: FormData) {

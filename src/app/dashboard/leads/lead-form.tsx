@@ -1,7 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
+import { toast } from 'sonner'
 import {
   createLeadFormAction,
   updateLeadFormAction,
@@ -89,6 +90,12 @@ export function LeadForm({ owners, stageOptions, lead }: LeadFormProps) {
     isEdit ? updateLeadFormAction : createLeadFormAction,
     initialState
   )
+
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message)
+    }
+  }, [state])
 
   return (
     <form action={formAction} className='space-y-6'>
