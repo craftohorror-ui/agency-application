@@ -36,9 +36,10 @@ export async function startPrivateChatAction(memberId: string) {
   try {
     const conversationId = await getOrCreatePrivateChat(memberId)
     return { success: true, conversationId }
-  } catch (err: any) {
-    console.error('START PRIVATE CHAT ACTION ERROR:', err)
-    return { error: err.message || JSON.stringify(err) }
+  } catch (err) {
+    const error = err as Error
+    console.error('START PRIVATE CHAT ACTION ERROR:', error)
+    return { error: error.message || JSON.stringify(error) }
   }
 }
 
