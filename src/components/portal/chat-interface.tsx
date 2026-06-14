@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useMemo } from 'react'
-import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, UserIcon, MessageSquareIcon } from 'lucide-react'
+import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, MessageSquareIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -59,7 +59,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
   // Step 4 State (Private Chats)
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
-  const [agencyMembers, setAgencyMembers] = useState<any[]>([])
+  const [agencyMembers, setAgencyMembers] = useState<Array<{ id: string; full_name: string; avatar_url: string | null; role: string }>>([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -211,7 +211,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       }).subscribe()
 
     return () => { supabase.removeChannel(partChannel) }
-  }, [activeConversationId, supabase])
+  }, [activeConversationId, supabase, initialMessages])
 
 
   // Debounced Read Receipt Writer
