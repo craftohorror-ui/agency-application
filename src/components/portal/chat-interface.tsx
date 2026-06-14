@@ -1,14 +1,21 @@
 'use client'
 
 import { useEffect, useState, useRef, useMemo } from 'react'
-import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, MessageSquareIcon } from 'lucide-react'
+import { SendIcon, Loader2Icon, SearchIcon, ArrowLeftIcon, PlusIcon, MessageSquareIcon, SmileIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClient } from '@/lib/supabase/client'
-import { sendPortalMessageAction } from '@/app/portal/messages/actions'
-import { sendAgencyMessageAction, getAgencyMembersAction, startPrivateChatAction } from '@/app/dashboard/messages/actions'
+import { sendPortalMessageAction, togglePortalReactionAction } from '@/app/portal/messages/actions'
+import { sendAgencyMessageAction, getAgencyMembersAction, toggleReactionAction } from '@/app/dashboard/messages/actions'
+
+export interface Reaction {
+  id: string
+  message_id: string
+  user_id: string
+  emoji: string
+}
 
 export interface ChatConversation {
   id: string
@@ -52,6 +59,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list')
+  const [reactions, setReactions] = useState<Reaction[]>([])
+  const [activePicker, setActivePicker] = useState<string | null>(null)
+  const EMOJIS = ['👍', '❤️', '😂', '🔥', '🎉', '👀', '😎']
   
   // Step 2 & 3 State
   const [readStates, setReadStates] = useState<Record<string, string>>({}) // profile_id -> message_id
@@ -174,6 +184,26 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
 
   // ==========================================
+  // STEP 2.5: REACTION LISTENER
+  // ==========================================
+  useEffect(() => {
+    const channel = supabase
+      .channel('reactions_listener')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reactions' }, (payload) => {
+        setReactions(prev => {
+          if (prev.find(r => r.id === payload.new.id)) return prev
+          return [...prev, payload.new as Reaction]
+        })
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'message_reactions' }, (payload) => {
+        setReactions(prev => prev.filter(r => r.id !== payload.old.id))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase])
+
+
+  // ==========================================
   // STEP 2: ACTIVE CONVERSATION DATA (Messages & Read States)
   // ==========================================
   useEffect(() => {
@@ -181,7 +211,16 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
     async function fetchMessages() {
       const { data } = await supabase.from('messages').select('*, sender:profiles(id, full_name, avatar_url, role)').eq('conversation_id', activeConversationId).order('created_at', { ascending: true })
-      if (data) setMessages(data)
+      if (data) {
+        setMessages(data)
+        const messageIds = data.map((m: ChatMessage) => m.id)
+        if (messageIds.length > 0) {
+          const { data: reactionData } = await supabase.from('message_reactions').select('*').in('message_id', messageIds)
+          if (reactionData) setReactions(reactionData as Reaction[])
+        } else {
+          setReactions([])
+        }
+      }
     }
 
     if (initialMessages.length > 0 && initialMessages[0].conversation_id !== activeConversationId) {
@@ -280,6 +319,26 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       const error = e as Error
       console.error(error)
       alert(`Private Chat Error: ${error.message || error}`)
+    }
+  }
+
+  async function handleToggleReaction(messageId: string, emoji: string) {
+    const exists = reactions.find(r => r.message_id === messageId && r.user_id === currentUserId && r.emoji === emoji)
+    if (exists) {
+      setReactions(prev => prev.filter(r => r.id !== exists.id))
+    } else {
+      setReactions(prev => [...prev, { id: crypto.randomUUID(), message_id: messageId, user_id: currentUserId, emoji }])
+    }
+    try {
+      let result
+      if (actionRoute === 'agency') {
+        result = await toggleReactionAction(messageId, emoji)
+      } else {
+        result = await togglePortalReactionAction(messageId, emoji)
+      }
+      if (result && result.error) throw new Error(result.error)
+    } catch (err) {
+      console.error('Failed to toggle reaction', err)
     }
   }
 
@@ -539,15 +598,67 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                             <span className="text-[11px] font-medium text-muted-foreground mb-1 ml-1">{msg.sender?.full_name}</span>
                           )}
                           
-                          <div 
-                            className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
-                              isMe 
-                                ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
-                                : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
-                            }`}
-                          >
-                            {msg.body}
+                          <div className="relative group flex items-center gap-2">
+                            {isMe && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative">
+                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground">
+                                  <SmileIcon className="h-3.5 w-3.5" />
+                                </button>
+                                {activePicker === msg.id && (
+                                  <div className="absolute top-8 right-0 bg-background border shadow-md rounded-full p-1 flex gap-1 z-20">
+                                    {EMOJIS.map(emoji => (
+                                      <button key={emoji} onClick={() => { handleToggleReaction(msg.id, emoji); setActivePicker(null); }} className="hover:bg-muted rounded-full p-1.5 text-sm hover:scale-110 transition-transform">{emoji}</button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
+                                isMe 
+                                  ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
+                                  : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
+                              }`}
+                            >
+                              {msg.body}
+                            </div>
+
+                            {!isMe && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative">
+                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground">
+                                  <SmileIcon className="h-3.5 w-3.5" />
+                                </button>
+                                {activePicker === msg.id && (
+                                  <div className="absolute top-8 left-0 bg-background border shadow-md rounded-full p-1 flex gap-1 z-20">
+                                    {EMOJIS.map(emoji => (
+                                      <button key={emoji} onClick={() => { handleToggleReaction(msg.id, emoji); setActivePicker(null); }} className="hover:bg-muted rounded-full p-1.5 text-sm hover:scale-110 transition-transform">{emoji}</button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
+                          
+                          {reactions.filter(r => r.message_id === msg.id).length > 0 && (
+                            <div className={`flex gap-1 mt-1 mx-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}`}>
+                              {Object.entries(reactions.filter(r => r.message_id === msg.id).reduce((acc, r) => {
+                                acc[r.emoji] = (acc[r.emoji] || 0) + 1
+                                return acc
+                              }, {} as Record<string, number>)).map(([emoji, count]) => {
+                                const hasReacted = reactions.some(r => r.message_id === msg.id && r.emoji === emoji && r.user_id === currentUserId)
+                                return (
+                                  <button 
+                                    key={emoji}
+                                    onClick={() => handleToggleReaction(msg.id, emoji)}
+                                    className={`px-1.5 py-0.5 text-[11px] rounded-full border flex items-center gap-1 transition-colors ${hasReacted ? 'border-primary text-primary bg-primary/10' : 'bg-background/80 text-muted-foreground hover:bg-muted'}`}
+                                  >
+                                    <span>{emoji}</span>
+                                    <span>{count}</span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
                           
                           <div className={`flex flex-col items-end gap-0.5 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <span className="text-[10px] text-muted-foreground">
