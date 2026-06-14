@@ -52,13 +52,16 @@ export function FileUpload({
       const res = await uploadFileAction(formData)
       if (res?.error) {
         toast.error(res.error)
+        window.alert(res.error)
       } else {
         toast.success('File uploaded successfully.')
         formRef.current?.reset()
       }
     } catch (error: unknown) {
       console.error('[FileUpload] Caught exception:', error)
-      toast.error(`Upload crashed: ${error instanceof Error ? error.message : String(error)}`)
+      const msg = error instanceof Error ? error.message : String(error)
+      toast.error(`Upload crashed: ${msg}`)
+      window.alert(`Upload crashed: ${msg}`)
     } finally {
       setIsUploading(false)
     }
