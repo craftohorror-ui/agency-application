@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClient } from '@/lib/supabase/client'
-import { sendPortalMessageAction, togglePortalReactionAction } from '@/app/portal/messages/actions'
-import { sendAgencyMessageAction, getAgencyMembersAction, toggleReactionAction } from '@/app/dashboard/messages/actions'
+import { sendPortalMessageAction, togglePortalReactionAction, editPortalMessageAction, deletePortalMessageAction } from '@/app/portal/messages/actions'
+import { sendAgencyMessageAction, getAgencyMembersAction, toggleReactionAction, editAgencyMessageAction, deleteAgencyMessageAction } from '@/app/dashboard/messages/actions'
 
 export interface Reaction {
   id: string
@@ -37,6 +37,10 @@ export interface ChatMessage {
   created_at: string
   file_path?: string | null
   duration?: number | null
+  edited_at?: string | null
+  is_deleted?: boolean
+  deleted_at?: string | null
+  reply_to_message_id?: string | null
   sender?: {
     id: string
     full_name: string
@@ -83,6 +87,10 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
   const [agencyMembers, setAgencyMembers] = useState<Array<{ id: string; full_name: string; avatar_url: string | null; role: string }>>([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
+
+  // Step 5 State (Message Management)
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null)
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const readDebounceTimer = useRef<NodeJS.Timeout | null>(null)
@@ -160,17 +168,13 @@ export function ChatInterface({ conversations: initialConversations, initialMess
           const messageObj: ChatMessage = {
             id: newMsg.id, conversation_id: newMsg.conversation_id, sender_id: newMsg.sender_id, body: newMsg.body, created_at: newMsg.created_at,
             file_path: newMsg.file_path, duration: newMsg.duration,
+            edited_at: newMsg.edited_at, is_deleted: newMsg.is_deleted, deleted_at: newMsg.deleted_at, reply_to_message_id: newMsg.reply_to_message_id,
             sender: sender || { id: newMsg.sender_id, full_name: 'Unknown', avatar_url: null, role: 'member' }
           }
 
           setConversations(prev => {
             const exists = prev.find(c => c.id === newMsg.conversation_id)
-            if (!exists) {
-              // We should probably fetch the new conversation so it appears in the sidebar!
-              // For now we will rely on a hard refresh or realtime conv listener, 
-              // but to prevent breaking the map loop we just return prev.
-              return prev
-            }
+            if (!exists) return prev
             return prev.map(c => {
               if (c.id === newMsg.conversation_id) {
                 const isActive = c.id === activeConversationId
@@ -196,7 +200,27 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             })
           }
         }
-      ).subscribe()
+      )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+        const updatedMsg = payload.new
+        if (updatedMsg.conversation_id === activeConversationId) {
+          setMessages(prev => prev.map(m => {
+            if (m.id === updatedMsg.id) {
+              return {
+                ...m,
+                body: updatedMsg.body,
+                edited_at: updatedMsg.edited_at,
+                is_deleted: updatedMsg.is_deleted,
+                deleted_at: updatedMsg.deleted_at,
+                file_path: updatedMsg.file_path,
+                duration: updatedMsg.duration
+              }
+            }
+            return m
+          }))
+        }
+      })
+      .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [activeConversationId, currentUserId, supabase])
@@ -420,18 +444,64 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   }
 
 
+  async function handleDeleteMessage(messageId: string) {
+    if (!confirm('Delete this message?')) return
+    try {
+      let result
+      if (actionRoute === 'agency') {
+        result = await deleteAgencyMessageAction(messageId)
+      } else {
+        result = await deletePortalMessageAction(messageId)
+      }
+      if (result && result.error) throw new Error(result.error)
+    } catch (err) {
+      console.error(err)
+      alert(`Failed to delete message: ${err}`)
+    }
+  }
+
   async function handleSend(e?: React.FormEvent) {
     if (e) e.preventDefault()
     if ((!inputValue.trim() && !audioBlob) || !activeConversationId || isSending) return
 
     const body = inputValue.trim() || '[Voice Message]'
+
+    // Handle Edit Mode
+    if (editingMessage) {
+      if (body === editingMessage.body || !body) {
+        setEditingMessage(null)
+        setInputValue('')
+        return
+      }
+      setIsSending(true)
+      try {
+        let result
+        if (actionRoute === 'agency') {
+          result = await editAgencyMessageAction(editingMessage.id, body)
+        } else {
+          result = await editPortalMessageAction(editingMessage.id, body)
+        }
+        if (result && result.error) throw new Error(result.error)
+        setEditingMessage(null)
+        setInputValue('')
+      } catch (err) {
+        console.error(err)
+        alert(`Failed to edit message: ${err}`)
+      } finally {
+        setIsSending(false)
+      }
+      return
+    }
+
     const hasAudio = !!audioBlob
     const currentDuration = recordingDuration
     const currentBlob = audioBlob
+    const currentReplyId = replyingTo?.id
 
     setInputValue('')
     setAudioBlob(null)
     setRecordingDuration(0)
+    setReplyingTo(null)
     setIsSending(true)
 
     try {
@@ -452,7 +522,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       const optimisticMessage: ChatMessage = {
         id: crypto.randomUUID(),
         conversation_id: activeConversationId, sender_id: currentUserId, body: body, created_at: new Date().toISOString(),
-        file_path: filePath, duration: currentDuration,
+        file_path: filePath, duration: currentDuration, reply_to_message_id: currentReplyId,
         sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' },
         isOptimistic: true
       }
@@ -461,9 +531,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
 
       let result
       if (actionRoute === 'agency') {
-        result = await sendAgencyMessageAction(activeConversationId, body, filePath, currentDuration)
+        result = await sendAgencyMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId)
       } else {
-        result = await sendPortalMessageAction(activeConversationId, body, filePath, currentDuration)
+        result = await sendPortalMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId)
       }
       
       if (result && result.error) {
@@ -703,9 +773,18 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                           )}
                           
                           <div className="relative group flex items-center gap-2">
-                            {isMe && (
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative">
-                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground">
+                            {isMe && !msg.is_deleted && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative gap-1 z-10">
+                                <button onClick={() => { setEditingMessage(msg); setInputValue(msg.body !== '[Voice Message]' ? msg.body : ''); setReplyingTo(null); }} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground" title="Edit">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                                </button>
+                                <button onClick={() => handleDeleteMessage(msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground hover:text-red-500" title="Delete">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                </button>
+                                <button onClick={() => { setReplyingTo(msg); setEditingMessage(null); }} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground" title="Reply">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                                </button>
+                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground" title="React">
                                   <SmileIcon className="h-3.5 w-3.5" />
                                 </button>
                                 {activePicker === msg.id && (
@@ -718,23 +797,37 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                               </div>
                             )}
                             
-                            <div className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
-                                isMe 
-                                  ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
-                                  : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
-                              }`}
-                            >
-                              {msg.file_path ? (
-                                <div className="flex flex-col gap-1">
-                                  {msg.body !== '[Voice Message]' && <span className="mb-1">{msg.body}</span>}
-                                  <VoicePlayer filePath={msg.file_path} duration={msg.duration || 0} supabase={supabase} />
+                            <div id={`msg-${msg.id}`} className="flex flex-col">
+                              {msg.reply_to_message_id && (
+                                <div onClick={() => document.getElementById(`msg-${msg.reply_to_message_id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className={`cursor-pointer mb-1 text-xs px-2 py-1.5 bg-muted/40 rounded-md border-l-4 border-primary/50 opacity-80 hover:opacity-100 transition-opacity truncate max-w-[250px] ${isMe ? 'self-end' : 'self-start'}`}>
+                                  <span className="font-medium text-foreground">{messages.find(m => m.id === msg.reply_to_message_id)?.sender?.full_name || 'Someone'}:</span>{' '}
+                                  {messages.find(m => m.id === msg.reply_to_message_id)?.is_deleted ? '🗑️ Deleted message' : (messages.find(m => m.id === msg.reply_to_message_id)?.body === '[Voice Message]' ? '🎤 Voice Message' : messages.find(m => m.id === msg.reply_to_message_id)?.body || 'Unknown message')}
                                 </div>
-                              ) : msg.body}
+                              )}
+                              <div className={`px-4 py-2.5 text-[15px] leading-relaxed break-words shadow-sm whitespace-pre-wrap ${
+                                  msg.is_deleted ? 'bg-muted/30 border border-dashed text-muted-foreground rounded-2xl' :
+                                  isMe 
+                                    ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm' 
+                                    : 'bg-card border text-card-foreground rounded-2xl rounded-tl-sm'
+                                }`}
+                              >
+                                {msg.is_deleted ? (
+                                  <div className="italic text-sm flex items-center gap-1">🗑️ {msg.sender?.full_name || 'Sender'} deleted a message</div>
+                                ) : msg.file_path ? (
+                                  <div className="flex flex-col gap-1">
+                                    {msg.body !== '[Voice Message]' && <span className="mb-1">{msg.body}</span>}
+                                    <VoicePlayer filePath={msg.file_path} duration={msg.duration || 0} supabase={supabase} />
+                                  </div>
+                                ) : msg.body}
+                              </div>
                             </div>
 
-                            {!isMe && (
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative">
-                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground">
+                            {!isMe && !msg.is_deleted && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center relative gap-1 z-10">
+                                <button onClick={() => { setReplyingTo(msg); setEditingMessage(null); }} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground" title="Reply">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                                </button>
+                                <button onClick={() => setActivePicker(activePicker === msg.id ? null : msg.id)} className="p-1.5 bg-background border shadow-sm rounded-full hover:bg-muted text-muted-foreground" title="React">
                                   <SmileIcon className="h-3.5 w-3.5" />
                                 </button>
                                 {activePicker === msg.id && (
@@ -748,7 +841,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                             )}
                           </div>
                           
-                          {reactions.filter(r => r.message_id === msg.id).length > 0 && (
+                          {!msg.is_deleted && reactions.filter(r => r.message_id === msg.id).length > 0 && (
                             <div className={`flex gap-1 mt-1 mx-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}`}>
                               {Object.entries(reactions.filter(r => r.message_id === msg.id).reduce((acc, r) => {
                                 acc[r.emoji] = (acc[r.emoji] || 0) + 1
@@ -769,9 +862,10 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                             </div>
                           )}
                           
-                          <div className={`flex flex-col items-end gap-0.5 mt-1 mx-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <span className="text-[10px] text-muted-foreground">
+                          <div className={`flex flex-col gap-0.5 mt-1 mx-1 ${isMe ? 'items-end justify-end' : 'items-start justify-start'}`}>
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                               {formatTime(msg.created_at)}
+                              {msg.edited_at && !msg.is_deleted && <span className="italic opacity-80">(edited)</span>}
                             </span>
                             
                             {isMe && readersOfThisMessage.length > 0 && (
@@ -821,9 +915,25 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
-                  <div className="flex-1 relative">
-                    <textarea
+                <form onSubmit={handleSend} className="flex flex-col gap-2 max-w-4xl mx-auto w-full">
+                  {(replyingTo || editingMessage) && (
+                    <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-t-xl border-x border-t text-sm relative -mb-2 z-0 mx-1">
+                      <div className="flex flex-col truncate">
+                        <span className="font-medium text-primary text-xs mb-0.5">
+                          {editingMessage ? 'Editing Message' : `Replying to ${replyingTo?.sender?.full_name || 'Someone'}`}
+                        </span>
+                        <span className="text-muted-foreground truncate max-w-[400px] text-xs">
+                          {editingMessage ? (editingMessage.body === '[Voice Message]' ? '🎤 Voice Message' : editingMessage.body) : (replyingTo?.body === '[Voice Message]' ? '🎤 Voice Message' : replyingTo?.body)}
+                        </span>
+                      </div>
+                      <button type="button" onClick={() => { if (editingMessage) setInputValue(''); setReplyingTo(null); setEditingMessage(null); }} className="p-1 rounded-full hover:bg-background text-muted-foreground transition-colors shrink-0">
+                        <XIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-2 items-end w-full relative z-10">
+                    <div className="flex-1 relative">
+                      <textarea
                       value={inputValue}
                       onChange={e => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -849,6 +959,7 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                   >
                     {isSending ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4 ml-0.5" />}
                   </Button>
+                  </div>
                 </form>
               )}
             </div>
