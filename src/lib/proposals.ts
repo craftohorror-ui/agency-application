@@ -213,3 +213,62 @@ By signing below, both parties agree to the terms outlined in this agreement.
   if (error) throw new Error(error.message)
   return contract
 }
+
+export async function duplicateProposal(id: string) {
+  const { supabase, user } = await requireStaff()
+  
+  // 1. Fetch existing proposal securely
+  const proposal = await getProposal(id)
+  if (!proposal) throw new Error('Proposal not found')
+
+  // 2. Future-Proof Data Copying
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: _id, client_id: _client, lead_id: _lead, status: _status, created_at: _created, updated_at: _updated, created_by: _createdBy, items: _itemsData, client: _clientData, lead: _leadData, ...clonedData } = proposal
+
+  // 3. Smart Copy Naming
+  const copyPattern = / \(Copy(?: (\d+))?\)$/
+  const match = proposal.title.match(copyPattern)
+  let newTitle = proposal.title
+  if (match) {
+    const num = match[1] ? parseInt(match[1], 10) + 1 : 2
+    newTitle = proposal.title.replace(copyPattern, ` (Copy ${num})`)
+  } else {
+    newTitle = `${proposal.title} (Copy)`
+  }
+
+  // 4. Create new proposal
+  const { data: newProposal, error: propError } = await supabase
+    .from('proposals')
+    .insert({
+      ...clonedData,
+      title: newTitle,
+      client_id: null,
+      lead_id: null,
+      status: 'draft',
+      created_by: user.id
+    })
+    .select('*')
+    .single()
+
+  if (propError) throw new Error(propError.message)
+
+  // 5. Clone line items if they exist
+  if (proposal.items && proposal.items.length > 0) {
+    const newItems = proposal.items.map(item => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _itemId, proposal_id: _propId, ...clonedItem } = item
+      return {
+        ...clonedItem,
+        proposal_id: newProposal.id
+      }
+    })
+
+    const { error: itemsError } = await supabase
+      .from('proposal_items')
+      .insert(newItems)
+
+    if (itemsError) throw new Error(itemsError.message)
+  }
+
+  return getProposal(newProposal.id)
+}

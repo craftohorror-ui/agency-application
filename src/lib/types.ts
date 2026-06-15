@@ -104,6 +104,7 @@ export interface Proposal {
   created_by: string | null
   created_at: string
   updated_at: string
+  template_id: string
 }
 
 export interface ProposalItem {
@@ -112,6 +113,41 @@ export interface ProposalItem {
   description: string
   qty: number
   unit_price: number
+}
+
+export interface ProposalPublicLink {
+  id: string
+  proposal_id: string
+  agency_id: string
+  token: string
+  name: string | null
+  is_active: boolean
+  expires_at: string | null
+  last_accessed_at: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export interface ProposalSession {
+  id: string
+  link_id: string
+  proposal_id: string
+  agency_id: string
+  viewer_ip_hash: string
+  viewer_user_agent: string | null
+  device_type: string | null
+  duration_seconds: number
+  started_at: string
+  last_active_at: string
+}
+
+export interface ProposalEvent {
+  id: string
+  session_id: string
+  agency_id: string
+  event_type: string
+  event_data: Record<string, unknown> | null
+  created_at: string
 }
 
 export interface Contract {

@@ -1,25 +1,45 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { EditIcon, TrashIcon, FileTextIcon, FolderIcon } from 'lucide-react'
+import { EditIcon, TrashIcon, FileTextIcon, FolderIcon, CopyIcon } from 'lucide-react'
 import { requireStaff } from '@/lib/auth'
 import { getProposal } from '@/lib/proposals'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { deleteProposalAction, convertProposalToContractAction, convertProposalToProjectAction } from '../actions'
+import { deleteProposalAction, convertProposalToContractAction, convertProposalToProjectAction, duplicateProposalAction } from '../actions'
+import { ProposalExportModal } from '@/components/proposals/proposal-export-modal'
+import { mapProposalToTemplateData } from '@/lib/templates'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
 export default async function ProposalDetailPage({ params }: PageProps) {
-  await requireStaff()
+  const { profile, supabase } = await requireStaff()
   const resolvedParams = await params
   const proposal = await getProposal(resolvedParams.id)
 
   if (!proposal) {
     notFound()
   }
+
+  // Fetch Agency Context
+  const { data: agency } = await supabase
+    .from('agencies')
+    .select('name, logo_url, settings')
+    .eq('id', profile.agency_id)
+    .single()
+
+  const templateData = mapProposalToTemplateData(
+    proposal, 
+    { 
+      name: agency?.name || 'Our Agency',
+      logoUrl: agency?.logo_url,
+      // Attempt to extract email/phone if stored in settings jsonb, else null
+      email: null,
+      phone: null
+    }
+  )
 
   function formatStatus(s: string) {
     return s.charAt(0).toUpperCase() + s.slice(1)
@@ -37,7 +57,13 @@ export default async function ProposalDetailPage({ params }: PageProps) {
             </span>
           </div>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 flex-wrap sm:flex-nowrap justify-end'>
+          <ProposalExportModal data={templateData} proposalId={proposal.id} initialTemplateId={proposal.template_id} />
+          <form action={duplicateProposalAction.bind(null, proposal.id)}>
+            <Button variant='outline' type="submit">
+              <CopyIcon className='mr-2 h-4 w-4' /> Duplicate
+            </Button>
+          </form>
           <Link href={`/dashboard/proposals/${proposal.id}/edit`}>
             <Button variant='outline'>
               <EditIcon className='mr-2 h-4 w-4' /> Edit

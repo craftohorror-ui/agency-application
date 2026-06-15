@@ -2,7 +2,8 @@
 
 import { redirect, unstable_rethrow } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createProposal, updateProposal, deleteProposal, convertProposalToContract, convertProposalToProject } from '@/lib/proposals'
+import { createProposal, updateProposal, deleteProposal, convertProposalToContract, convertProposalToProject, duplicateProposal } from '@/lib/proposals'
+import { generatePublicLink, revokePublicLink } from '@/lib/proposals-analytics'
 import type { ProposalStatus } from '@/lib/types'
 
 export type ProposalFormState = {
@@ -127,4 +128,30 @@ export async function convertProposalToProjectAction(id: string) {
   revalidatePath('/dashboard/proposals')
   revalidatePath('/dashboard/projects')
   redirect(`/dashboard/projects/${project.id}?success=Contract+converted+to+project`)
+}
+
+export async function duplicateProposalAction(id: string) {
+  const newProposal = await duplicateProposal(id)
+  if (!newProposal) {
+    throw new Error('Failed to duplicate proposal')
+  }
+  revalidatePath('/dashboard/proposals')
+  redirect(`/dashboard/proposals/${newProposal.id}?success=Proposal+duplicated+successfully`)
+}
+
+export async function generatePublicLinkAction(proposalId: string, name?: string, expiresInDays: number = 30) {
+  const link = await generatePublicLink(proposalId, name, expiresInDays)
+  revalidatePath(`/dashboard/proposals/${proposalId}`)
+  return link
+}
+
+export async function updateProposalTemplateAction(proposalId: string, templateId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await updateProposal(proposalId, { template_id: templateId } as any)
+  revalidatePath(`/dashboard/proposals/${proposalId}`)
+}
+
+export async function revokePublicLinkAction(linkId: string, proposalId: string) {
+  await revokePublicLink(linkId)
+  revalidatePath(`/dashboard/proposals/${proposalId}`)
 }

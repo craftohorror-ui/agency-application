@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { PlusIcon } from 'lucide-react'
+import { PlusIcon, CopyIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { listProposals } from '@/lib/proposals'
 import type { ProposalStatus } from '@/lib/types'
+import { duplicateProposalAction } from './actions'
 
 type SearchParams = {
   search?: string | string[]
@@ -97,10 +98,15 @@ export default async function ProposalsPage({ searchParams }: { searchParams?: P
                     <div className='col-span-2 text-right'>
                       <Badge variant='outline'>{formatStatus(proposal.status)}</Badge>
                     </div>
-                    <div className='col-span-1 text-right'>
+                    <div className='col-span-1 flex justify-end gap-1'>
                       <Link href={`/dashboard/proposals/${proposal.id}`}>
                         <Button variant='ghost' size='sm'>View</Button>
                       </Link>
+                      <form action={duplicateProposalAction.bind(null, proposal.id)}>
+                        <Button variant='ghost' size='sm' type="submit" title="Duplicate Proposal">
+                          <CopyIcon className="h-4 w-4" />
+                        </Button>
+                      </form>
                     </div>
                   </div>
                 ))}
