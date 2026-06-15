@@ -159,8 +159,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   // ==========================================
   useEffect(() => {
     const channel = supabase
-      .channel('global_messages_listener')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+      .channel(`global_messages_${currentUserId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, async (payload) => {
+        if (payload.eventType === 'INSERT') {
           const newMsg = payload.new
 
           const { data: sender } = await supabase.from('profiles').select('id, full_name, avatar_url, role').eq('id', newMsg.sender_id).single()
@@ -199,25 +200,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
               return [...prev, messageObj]
             })
           }
-        }
-      )
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
-        const updatedMsg = payload.new
-        if (updatedMsg.conversation_id === activeConversationId) {
-          setMessages(prev => prev.map(m => {
-            if (m.id === updatedMsg.id) {
-              return {
-                ...m,
-                body: updatedMsg.body,
-                edited_at: updatedMsg.edited_at,
-                is_deleted: updatedMsg.is_deleted,
-                deleted_at: updatedMsg.deleted_at,
-                file_path: updatedMsg.file_path,
-                duration: updatedMsg.duration
-              }
-            }
-            return m
-          }))
+        } else if (payload.eventType === 'UPDATE') {
+          const updatedMsg = payload.new as Partial<ChatMessage>
+          if (updatedMsg.conversation_id === activeConversationId) {
+            setMessages(prev => prev.map(m => m.id === updatedMsg.id ? { ...m, ...updatedMsg } : m))
+          }
         }
       })
       .subscribe()
