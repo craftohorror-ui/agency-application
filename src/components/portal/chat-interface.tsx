@@ -43,6 +43,7 @@ export interface ChatMessage {
     avatar_url: string | null
     role: string
   }
+  isOptimistic?: boolean
 }
 
 interface ChatInterfaceProps {
@@ -189,8 +190,8 @@ export function ChatInterface({ conversations: initialConversations, initialMess
             setMessages(prev => {
               const duplicate = prev.find(m => m.id === newMsg.id)
               if (duplicate) return prev
-              const isOptimisticDuplicate = prev.some(m => m.sender_id === currentUserId && m.body === newMsg.body && new Date(newMsg.created_at).getTime() - new Date(m.created_at).getTime() < 5000)
-              if (isOptimisticDuplicate) return prev.map(m => (m.sender_id === currentUserId && m.body === newMsg.body) ? messageObj : m)
+              const optimisticMsg = prev.find(m => m.isOptimistic && m.sender_id === currentUserId && m.body === newMsg.body)
+              if (optimisticMsg) return prev.map(m => m.id === optimisticMsg.id ? messageObj : m)
               return [...prev, messageObj]
             })
           }
@@ -448,7 +449,8 @@ export function ChatInterface({ conversations: initialConversations, initialMess
         id: crypto.randomUUID(),
         conversation_id: activeConversationId, sender_id: currentUserId, body: body, created_at: new Date().toISOString(),
         file_path: filePath, duration: currentDuration,
-        sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' }
+        sender: { id: currentUserId, full_name: 'Me', avatar_url: null, role: 'client' },
+        isOptimistic: true
       }
       setMessages(prev => [...prev, optimisticMessage])
       setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, last_message_body: body, last_message_created_at: optimisticMessage.created_at } : c))
@@ -542,7 +544,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                       <div className="truncate font-medium text-sm text-foreground">{conv.title}</div>
                       {conv.last_message_created_at && <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>}
                     </div>
-                    <div className="truncate text-xs text-muted-foreground mt-0.5">{conv.last_message_body || 'No messages yet'}</div>
+                    <div className="truncate text-xs text-muted-foreground mt-0.5">
+                      {conv.last_message_body === '[Voice Message]' ? '🎤 Voice Message' : (conv.last_message_body || 'No messages yet')}
+                    </div>
                   </div>
                   {!!conv.unread_count && conv.unread_count > 0 && (
                     <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">{conv.unread_count}</Badge>
@@ -587,7 +591,9 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                         <div className="truncate font-medium text-sm text-foreground">{other?.full_name || 'User'}</div>
                         {conv.last_message_created_at && <div className="text-[10px] text-muted-foreground">{formatTime(conv.last_message_created_at)}</div>}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground mt-0.5">{conv.last_message_body || 'No messages yet'}</div>
+                      <div className="truncate text-xs text-muted-foreground mt-0.5">
+                        {conv.last_message_body === '[Voice Message]' ? '🎤 Voice Message' : (conv.last_message_body || 'No messages yet')}
+                      </div>
                     </div>
                     {!!conv.unread_count && conv.unread_count > 0 && (
                       <Badge variant="default" className="rounded-full px-1.5 min-w-[20px] justify-center text-[10px]">{conv.unread_count}</Badge>
@@ -716,7 +722,6 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                               {msg.file_path ? (
                                 <div className="flex flex-col gap-1">
                                   {msg.body !== '[Voice Message]' && <span className="mb-1">{msg.body}</span>}
-                                  <span className="opacity-80 text-[11px] uppercase tracking-wider">Voice Message</span>
                                   <VoicePlayer filePath={msg.file_path} duration={msg.duration || 0} supabase={supabase} />
                                 </div>
                               ) : msg.body}
