@@ -285,7 +285,11 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     if (!activeConversationId || messages.length === 0) return
 
     function triggerMarkRead() {
-      const latestId = messages[messages.length - 1].id
+      // Find the latest non-optimistic message to avoid Foreign Key violations
+      const latestRealMessage = [...messages].reverse().find(m => !m.isOptimistic)
+      if (!latestRealMessage) return
+      
+      const latestId = latestRealMessage.id
       
       if (readDebounceTimer.current) clearTimeout(readDebounceTimer.current)
       
