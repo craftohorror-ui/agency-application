@@ -55,12 +55,13 @@ interface ChatInterfaceProps {
   initialMessages: ChatMessage[]
   currentUserId: string
   actionRoute?: 'portal' | 'agency'
+  initialConversationId?: string | null
 }
 
-export function ChatInterface({ conversations: initialConversations, initialMessages, currentUserId, actionRoute = 'portal' }: ChatInterfaceProps) {
+export function ChatInterface({ conversations: initialConversations, initialMessages, currentUserId, actionRoute = 'portal', initialConversationId }: ChatInterfaceProps) {
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
-    initialConversations.length > 0 ? initialConversations[0].id : null
+    initialConversationId || (initialConversations.length > 0 ? initialConversations[0].id : null)
   )
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputValue, setInputValue] = useState('')
@@ -92,11 +93,22 @@ export function ChatInterface({ conversations: initialConversations, initialMess
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null)
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
 
+  // Step 6 State (Mentions)
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null)
+  const [mentionIndex, setMentionIndex] = useState<number>(-1)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const readDebounceTimer = useRef<NodeJS.Timeout | null>(null)
   const supabase = createClient()
 
   const activeConversation = conversations.find(c => c.id === activeConversationId)
+
+  // Sync initialConversationId from props (e.g. from Notification click)
+  useEffect(() => {
+    if (initialConversationId && initialConversationId !== activeConversationId) {
+      setActiveConversationId(initialConversationId)
+    }
+  }, [initialConversationId])
 
   // Mobile View Transitions
   useEffect(() => {
@@ -516,11 +528,20 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       setMessages(prev => [...prev, optimisticMessage])
       setConversations(prev => prev.map(c => c.id === activeConversationId ? { ...c, last_message_body: body, last_message_created_at: optimisticMessage.created_at } : c))
 
+      // Parse mentions
+      const mentionedUserIds: string[] = []
+      const participants = activeConversation?.participants || []
+      participants.forEach(p => {
+        if (p.full_name && body.includes(`@${p.full_name}`)) {
+          mentionedUserIds.push(p.profile_id)
+        }
+      })
+
       let result
       if (actionRoute === 'agency') {
-        result = await sendAgencyMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId)
+        result = await sendAgencyMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId, mentionedUserIds)
       } else {
-        result = await sendPortalMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId)
+        result = await sendPortalMessageAction(activeConversationId, body, filePath, currentDuration, currentReplyId, mentionedUserIds)
       }
       
       if (result && result.error) {
@@ -537,7 +558,74 @@ export function ChatInterface({ conversations: initialConversations, initialMess
     }
   }
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value
+    setInputValue(val)
+    
+    const cursor = e.target.selectionStart
+    const textBeforeCursor = val.slice(0, cursor)
+    const match = textBeforeCursor.match(/@([a-zA-Z0-9_ ]*)$/)
+    if (match) {
+      setMentionQuery(match[1])
+      setMentionIndex(0)
+    } else {
+      setMentionQuery(null)
+    }
+  }
+
+  const getMentionUsers = () => {
+    if (!mentionQuery && mentionQuery !== '') return []
+    const lowerQ = mentionQuery.toLowerCase()
+    return (activeConversation?.participants || []).filter(p => p.profile_id !== currentUserId && p.full_name?.toLowerCase().includes(lowerQ))
+  }
+
+  const insertMention = (fullName: string) => {
+    const cursor = (document.querySelector('textarea') as HTMLTextAreaElement)?.selectionStart || inputValue.length
+    const textBeforeCursor = inputValue.slice(0, cursor)
+    const textAfterCursor = inputValue.slice(cursor)
+    
+    const replaced = textBeforeCursor.replace(/@[a-zA-Z0-9_ ]*$/, `@${fullName} `)
+    setInputValue(replaced + textAfterCursor)
+    setMentionQuery(null)
+    
+    setTimeout(() => {
+      const ta = document.querySelector('textarea')
+      if (ta) {
+        ta.focus()
+        ta.selectionStart = ta.selectionEnd = replaced.length
+      }
+    }, 0)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (mentionQuery !== null) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setMentionIndex(prev => prev + 1)
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setMentionIndex(prev => Math.max(0, prev - 1))
+        return
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        const matchingUsers = getMentionUsers()
+        if (matchingUsers[mentionIndex]) {
+          insertMention(matchingUsers[mentionIndex].full_name)
+        } else if (matchingUsers.length > 0) {
+          insertMention(matchingUsers[0].full_name)
+        }
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setMentionQuery(null)
+        return
+      }
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
@@ -920,11 +1008,28 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                   )}
                   <div className="flex gap-2 items-end w-full relative z-10">
                     <div className="flex-1 relative">
+                      {mentionQuery !== null && getMentionUsers().length > 0 && (
+                        <div className="absolute bottom-full left-0 mb-2 w-64 bg-popover border rounded-xl shadow-md overflow-hidden z-50 flex flex-col max-h-[200px] overflow-y-auto">
+                          {getMentionUsers().map((u, i) => (
+                            <button
+                              key={u.profile_id}
+                              type="button"
+                              className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-muted ${i === mentionIndex ? 'bg-muted' : ''}`}
+                              onClick={() => insertMention(u.full_name)}
+                            >
+                              <div className="h-6 w-6 shrink-0 rounded-full bg-secondary flex items-center justify-center text-xs overflow-hidden">
+                                {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : u.full_name?.charAt(0) || 'U'}
+                              </div>
+                              <div className="truncate font-medium text-foreground">{u.full_name}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <textarea
                       value={inputValue}
-                      onChange={e => setInputValue(e.target.value)}
+                      onChange={handleTextareaChange}
                       onKeyDown={handleKeyDown}
-                      placeholder="Type a message... (Shift+Enter for new line)"
+                      placeholder="Type a message... (Shift+Enter for new line, @ to mention)"
                       className="w-full rounded-2xl px-4 py-3 bg-muted/50 border-muted-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[44px] max-h-[150px] resize-none leading-relaxed text-sm pr-12"
                       disabled={isSending || !activeConversationId}
                       rows={Math.min(5, Math.max(1, inputValue.split('\n').length))}

@@ -2,14 +2,15 @@ import { requireStaff } from '@/lib/auth'
 import { listAgencyConversations, getAgencyConversationMessages } from '@/lib/messages'
 import { ChatInterface, ChatMessage } from '@/components/portal/chat-interface'
 
-export default async function MessagesPage() {
+export default async function MessagesPage({ searchParams }: { searchParams: { conversationId?: string } }) {
   const { user } = await requireStaff()
   
   const conversations = await listAgencyConversations()
+  const initialConversationId = searchParams.conversationId || (conversations.length > 0 ? conversations[0].id : null)
   
   let initialMessages: ChatMessage[] = []
-  if (conversations.length > 0) {
-    initialMessages = await getAgencyConversationMessages(conversations[0].id)
+  if (initialConversationId) {
+    initialMessages = await getAgencyConversationMessages(initialConversationId)
   }
 
   return (
@@ -19,6 +20,7 @@ export default async function MessagesPage() {
         initialMessages={initialMessages} 
         currentUserId={user.id}
         actionRoute="agency"
+        initialConversationId={initialConversationId}
       />
     </div>
   )

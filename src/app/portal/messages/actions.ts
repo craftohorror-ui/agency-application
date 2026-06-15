@@ -2,8 +2,8 @@
 
 import { requireClient } from '@/lib/auth'
 
-export async function sendPortalMessageAction(conversationId: string, body: string, filePath?: string, duration?: number, replyToMessageId?: string) {
-  const { supabase, user } = await requireClient()
+export async function sendPortalMessageAction(conversationId: string, body: string, filePath?: string, duration?: number, replyToMessageId?: string, mentionedUserIds?: string[]) {
+  const { supabase, profile } = await requireClient()
   
   if (!body.trim()) return
 
@@ -11,7 +11,7 @@ export async function sendPortalMessageAction(conversationId: string, body: stri
     .from('messages')
     .insert({
       conversation_id: conversationId,
-      sender_id: user.id,
+      sender_id: profile.id,
       body: body.trim(),
       ...(filePath ? { file_path: filePath } : {}),
       ...(duration !== undefined ? { duration } : {}),
@@ -24,6 +24,56 @@ export async function sendPortalMessageAction(conversationId: string, body: stri
     console.error('SEND MESSAGE ERROR:', error)
     return { error: error.message || JSON.stringify(error) }
   }
+
+  // Trigger notifications
+  try {
+    const { createMessageNotification } = await import('@/lib/notifications')
+    const notifiedUsers = new Set<string>()
+
+    // 1. Mentions
+    if (mentionedUserIds && mentionedUserIds.length > 0) {
+      for (const userId of mentionedUserIds) {
+        if (userId === profile.id) continue
+        await createMessageNotification({
+          supabase, agencyId: profile.agency_id, actorId: profile.id, userId, conversationId, messageId: data.id,
+          type: 'mention', title: 'New Mention', body: `${profile.full_name || 'Someone'} mentioned you`
+        })
+        notifiedUsers.add(userId)
+      }
+    }
+
+    // 2. Reply
+    if (replyToMessageId) {
+      const { data: originalMsg } = await supabase.from('messages').select('sender_id').eq('id', replyToMessageId).single()
+      if (originalMsg && originalMsg.sender_id !== profile.id && !notifiedUsers.has(originalMsg.sender_id)) {
+        await createMessageNotification({
+          supabase, agencyId: profile.agency_id, actorId: profile.id, userId: originalMsg.sender_id, conversationId, messageId: data.id,
+          type: 'reply', title: 'New Reply', body: `${profile.full_name || 'Someone'} replied to your message`
+        })
+        notifiedUsers.add(originalMsg.sender_id)
+      }
+    }
+
+    // 3. Private Message
+    const { data: conv } = await supabase.from('conversations').select('type').eq('id', conversationId).single()
+    if (conv?.type === 'private') {
+      const { data: participants } = await supabase.from('conversation_participants').select('profile_id').eq('conversation_id', conversationId)
+      if (participants) {
+        for (const p of participants) {
+          if (p.profile_id !== profile.id && !notifiedUsers.has(p.profile_id)) {
+            await createMessageNotification({
+              supabase, agencyId: profile.agency_id, actorId: profile.id, userId: p.profile_id, conversationId, messageId: data.id,
+              type: 'message', title: 'New Message', body: `${profile.full_name || 'Someone'} sent you a message`
+            })
+            notifiedUsers.add(p.profile_id)
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to process notifications:', e)
+  }
+
   return { success: true, data }
 }
 
@@ -96,6 +146,19 @@ export async function togglePortalReactionAction(messageId: string, emoji: strin
       
     if (insertError) {
       return { error: insertError.message }
+    }
+
+    try {
+      const { data: msg } = await supabase.from('messages').select('sender_id, conversation_id').eq('id', messageId).single()
+      if (msg && msg.sender_id !== profile.id) {
+        const { createMessageNotification } = await import('@/lib/notifications')
+        await createMessageNotification({
+          supabase, agencyId: profile.agency_id, actorId: profile.id, userId: msg.sender_id, conversationId: msg.conversation_id || '', messageId,
+          type: 'reaction', title: 'New Reaction', body: `${profile.full_name || 'Someone'} reacted ${emoji} to your message`
+        })
+      }
+    } catch (e) {
+      console.error('Failed to process reaction notification:', e)
     }
   }
 

@@ -2,6 +2,7 @@ import { requireClient } from '@/lib/auth'
 import { signOut } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { PortalNav } from '@/components/portal/portal-nav'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const { profile } = await requireClient()
@@ -15,6 +16,7 @@ export default async function PortalLayout({ children }: { children: React.React
           </div>
         </div>
         <div className='flex items-center gap-3'>
+          <NotificationBell currentUserId={profile.id} />
           <span className='text-sm text-muted-foreground'>
             {profile.full_name || profile.email}
           </span>

@@ -3,6 +3,7 @@ import { signOut } from '@/app/(auth)/actions'
 import { Sidebar } from '@/components/sidebar'
 import { Button } from '@/components/ui/button'
 import { GlobalSearch } from '@/components/global-search'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { profile } = await requireStaff()
@@ -21,6 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
 
           <div className='ml-auto flex items-center gap-3'>
+            <NotificationBell currentUserId={profile.id} />
             <div className='text-right'>
               <p className='text-sm font-medium leading-none'>
                 {profile.full_name || profile.email}

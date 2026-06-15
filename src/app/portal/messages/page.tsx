@@ -3,7 +3,7 @@ import { listPortalConversations, getConversationMessages, getOrCreateGeneralSup
 import { ChatInterface } from '@/components/portal/chat-interface'
 import type { Message } from '@/lib/types'
 
-export default async function PortalMessagesPage() {
+export default async function PortalMessagesPage({ searchParams }: { searchParams: { conversationId?: string } }) {
   const { user } = await requireClient()
   
   // Enforce support conversation exists
@@ -11,10 +11,11 @@ export default async function PortalMessagesPage() {
 
   // Now list all conversations
   const conversations = await listPortalConversations()
+  const initialConversationId = searchParams.conversationId || (conversations.length > 0 ? conversations[0].id : null)
   
   let initialMessages: (Message & { sender: { id: string, full_name: string, avatar_url: string | null, role: string } })[] = []
-  if (conversations.length > 0) {
-    initialMessages = await getConversationMessages(conversations[0].id)
+  if (initialConversationId) {
+    initialMessages = await getConversationMessages(initialConversationId)
   }
 
   return (
@@ -30,6 +31,7 @@ export default async function PortalMessagesPage() {
         conversations={conversations} 
         initialMessages={initialMessages} 
         currentUserId={user.id} 
+        initialConversationId={initialConversationId}
       />
     </div>
   )
