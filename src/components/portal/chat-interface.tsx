@@ -667,7 +667,8 @@ export function ChatInterface({ conversations: initialConversations, initialMess
                 ) : (
                   messages.map((msg, i) => {
                     const isMe = msg.sender_id === currentUserId
-                    const showAvatar = i === 0 || messages[i-1].sender_id !== msg.sender_id
+                    const timeDiff = i > 0 ? new Date(msg.created_at).getTime() - new Date(messages[i-1].created_at).getTime() : 0
+                    const showAvatar = i === 0 || messages[i-1].sender_id !== msg.sender_id || timeDiff > 60 * 60 * 1000
                     
                     const readersOfThisMessage = Object.entries(readStates)
                       .filter(([pid, mid]) => mid === msg.id && pid !== currentUserId)
