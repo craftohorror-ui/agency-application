@@ -2,11 +2,17 @@ import { requireStaff } from '@/lib/auth'
 import { listAgencyConversations, getAgencyConversationMessages } from '@/lib/messages'
 import { ChatInterface, ChatMessage } from '@/components/portal/chat-interface'
 
-export default async function MessagesPage({ searchParams }: { searchParams: { conversationId?: string } }) {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function MessagesPage(props: PageProps) {
   const { user } = await requireStaff()
+  const searchParams = await props.searchParams
   
   const conversations = await listAgencyConversations()
-  const initialConversationId = searchParams.conversationId || (conversations.length > 0 ? conversations[0].id : null)
+  const conversationIdParam = typeof searchParams.conversationId === 'string' ? searchParams.conversationId : null
+  const initialConversationId = conversationIdParam || (conversations.length > 0 ? conversations[0].id : null)
   
   let initialMessages: ChatMessage[] = []
   if (initialConversationId) {
