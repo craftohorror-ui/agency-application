@@ -23,15 +23,19 @@ export async function GET(
     // Set Chromium flags
     chromium.setGraphicsMode = false
 
-    const executablePath = await chromium.executablePath()
+    console.log(
+      "Chromium executable:",
+      await chromium.executablePath()
+    );
 
     const browser = await puppeteer.launch({
       args: chromium.args,
-      defaultViewport: { width: 1200, height: 800 },
-      executablePath: executablePath || undefined,
+      // @ts-expect-error Types for sparticuz/chromium are incomplete
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
       // @ts-expect-error Types for sparticuz/chromium are incomplete
       headless: chromium.headless,
-    })
+    });
 
     const page = await browser.newPage()
 
