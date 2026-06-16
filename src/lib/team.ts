@@ -85,6 +85,9 @@ export type TeamUpdateInput = {
   title?: string | null
   hourly_rate?: number | null
   is_suspended?: boolean
+  phone?: string | null
+  bio?: string | null
+  avatar_url?: string | null
 }
 
 export async function updateTeamMember(id: string, input: TeamUpdateInput): Promise<Profile> {
@@ -100,6 +103,9 @@ export async function updateTeamMember(id: string, input: TeamUpdateInput): Prom
   if (input.title !== undefined) payload.title = input.title ? input.title.trim() : null
   if (input.hourly_rate !== undefined) payload.hourly_rate = input.hourly_rate
   if (input.is_suspended !== undefined) payload.is_suspended = input.is_suspended
+  if (input.phone !== undefined) payload.phone = input.phone ? input.phone.trim() : null
+  if (input.bio !== undefined) payload.bio = input.bio ? input.bio.trim() : null
+  if (input.avatar_url !== undefined) payload.avatar_url = input.avatar_url
 
   if (Object.keys(payload).length === 0) {
     throw new Error('No fields provided for update')

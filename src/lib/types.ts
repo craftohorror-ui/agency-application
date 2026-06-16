@@ -35,11 +35,41 @@ export interface Profile {
   role: UserRole
   title: string | null
   avatar_url: string | null
+  phone: string | null
+  bio: string | null
   hourly_rate: number | null
   is_suspended: boolean
   agency_id: string
   created_at: string
   updated_at: string
+}
+
+export interface Agency {
+  id: string
+  name: string
+  created_at: string
+  logo_url: string | null
+  logo_dark_url: string | null
+  tagline: string | null
+  primary_color: string | null
+  secondary_color: string | null
+  accent_color: string | null
+  legal_name: string | null
+  registration_number: string | null
+  tax_id: string | null
+  website: string | null
+  linkedin_url: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  default_proposal_footer: string | null
+  default_contract_footer: string | null
+  default_invoice_footer: string | null
+  terms_and_conditions: string | null
+  privacy_policy: string | null
+  email_signature: string | null
+  timezone: string
+  default_currency: string
+  default_legal_disclaimer: string | null
 }
 
 export interface Lead {
@@ -105,6 +135,7 @@ export interface Proposal {
   created_at: string
   updated_at: string
   template_id: string
+  branding_snapshot: Record<string, any> | null
 }
 
 export interface ProposalItem {
@@ -167,6 +198,7 @@ export interface Contract {
   created_at: string
   updated_at: string
   template_id: string
+  branding_snapshot: Record<string, any> | null
 }
 
 export interface Project {
@@ -240,6 +272,7 @@ export interface Invoice {
   notes: string | null
   created_at: string
   updated_at: string
+  branding_snapshot: Record<string, any> | null
 }
 
 export interface InvoiceItem {

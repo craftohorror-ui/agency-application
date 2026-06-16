@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { requireStaff, requireClient } from '@/lib/auth'
+import { getCurrentAgencySettings } from '@/lib/agencies'
 import type { Invoice, InvoiceItem, InvoiceStatus } from '@/lib/types'
 
 export interface InvoiceWithRelations extends Invoice {
@@ -137,20 +138,40 @@ export type CreateInvoiceItemInput = {
 
 export async function createInvoice(input: CreateInvoiceInput, items: CreateInvoiceItemInput[]) {
   const { supabase } = await requireStaff()
+  const agencySettings = await getCurrentAgencySettings()
+
+  const branding_snapshot = {
+    agency_name: agencySettings.name,
+    logo_url: agencySettings.logo_url,
+    logo_dark_url: agencySettings.logo_dark_url,
+    primary_color: agencySettings.primary_color || '#0f172a',
+    secondary_color: agencySettings.secondary_color || '#334155',
+    terms_and_conditions: agencySettings.terms_and_conditions,
+    privacy_policy: agencySettings.privacy_policy,
+    legal_name: agencySettings.legal_name,
+    tax_id: agencySettings.tax_id,
+    website: agencySettings.website,
+    default_legal_disclaimer: agencySettings.default_legal_disclaimer
+  }
 
   const taxRate = input.tax_rate || 0
   const { subtotal, taxAmount, total } = calculateTotals(items, taxRate)
+  
+  // Use agency default notes/disclaimer if none provided
+  const notes = input.notes || agencySettings.default_invoice_footer
 
   const { data: invoice, error: invError } = await supabase
     .from('invoices')
     .insert({
       ...input,
+      notes,
       tax_rate: taxRate,
       subtotal,
       tax_amount: taxAmount,
       total,
       amount_paid: 0,
-      status: input.status || 'draft'
+      status: input.status || 'draft',
+      branding_snapshot
     })
     .select('*')
     .single()
@@ -259,6 +280,22 @@ export async function generateInvoiceFromProject(projectId: string) {
   const issue_date = new Date().toISOString().split('T')[0]
   const due_date = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
+  const agencySettings = await getCurrentAgencySettings()
+  
+  const branding_snapshot = {
+    agency_name: agencySettings.name,
+    logo_url: agencySettings.logo_url,
+    logo_dark_url: agencySettings.logo_dark_url,
+    primary_color: agencySettings.primary_color || '#0f172a',
+    secondary_color: agencySettings.secondary_color || '#334155',
+    terms_and_conditions: agencySettings.terms_and_conditions,
+    privacy_policy: agencySettings.privacy_policy,
+    legal_name: agencySettings.legal_name,
+    tax_id: agencySettings.tax_id,
+    website: agencySettings.website,
+    default_legal_disclaimer: agencySettings.default_legal_disclaimer
+  }
+
   const { data: invoice, error } = await supabase.from('invoices').insert({
     client_id: project.client_id,
     project_id: project.id,
@@ -269,7 +306,9 @@ export async function generateInvoiceFromProject(projectId: string) {
     tax_amount: taxAmount,
     total,
     amount_paid: 0,
-    status: 'draft'
+    status: 'draft',
+    notes: agencySettings.default_invoice_footer,
+    branding_snapshot
   }).select('id').single()
 
   if (error) throw new Error(error.message)

@@ -17,6 +17,7 @@ import {
   FileSignature,
   Receipt,
   MessageSquare,
+  Settings,
 } from 'lucide-react'
 
 const NAV = [
@@ -32,6 +33,7 @@ const NAV = [
   { href: '/dashboard/files', label: 'Files', icon: FolderOpen, roles: ['owner', 'manager', 'member'] },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3, roles: ['owner'] },
   { href: '/dashboard/admin', label: 'Admin', icon: Shield, roles: ['owner'] },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, roles: ['owner', 'manager', 'member'] },
 ] as const
 
 export function Sidebar({ role }: { role: UserRole }) {

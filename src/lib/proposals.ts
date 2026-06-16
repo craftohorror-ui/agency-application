@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { requireStaff } from '@/lib/auth'
+import { getCurrentAgencySettings } from '@/lib/agencies'
 import type { Proposal, ProposalItem, ProposalStatus } from '@/lib/types'
 
 export interface ProposalWithRelations extends Proposal {
@@ -68,15 +69,34 @@ export type CreateProposalItemInput = {
 
 export async function createProposal(input: CreateProposalInput, items: CreateProposalItemInput[]) {
   const { supabase, user } = await requireStaff()
+  const agencySettings = await getCurrentAgencySettings()
+
+  const branding_snapshot = {
+    agency_name: agencySettings.name,
+    logo_url: agencySettings.logo_url,
+    logo_dark_url: agencySettings.logo_dark_url,
+    primary_color: agencySettings.primary_color || '#0f172a',
+    secondary_color: agencySettings.secondary_color || '#334155',
+    terms_and_conditions: agencySettings.terms_and_conditions,
+    privacy_policy: agencySettings.privacy_policy,
+    legal_name: agencySettings.legal_name,
+    tax_id: agencySettings.tax_id,
+    website: agencySettings.website
+  }
 
   const amount = items.reduce((acc, item) => acc + (item.qty * item.unit_price), 0)
+  
+  // Use agency default footer/terms if none provided
+  const terms = input.terms || agencySettings.default_proposal_footer
 
   const { data: proposal, error: propError } = await supabase
     .from('proposals')
     .insert({
       ...input,
+      terms,
       amount,
       status: input.status || 'draft',
+      branding_snapshot,
       created_by: user.id
     })
     .select('*')
@@ -220,6 +240,21 @@ Either Party may terminate this Agreement for convenience upon providing thirty 
 By signing below, the Parties acknowledge that they have read, understood, and agreed to be bound by the terms and conditions of this Agreement.
 `
 
+  const agencySettings = await getCurrentAgencySettings()
+  
+  const branding_snapshot = {
+    agency_name: agencySettings.name,
+    logo_url: agencySettings.logo_url,
+    logo_dark_url: agencySettings.logo_dark_url,
+    primary_color: agencySettings.primary_color || '#0f172a',
+    secondary_color: agencySettings.secondary_color || '#334155',
+    terms_and_conditions: agencySettings.terms_and_conditions,
+    privacy_policy: agencySettings.privacy_policy,
+    legal_name: agencySettings.legal_name,
+    tax_id: agencySettings.tax_id,
+    website: agencySettings.website
+  }
+
   const { data: contract, error } = await supabase
     .from('contracts')
     .insert({
@@ -229,6 +264,7 @@ By signing below, the Parties acknowledge that they have read, understood, and a
       body: contractBody,
       status: 'draft',
       version: 1,
+      branding_snapshot,
       created_by: user.id
     })
     .select('*')
