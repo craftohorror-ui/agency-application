@@ -11,11 +11,17 @@ export async function updateContractStatusAction(id: string, status: ContractSta
 }
 
 export async function updateContractBodyAction(id: string, formData: FormData) {
-  const body = formData.get('body') as string
-  if (!body) return
-  
-  await updateContract(id, { body })
-  revalidatePath(`/dashboard/contracts/${id}`)
+  try {
+    const body = formData.get('body') as string
+    if (!body) return { error: 'Body is required' }
+    
+    await updateContract(id, { body })
+    revalidatePath(`/dashboard/contracts/${id}`)
+    return { success: true }
+  } catch (err: any) {
+    console.error('Error updating contract body:', err)
+    return { error: err.message || 'Unable to save contract changes' }
+  }
 }
 
 export async function updateContractTemplateAction(id: string, templateId: string) {

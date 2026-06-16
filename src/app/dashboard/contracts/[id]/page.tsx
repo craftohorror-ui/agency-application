@@ -4,10 +4,10 @@ import { getContract, listContractVersions } from '@/lib/contracts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { updateContractStatusAction, updateContractBodyAction } from '../actions'
+import { updateContractStatusAction } from '../actions'
 import { ContractExportModal } from '@/components/contracts/contract-export-modal'
 import { mapContractToTemplateData } from '@/lib/contract-template-registry'
+import { ContractEditor } from '@/components/contracts/contract-editor'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -88,17 +88,7 @@ export default async function ContractDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               {contract.status === 'draft' ? (
-                <form action={updateContractBodyAction.bind(null, contract.id)} className="space-y-4">
-                  <Textarea 
-                    name="body" 
-                    defaultValue={contract.body} 
-                    className="min-h-[500px] font-mono text-sm" 
-                    required
-                  />
-                  <div className="flex justify-end">
-                    <Button type="submit">Save Changes & Bump Version</Button>
-                  </div>
-                </form>
+                <ContractEditor contractId={contract.id} initialBody={contract.body} />
               ) : (
                 <div className="rounded-md border bg-muted/20 p-6 whitespace-pre-wrap font-mono text-sm">
                   {contract.body}
