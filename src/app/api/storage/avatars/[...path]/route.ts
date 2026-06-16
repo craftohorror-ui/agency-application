@@ -2,8 +2,9 @@ import { requireStaff } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function GET(request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
   try {
+    const params = await props.params
     // Only staff can access avatars natively, but clients can see them too.
     // For now we allow any authenticated user to proxy. We can just use the admin client.
     const path = params.path.join('/')

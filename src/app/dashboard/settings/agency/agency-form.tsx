@@ -60,8 +60,8 @@ export function AgencyForm({ agency }: { agency: Agency }) {
 
       toast.success('Agency settings saved successfully')
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message || 'An error occurred')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }

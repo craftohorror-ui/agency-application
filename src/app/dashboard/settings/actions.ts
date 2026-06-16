@@ -23,7 +23,7 @@ export async function updateProfile(formData: FormData) {
   try {
     // We will augment `updateTeamMember` to support `phone` and `bio` and `avatar_url` 
     // but wait, `TeamUpdateInput` doesn't have them yet. Let's update `src/lib/team.ts` in a separate step.
-    const input: any = {
+    const input: TeamUpdateInput = {
       full_name,
       title,
       phone,
@@ -36,8 +36,8 @@ export async function updateProfile(formData: FormData) {
     await updateTeamMember(profile.id, input)
     revalidatePath('/dashboard/settings')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'An error occurred' }
   }
 }
 
@@ -55,12 +55,11 @@ export async function saveAgencySettings(formData: FormData) {
     'timezone', 'default_currency', 'default_legal_disclaimer'
   ]
 
-  const payload: AgencyUpdateInput = {}
+  const payload: Record<string, unknown> = {}
 
   for (const key of keys) {
     const val = formData.get(key)
     if (val !== null) {
-      // @ts-ignore
       payload[key] = val.toString().trim() || null
     }
   }
@@ -71,10 +70,10 @@ export async function saveAgencySettings(formData: FormData) {
   if (payload.default_currency === null) payload.default_currency = 'USD'
 
   try {
-    await updateAgencySettings(payload)
+    await updateAgencySettings(payload as AgencyUpdateInput)
     revalidatePath('/dashboard/settings/agency')
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'An error occurred' }
   }
 }

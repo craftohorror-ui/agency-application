@@ -135,7 +135,7 @@ export interface Proposal {
   created_at: string
   updated_at: string
   template_id: string
-  branding_snapshot: Record<string, any> | null
+  branding_snapshot: Record<string, unknown> | null
 }
 
 export interface ProposalItem {
@@ -198,7 +198,7 @@ export interface Contract {
   created_at: string
   updated_at: string
   template_id: string
-  branding_snapshot: Record<string, any> | null
+  branding_snapshot: Record<string, unknown> | null
 }
 
 export interface Project {
@@ -272,7 +272,7 @@ export interface Invoice {
   notes: string | null
   created_at: string
   updated_at: string
-  branding_snapshot: Record<string, any> | null
+  branding_snapshot: Record<string, unknown> | null
 }
 
 export interface InvoiceItem {
