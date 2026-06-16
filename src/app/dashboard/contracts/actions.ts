@@ -17,3 +17,8 @@ export async function updateContractBodyAction(id: string, formData: FormData) {
   await updateContract(id, { body })
   revalidatePath(`/dashboard/contracts/${id}`)
 }
+
+export async function updateContractTemplateAction(id: string, templateId: string) {
+  await updateContract(id, { template_id: templateId })
+  revalidatePath(`/dashboard/contracts/${id}`)
+}

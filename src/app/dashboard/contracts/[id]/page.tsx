@@ -6,19 +6,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { updateContractStatusAction, updateContractBodyAction } from '../actions'
+import { ContractExportModal } from '@/components/contracts/contract-export-modal'
+import { mapContractToTemplateData } from '@/lib/contract-template-registry'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
 export default async function ContractDetailPage({ params }: PageProps) {
-  await requireStaff()
+  const { profile, supabase } = await requireStaff()
   const resolvedParams = await params
   const contract = await getContract(resolvedParams.id)
 
   if (!contract) {
     notFound()
   }
+
+  // Fetch Agency Context
+  const { data: agency } = await supabase
+    .from('agencies')
+    .select('name, logo_url')
+    .eq('id', profile.agency_id)
+    .single()
+
+  const templateData = mapContractToTemplateData(
+    contract, 
+    { 
+      name: agency?.name || 'Our Agency',
+      logoUrl: agency?.logo_url
+    }
+  )
 
   const versions = await listContractVersions(contract.id)
 
@@ -43,7 +60,8 @@ export default async function ContractDetailPage({ params }: PageProps) {
             <span className="text-sm text-muted-foreground">Version {contract.version}</span>
           </div>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 flex-wrap sm:flex-nowrap justify-end'>
+          <ContractExportModal contractId={contract.id} initialTemplateId={contract.template_id} templateData={templateData} />
           {contract.status === 'draft' && (
             <form action={updateContractStatusAction.bind(null, contract.id, 'pending')}>
               <Button type="submit">Send for Signature</Button>

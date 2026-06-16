@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/proposals/[id]/export": [
       "./node_modules/@sparticuz/chromium/**/*"
+    ],
+    "/api/contracts/[id]/export": [
+      "./node_modules/@sparticuz/chromium/**/*"
     ]
   }
 }
