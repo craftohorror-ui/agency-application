@@ -25,17 +25,28 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       const form = new FormData(e.currentTarget)
       
       const fileInput = form.get('avatar_file') as File | null
+      
+      console.log("Selected File:", fileInput)
+      console.log("File Name:", fileInput?.name)
+      console.log("File Size:", fileInput?.size)
+      console.log("User ID:", profile?.id)
+      console.log("Profile ID:", profile?.id)
+
       if (fileInput && fileInput.size > 0) {
         // Upload Avatar
         const ext = fileInput.name.split('.').pop()
         const fileName = `${profile.id}-${Date.now()}.${ext}`
         
+        console.log("Uploading avatar...")
         const { data, error } = await supabase.storage
           .from('avatars')
           .upload(fileName, fileInput, {
             cacheControl: '3600',
             upsert: false
           })
+
+        console.log("Upload Result:", data)
+        console.log("Upload Error:", error)
 
         if (error) throw error
 
@@ -45,7 +56,17 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         form.delete('avatar_url')
       }
 
+      // FIX: Next.js limits Server Action payloads to 1MB. 
+      // If we don't delete the file, sending the FormData crashes the Server Components render.
+      form.delete('avatar_file')
+
+      console.log("Avatar URL:", form.get('avatar_url'))
+
       const result = await updateProfile(form)
+      
+      console.log("Update Data:", result.success ? result : null)
+      console.log("Update Error:", result.error)
+
       if (result.error) throw new Error(result.error)
 
       toast.success('Profile updated successfully')
