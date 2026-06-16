@@ -23,10 +23,9 @@ export async function GET(
     // Set Chromium flags
     chromium.setGraphicsMode = false
 
-    console.log(
-      "Chromium executable:",
-      await chromium.executablePath()
-    );
+    console.log("NODE_ENV", process.env.NODE_ENV)
+    console.log("VERCEL", process.env.VERCEL)
+    console.log("CHROMIUM PATH", await chromium.executablePath())
 
     const browser = await puppeteer.launch({
       args: chromium.args,
