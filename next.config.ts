@@ -3,12 +3,10 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
-  experimental: {
-    outputFileTracingIncludes: {
-      "/api/proposals/[id]/export": [
-        "./node_modules/@sparticuz/chromium/**/*"
-      ]
-    }
+  outputFileTracingIncludes: {
+    "/api/proposals/[id]/export": [
+      "./node_modules/@sparticuz/chromium/**/*"
+    ]
   }
 }
 
