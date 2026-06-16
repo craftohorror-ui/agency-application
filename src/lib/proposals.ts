@@ -161,39 +161,63 @@ export async function convertProposalToContract(id: string) {
   if (!proposal) throw new Error('Proposal not found')
   if (!proposal.client_id) throw new Error('Proposal must be linked to a client to convert to contract')
 
-  const itemsList = proposal.items.map(i => `- ${i.qty}x ${i.description} ($${i.unit_price})`).join('\n')
+  const itemsList = proposal.items.map(i => `- ${i.qty}x ${i.description} @ $${i.unit_price} each`).join('\n')
 
-  const contractBody = `# Service Agreement
+  const contractBody = `MASTER SERVICE AGREEMENT
 
-This Agreement is entered into between **Our Agency** ("Agency") and **${proposal.client?.name || 'Client'}** ("Client") on ${new Date().toLocaleDateString()}.
+PARTIES
 
-## 1. Scope of Work
-${proposal.scope || 'As outlined in the proposal.'}
+This Master Service Agreement ("Agreement") is entered into and made effective as of ${new Date().toLocaleDateString()} (the "Effective Date"), by and between:
 
-## 2. Deliverables
-${proposal.deliverables || 'As outlined in the proposal.'}
+**Agency:**
+Our Agency
+(Hereinafter referred to as the "Agency")
 
-### Line Items:
+**Client:**
+${proposal.client?.name || 'Client'}
+${proposal.client?.company || ''}
+(Hereinafter referred to as the "Client")
+
+Collectively referred to as the "Parties".
+
+1. SERVICES
+The Agency agrees to perform and deliver the professional services outlined below (the "Services"). The Agency shall perform these Services in a professional, timely, and workmanlike manner in accordance with industry standards.
+${proposal.scope || 'Services will be provided as outlined and mutually agreed upon.'}
+
+2. DELIVERABLES
+In connection with the Services, the Agency will provide the following specific deliverables to the Client:
+${proposal.deliverables || 'Deliverables will be provided as outlined and mutually agreed upon.'}
+
+3. PROJECT TIMELINE
+The Parties agree to the following timeline for the execution and completion of the Services:
+${proposal.timeline || 'The timeline will be mutually agreed upon prior to the commencement of work.'}
+
+4. FEES AND PAYMENT TERMS
+In consideration of the Services performed, the Client agrees to pay the Agency the total sum of **$${proposal.amount}**.
+
+**Line Items:**
 ${itemsList}
 
-## 3. Timeline
-${proposal.timeline || 'To be determined.'}
+**Payment Terms:**
+${proposal.terms || 'Invoices shall be paid within the agreed upon terms. The Agency reserves the right to suspend services for any undisputed past-due invoices.'}
 
-## 4. Payment Terms
-**Total Amount:** $${proposal.amount}
-${proposal.terms || 'Standard payment terms apply.'}
+5. CLIENT RESPONSIBILITIES
+The Client agrees to provide timely access to all materials, information, and personnel necessary for the Agency to perform the Services. Delays in Client feedback or provision of assets may result in corresponding extensions to the Project Timeline.
 
-## 5. Termination
-Either party may terminate this agreement with 30 days written notice.
+6. CONFIDENTIALITY
+Each Party agrees to retain in confidence the non-public information and know-how transmitted or disclosed to them by the other Party in the course of performing this Agreement. Neither Party shall disclose such information to any third party without prior written consent.
 
-## 6. Intellectual Property
-Upon full payment, all deliverables become the property of the Client.
+7. INTELLECTUAL PROPERTY
+Upon receipt of full and final payment, the Agency grants the Client all rights, title, and interest in and to the final Deliverables. The Agency retains the right to use the Deliverables for promotional and portfolio purposes, unless otherwise agreed in writing.
 
-## 7. Confidentiality
-Both parties agree to maintain the confidentiality of proprietary information.
+8. LIMITATION OF LIABILITY
+In no event shall the Agency be liable for any indirect, incidental, special, or consequential damages arising out of or related to this Agreement. The Agency's total liability shall not exceed the total fees paid by the Client under this Agreement.
 
-## 8. Acceptance
-By signing below, both parties agree to the terms outlined in this agreement.
+9. TERMINATION
+Either Party may terminate this Agreement for convenience upon providing thirty (30) days prior written notice to the other Party. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the date of termination.
+
+10. ACCEPTANCE
+By signing below, the Parties acknowledge that they have read, understood, and agreed to be bound by the terms and conditions of this Agreement.
 `
 
   const { data: contract, error } = await supabase
