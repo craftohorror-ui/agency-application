@@ -62,7 +62,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
 
         {/* Executive Summary & Scope */}
         {data.scope && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <h4 className="text-lg font-bold border-b pb-2 mb-4 uppercase tracking-wider" style={{ color: textDark, borderColor: '#e2e8f0' }}>
               1. Executive Summary & Scope
             </h4>
@@ -74,7 +74,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
 
         {/* Deliverables */}
         {data.deliverables && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <h4 className="text-lg font-bold border-b pb-2 mb-4 uppercase tracking-wider" style={{ color: textDark, borderColor: '#e2e8f0' }}>
               2. Deliverables
             </h4>
@@ -86,7 +86,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
 
         {/* Timeline */}
         {data.timeline && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <h4 className="text-lg font-bold border-b pb-2 mb-4 uppercase tracking-wider" style={{ color: textDark, borderColor: '#e2e8f0' }}>
               3. Proposed Timeline
             </h4>
@@ -97,7 +97,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
         )}
 
         {/* Pricing / Investment */}
-        <section className="mb-12 break-inside-avoid">
+        <section className="mb-12 break-inside-avoid print-avoid-break">
           <h4 className="text-lg font-bold border-b pb-2 mb-4 uppercase tracking-wider" style={{ color: textDark, borderColor: '#e2e8f0' }}>
             4. Investment Profile
           </h4>
@@ -114,7 +114,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
             <tbody className="divide-y divide-slate-100">
               {data.items.length > 0 ? (
                 data.items.map((item, idx) => (
-                  <tr key={item.id || idx} className="break-inside-avoid">
+                  <tr key={item.id || idx} className="break-inside-avoid print-avoid-break">
                     <td className="px-4 py-3" style={{ color: textDark }}>{item.description}</td>
                     <td className="px-4 py-3 text-center" style={{ color: textLight }}>{item.qty}</td>
                     <td className="px-4 py-3 text-right" style={{ color: textLight }}>${item.unitPrice.toFixed(2)}</td>
@@ -122,13 +122,13 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
                   </tr>
                 ))
               ) : (
-                <tr className="break-inside-avoid">
+                <tr className="break-inside-avoid print-avoid-break">
                   <td colSpan={4} className="px-4 py-6 text-center italic" style={{ color: textLight }}>No investment items specified.</td>
                 </tr>
               )}
             </tbody>
             <tfoot className="border-t-2 border-slate-200">
-              <tr className="break-inside-avoid">
+              <tr className="break-inside-avoid print-avoid-break">
                 <td colSpan={3} className="px-4 py-4 text-right font-bold uppercase tracking-wider" style={{ color: textDark }}>Total Amount</td>
                 <td className="px-4 py-4 text-right font-bold text-lg" style={{ color: primaryBlue }}>${data.totalAmount.toFixed(2)}</td>
               </tr>
@@ -138,7 +138,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
 
         {/* Terms */}
         {data.terms && (
-          <section className="mb-16 break-inside-avoid">
+          <section className="mb-16 break-inside-avoid print-avoid-break">
             <h4 className="text-lg font-bold border-b pb-2 mb-4 uppercase tracking-wider" style={{ color: textDark, borderColor: '#e2e8f0' }}>
               5. Terms & Conditions
             </h4>
@@ -149,7 +149,7 @@ export function CorporateTemplate({ data }: { data: TemplateData }) {
         )}
 
         {/* Signatures */}
-        <section className="break-inside-avoid">
+        <section className="break-inside-avoid print-avoid-break">
           <div className="grid grid-cols-2 gap-16 mt-8">
             <div>
               <div className="border-b-2 border-slate-300 h-12 mb-2"></div>

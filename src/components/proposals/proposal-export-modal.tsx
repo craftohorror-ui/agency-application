@@ -73,23 +73,12 @@ export function ProposalExportModal({ data, proposalId, initialTemplateId }: Pro
   const handleExportPDF = async () => {
     try {
       setIsExporting(true)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const html2pdf = (await import('html2pdf.js' as any)).default
-      const element = document.getElementById('proposal-export-element')
+      const res = await fetch(`/api/proposals/${proposalId}/export`)
+      if (!res.ok) throw new Error('Failed to generate PDF')
       
-      if (!element) return
-
+      const blob = await res.blob()
       const safeTitle = data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'proposal'
-      
-      const opt = {
-        margin:       0, // CSS handles margins
-        filename:     `${safeTitle}_${data.clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }
-
-      await html2pdf().set(opt).from(element).save()
+      saveAs(blob, `${safeTitle}_${data.clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`)
     } catch (error) {
       console.error('Failed to export PDF:', error)
       alert('Failed to export PDF. Please try again.')

@@ -47,7 +47,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
         </div>
 
         {/* Client Block */}
-        <section className="mb-14 break-inside-avoid bg-slate-50 p-6 rounded-lg border border-slate-100">
+        <section className="mb-14 break-inside-avoid print-avoid-break bg-slate-50 p-6 rounded-lg border border-slate-100">
           <div className="grid grid-cols-2 gap-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: emerald }}>Prepared For</p>
@@ -65,7 +65,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
 
         {/* Methodology / Scope */}
         {data.scope && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-6 w-1" style={{ backgroundColor: emerald }}></div>
               <h4 className="text-xl font-bold" style={{ color: darkSlate }}>
@@ -80,7 +80,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
 
         {/* Deliverables */}
         {data.deliverables && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-6 w-1" style={{ backgroundColor: emerald }}></div>
               <h4 className="text-xl font-bold" style={{ color: darkSlate }}>
@@ -95,7 +95,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
 
         {/* Timeline */}
         {data.timeline && (
-          <section className="mb-12 break-inside-avoid">
+          <section className="mb-12 break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-6 w-1" style={{ backgroundColor: emerald }}></div>
               <h4 className="text-xl font-bold" style={{ color: darkSlate }}>
@@ -109,7 +109,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
         )}
 
         {/* Pricing */}
-        <section className="mb-12 break-inside-avoid">
+        <section className="mb-12 break-inside-avoid print-avoid-break">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-6 w-1" style={{ backgroundColor: emerald }}></div>
             <h4 className="text-xl font-bold" style={{ color: darkSlate }}>
@@ -130,7 +130,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
               <tbody className="divide-y divide-slate-100">
                 {data.items.length > 0 ? (
                   data.items.map((item, idx) => (
-                    <tr key={item.id || idx} className="break-inside-avoid">
+                    <tr key={item.id || idx} className="break-inside-avoid print-avoid-break">
                       <td className="px-4 py-4 font-medium" style={{ color: darkSlate }}>{item.description}</td>
                       <td className="px-4 py-4 text-center" style={{ color: textBody }}>{item.qty}</td>
                       <td className="px-4 py-4 text-right" style={{ color: textBody }}>${item.unitPrice.toFixed(2)}</td>
@@ -138,13 +138,13 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
                     </tr>
                   ))
                 ) : (
-                  <tr className="break-inside-avoid">
+                  <tr className="break-inside-avoid print-avoid-break">
                     <td colSpan={4} className="px-4 py-8 text-center italic" style={{ color: textBody }}>No phases detailed.</td>
                   </tr>
                 )}
               </tbody>
               <tfoot className="bg-slate-50 border-t border-slate-200">
-                <tr className="break-inside-avoid">
+                <tr className="break-inside-avoid print-avoid-break">
                   <td colSpan={3} className="px-4 py-5 text-right font-bold uppercase tracking-wider text-sm" style={{ color: darkSlate }}>Total Engagement Value</td>
                   <td className="px-4 py-5 text-right font-bold text-xl" style={{ color: emerald }}>${data.totalAmount.toFixed(2)}</td>
                 </tr>
@@ -155,7 +155,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
 
         {/* Terms */}
         {data.terms && (
-          <section className="mb-16 break-inside-avoid">
+          <section className="mb-16 break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-6 w-1" style={{ backgroundColor: emerald }}></div>
               <h4 className="text-xl font-bold" style={{ color: darkSlate }}>
@@ -169,7 +169,7 @@ export function ConsultingTemplate({ data }: { data: TemplateData }) {
         )}
 
         {/* Signatures */}
-        <section className="break-inside-avoid">
+        <section className="break-inside-avoid print-avoid-break">
           <div className="grid grid-cols-2 gap-12 mt-8">
             <div>
               <div className="border-b-2 border-slate-200 h-12 mb-3"></div>

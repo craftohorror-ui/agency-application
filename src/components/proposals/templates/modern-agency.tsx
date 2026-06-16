@@ -108,7 +108,7 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
 
         {/* Timeline */}
         {data.timeline && (
-          <section className="break-inside-avoid">
+          <section className="break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accentColor }}>3</div>
               <h2 className="text-2xl font-bold" style={{ color: slateDark }}>Timeline & Process</h2>
@@ -120,7 +120,7 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
         )}
 
         {/* Pricing / Investment */}
-        <section className="break-inside-avoid">
+        <section className="break-inside-avoid print-avoid-break">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accentColor }}>4</div>
             <h2 className="text-2xl font-bold" style={{ color: slateDark }}>Investment Summary</h2>
@@ -139,7 +139,7 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
               <tbody className="divide-y divide-slate-200">
                 {data.items.length > 0 ? (
                   data.items.map((item, idx) => (
-                    <tr key={item.id || idx} className="hover:bg-slate-50 break-inside-avoid">
+                    <tr key={item.id || idx} className="hover:bg-slate-50 break-inside-avoid print-avoid-break">
                       <td className="px-6 py-4 font-medium text-slate-900">{item.description}</td>
                       <td className="px-6 py-4 text-right text-slate-600">{item.qty}</td>
                       <td className="px-6 py-4 text-right text-slate-600">${item.unitPrice.toFixed(2)}</td>
@@ -147,13 +147,13 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
                     </tr>
                   ))
                 ) : (
-                  <tr className="break-inside-avoid">
+                  <tr className="break-inside-avoid print-avoid-break">
                     <td colSpan={4} className="px-6 py-4 text-center text-slate-500 italic">No line items specified.</td>
                   </tr>
                 )}
               </tbody>
               <tfoot className="bg-slate-50 border-t-2 border-slate-300">
-                <tr className="break-inside-avoid">
+                <tr className="break-inside-avoid print-avoid-break">
                   <td colSpan={3} className="px-6 py-5 text-right font-bold text-slate-700">Total Investment:</td>
                   <td className="px-6 py-5 text-right font-bold text-xl" style={{ color: accentColor }}>${data.totalAmount.toFixed(2)}</td>
                 </tr>
@@ -164,7 +164,7 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
 
         {/* Terms & Conditions */}
         {data.terms && (
-          <section className="pt-8 mt-8 border-t border-slate-200 break-inside-avoid">
+          <section className="pt-8 mt-8 border-t border-slate-200 break-inside-avoid print-avoid-break">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: accentColor }}>5</div>
               <h2 className="text-2xl font-bold" style={{ color: slateDark }}>Terms & Conditions</h2>
@@ -176,7 +176,7 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
         )}
 
         {/* Signature Block */}
-        <section className="pt-16 mt-16 border-t border-slate-200 pb-16 break-inside-avoid">
+        <section className="pt-16 mt-16 border-t border-slate-200 pb-16 break-inside-avoid print-avoid-break">
           <h3 className="text-xl font-bold mb-12" style={{ color: slateDark }}>Acceptance of Proposal</h3>
           <div className="grid grid-cols-2 gap-16">
             <div>

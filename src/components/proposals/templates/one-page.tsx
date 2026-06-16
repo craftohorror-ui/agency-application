@@ -49,7 +49,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
             
             {/* Scope */}
             {data.scope && (
-              <section className="mb-6 break-inside-avoid">
+              <section className="mb-6 break-inside-avoid print-avoid-break">
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-2 border-b-2 pb-1" style={{ color: indigo, borderColor: indigo }}>Project Scope</h3>
                 <div className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: textDark }}>
                   {data.scope}
@@ -59,7 +59,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
 
             {/* Deliverables */}
             {data.deliverables && (
-              <section className="mb-6 break-inside-avoid">
+              <section className="mb-6 break-inside-avoid print-avoid-break">
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-2 border-b-2 pb-1" style={{ color: indigo, borderColor: indigo }}>Deliverables</h3>
                 <div className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: textDark }}>
                   {data.deliverables}
@@ -69,7 +69,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
 
             {/* Timeline */}
             {data.timeline && (
-              <section className="mb-6 break-inside-avoid">
+              <section className="mb-6 break-inside-avoid print-avoid-break">
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-2 border-b-2 pb-1" style={{ color: indigo, borderColor: indigo }}>Timeline</h3>
                 <div className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: textDark }}>
                   {data.timeline}
@@ -79,7 +79,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
             
             {/* Terms */}
             {data.terms && (
-              <section className="mb-6 break-inside-avoid">
+              <section className="mb-6 break-inside-avoid print-avoid-break">
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-2 border-b-2 pb-1" style={{ color: indigo, borderColor: indigo }}>Terms</h3>
                 <div className="text-[10px] leading-relaxed whitespace-pre-wrap" style={{ color: textLight }}>
                   {data.terms}
@@ -93,7 +93,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
           <div className="col-span-5 flex flex-col">
             
             {/* Pricing Section */}
-            <section className="mb-8 break-inside-avoid bg-slate-50 p-4 rounded-md border border-slate-200">
+            <section className="mb-8 break-inside-avoid print-avoid-break bg-slate-50 p-4 rounded-md border border-slate-200">
               <h3 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: darkIndigo }}>Financial Summary</h3>
               
               <table className="w-full text-xs">
@@ -130,7 +130,7 @@ export function OnePageTemplate({ data }: { data: TemplateData }) {
             </section>
 
             {/* Signatures */}
-            <section className="mt-auto break-inside-avoid">
+            <section className="mt-auto break-inside-avoid print-avoid-break">
               <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-6" style={{ color: darkIndigo }}>Authorization</h3>
                 

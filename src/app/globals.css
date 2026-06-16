@@ -36,3 +36,19 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .proposal-container, body, html {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
