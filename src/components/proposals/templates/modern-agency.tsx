@@ -179,8 +179,8 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
             
             {/* Elevated Total Block */}
             <div className="p-8 flex justify-between items-center text-white" style={{ backgroundColor: accentColor }}>
-              <div className="font-bold text-lg uppercase tracking-widest drop-shadow-sm text-black/60">Total Investment</div>
-              <div className="font-black text-5xl text-slate-900 drop-shadow-sm">${data.totalAmount.toFixed(2)}</div>
+              <div className="font-bold text-lg uppercase tracking-widest drop-shadow-sm text-white">Total Investment</div>
+              <div className="font-black text-5xl text-white drop-shadow-sm">${data.totalAmount.toFixed(2)}</div>
             </div>
           </div>
         </section>
