@@ -18,9 +18,9 @@ export async function updateContractBodyAction(id: string, formData: FormData) {
     await updateContract(id, { body })
     revalidatePath(`/dashboard/contracts/${id}`)
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error updating contract body:', err)
-    return { error: err.message || 'Unable to save contract changes' }
+    return { error: err instanceof Error ? err.message : 'Unable to save contract changes' }
   }
 }
 
