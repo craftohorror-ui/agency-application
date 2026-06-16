@@ -22,9 +22,10 @@ export async function getAgencyBranding(agencyId: string): Promise<Agency> {
         .from('agencies')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
       
       if (error) throw new Error(error.message)
+      if (!data) throw new Error('Agency branding not found.')
       return data as Agency
     },
     ['agency-branding', agencyId],
@@ -41,13 +42,26 @@ export async function getCurrentAgencySettings(): Promise<Agency> {
   const { supabase, profile } = await requireStaff()
   const agencyId = profile.agency_id
 
+  console.log('[DEBUG AGENCY] agencyId value immediately before query:', agencyId)
+
   const { data, error } = await supabase
     .from('agencies')
     .select('*')
     .eq('id', agencyId)
-    .single()
+    .maybeSingle()
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error('[DEBUG AGENCY] Full Supabase error object:', JSON.stringify(error, null, 2))
+    console.error('[DEBUG AGENCY] Stack trace:', new Error().stack)
+    throw new Error(error.message)
+  }
+
+  if (!data) {
+    const err = new Error('Agency profile not found. Please contact support to restore your agency record.')
+    console.error('[DEBUG AGENCY] No data returned. Stack trace:', err.stack)
+    throw err
+  }
+
   return data as Agency
 }
 
@@ -62,9 +76,13 @@ export async function updateAgencySettings(input: AgencyUpdateInput): Promise<Ag
     .update(input)
     .eq('id', agencyId)
     .select('*')
-    .single()
+    .maybeSingle()
 
   if (error) throw new Error(error.message)
+  
+  if (!data) {
+    throw new Error('Agency profile not found. Update failed.')
+  }
 
   // Revalidate cache tag
   const { revalidateTag } = await import('next/cache')

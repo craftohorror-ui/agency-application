@@ -15,6 +15,14 @@ export async function getProfile() {
     .eq('id', user.id)
     .single<Profile>()
 
+  console.log('[DEBUG AUTH] getProfile() result:', {
+    authUserId: user.id,
+    authUserEmail: user.email,
+    profileIdLoaded: profile?.id,
+    profileEmailLoaded: profile?.email,
+    profileAgencyIdLoaded: profile?.agency_id
+  })
+
   if (!profile || profile.is_suspended) redirect('/login')
   return { supabase, user, profile }
 }
