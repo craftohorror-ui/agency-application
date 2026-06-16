@@ -39,26 +39,24 @@ export async function getAgencyBranding(agencyId: string): Promise<Agency> {
 }
 
 export async function getCurrentAgencySettings(): Promise<Agency> {
-  const { supabase, profile } = await requireStaff()
+  const { profile } = await requireStaff()
   const agencyId = profile.agency_id
 
-  console.log('[DEBUG AGENCY] agencyId value immediately before query:', agencyId)
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminSupabase = createAdminClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await adminSupabase
     .from('agencies')
     .select('*')
     .eq('id', agencyId)
     .maybeSingle()
 
   if (error) {
-    console.error('[DEBUG AGENCY] Full Supabase error object:', JSON.stringify(error, null, 2))
-    console.error('[DEBUG AGENCY] Stack trace:', new Error().stack)
     throw new Error(error.message)
   }
 
   if (!data) {
     const err = new Error('Agency profile not found. Please contact support to restore your agency record.')
-    console.error('[DEBUG AGENCY] No data returned. Stack trace:', err.stack)
     throw err
   }
 
@@ -68,10 +66,13 @@ export async function getCurrentAgencySettings(): Promise<Agency> {
 export type AgencyUpdateInput = Partial<Omit<Agency, 'id' | 'created_at'>>
 
 export async function updateAgencySettings(input: AgencyUpdateInput): Promise<Agency> {
-  const { supabase, profile } = await requireStaff()
+  const { profile } = await requireStaff()
   const agencyId = profile.agency_id
 
-  const { data, error } = await supabase
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminSupabase = createAdminClient()
+
+  const { data, error } = await adminSupabase
     .from('agencies')
     .update(input)
     .eq('id', agencyId)
