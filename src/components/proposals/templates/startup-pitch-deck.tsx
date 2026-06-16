@@ -2,121 +2,186 @@ import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
 
-function StartupPitchDeck({ data }: { data: TemplateData }) {
-  return (
-    <div className="max-w-4xl mx-auto bg-[#1e1e2f] min-h-screen font-sans text-white shadow-2xl print:shadow-none print:max-w-none print:color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-      
-      {/* Slide 1: Title */}
-      <div className="h-[800px] flex flex-col justify-center items-center text-center px-16 relative overflow-hidden print:break-after-page">
-        <div className="absolute top-12 left-12">
-          {data.agencyLogo ? (
-            <img src={data.agencyLogo} alt={data.agencyName} className="h-8 w-auto object-contain opacity-80" />
-          ) : (
-            <h2 className="text-xl font-bold tracking-widest text-slate-300 uppercase">{data.agencyName}</h2>
-          )}
-        </div>
-        
-        <div className="w-full max-w-3xl z-10">
-          <h1 className="text-6xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600" style={{ backgroundImage: `linear-gradient(to right, ${data.brandColor || '#c084fc'}, #ec4899)` }}>{data.title}</h1>
-          <p className="text-2xl text-slate-300 font-light mb-12">Presented to {data.clientName}</p>
-          <div className="h-1 w-24 mx-auto rounded-full" style={{ backgroundColor: data.brandColor || '#c084fc' }}></div>
-        </div>
-
-        <div className="absolute bottom-12 right-12 text-sm text-slate-500 font-medium">{data.date}</div>
-      </div>
-
-      {/* Slide 2: Problem & Solution (Scope & Deliverables) */}
-      <div className="h-[800px] flex flex-col px-16 py-24 relative print:break-after-page">
-        <h2 className="text-4xl font-bold mb-12 text-slate-100">The Strategy</h2>
-        
-        <div className="grid grid-cols-2 gap-16 flex-1">
-          <div className="bg-[#2a2a3c] p-8 rounded-2xl border border-[#3f3f5a]">
-            <h3 className="text-xl font-semibold mb-4 flex items-center gap-3" style={{ color: data.brandColor || '#c084fc' }}>
-              <span className="p-2 rounded-lg bg-black/20">01</span> The Vision
-            </h3>
-            <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{data.scope || 'Executive summary and vision.'}</p>
-          </div>
-          
-          <div className="bg-[#2a2a3c] p-8 rounded-2xl border border-[#3f3f5a]">
-            <h3 className="text-xl font-semibold mb-4 flex items-center gap-3" style={{ color: data.brandColor || '#c084fc' }}>
-              <span className="p-2 rounded-lg bg-black/20">02</span> The Execution
-            </h3>
-            <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{data.deliverables || 'How we will execute.'}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Slide 3: Financials */}
-      <div className="h-[800px] flex flex-col px-16 py-24 relative print:break-after-page">
-        <h2 className="text-4xl font-bold mb-12 text-slate-100">Financial Model</h2>
-        
-        <div className="bg-[#2a2a3c] rounded-2xl border border-[#3f3f5a] overflow-hidden flex-1 flex flex-col">
-          <div className="flex-1 overflow-auto">
-            <table className="w-full text-left">
-              <thead className="bg-black/20 text-slate-400">
-                <tr>
-                  <th className="p-6 font-medium">Investment Category</th>
-                  <th className="p-6 font-medium text-center">Volume</th>
-                  <th className="p-6 font-medium text-right">Unit Price</th>
-                  <th className="p-6 font-medium text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#3f3f5a]">
-                {data.items.map((item, idx) => (
-                  <tr key={item.id || idx}>
-                    <td className="p-6 text-slate-200">{item.description}</td>
-                    <td className="p-6 text-center text-slate-400">{item.qty}</td>
-                    <td className="p-6 text-right text-slate-400">${item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td className="p-6 text-right font-medium text-slate-100">${item.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="bg-black/40 p-8 flex justify-between items-center border-t border-[#3f3f5a]">
-            <span className="text-xl text-slate-400 font-medium uppercase tracking-widest">Ask</span>
-            <span className="text-4xl font-bold" style={{ color: data.brandColor || '#c084fc' }}>${data.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Slide 4: Timeline & Closing */}
-      <div className="h-[800px] flex flex-col px-16 py-24 relative">
-        <h2 className="text-4xl font-bold mb-12 text-slate-100">Roadmap & Terms</h2>
-        
-        <div className="grid grid-cols-2 gap-16 flex-1">
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-slate-400">Timeline</h3>
-            <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{data.timeline || 'TBD'}</p>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-slate-400">Key Terms</h3>
-            <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{data.terms || 'TBD'}</p>
-          </div>
-        </div>
-
-        <div className="mt-auto text-center border-t border-[#3f3f5a] pt-8">
-          <p className="text-xl font-bold text-white mb-2">{data.agencyName}</p>
-          <div className="text-slate-400 flex justify-center gap-6">
-            <span>{data.agencyEmail}</span>
-            <span>{data.agencyPhone}</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  )
-}
-
 export const startupPitchDeckConfig: TemplateConfig = {
   id: 'startup-pitch-deck',
   name: 'Startup Pitch Deck',
-  description: 'Slide-based dark mode layout suitable for pitch presentations.',
-  component: StartupPitchDeck,
-  primaryColor: '#c084fc',
-  secondaryColor: '#1e1e2f',
+  description: 'High-impact slide-style layout with massive typography and vibrant energetic gradients.',
+  component: StartupPitchDeckTemplate,
+  primaryColor: '#f97316', // Orange
+  secondaryColor: '#ffffff',
   supportsPdf: true,
-  supportsDocx: false, // Page heights and dark backgrounds do not map well to DOCX
-  version: '1.0.0'
+  supportsDocx: false, // Pitch style too complex for docx
+  version: '2.0'
+}
+
+export function StartupPitchDeckTemplate({ data }: { data: TemplateData }) {
+  const brandColor = data.brandColor || '#f97316'
+
+  return (
+    <div className="w-full max-w-[850px] mx-auto bg-slate-900 font-sans text-white shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+      
+      {/* --- COVER PAGE --- */}
+      <div className="relative min-h-[1100px] flex flex-col justify-center p-24 print-avoid-break bg-slate-900 overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+        
+        {/* Massive vibrant gradient orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] opacity-40 mix-blend-screen" style={{ backgroundColor: brandColor }} />
+        
+        {/* Abstract dot grid */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+        <div className="relative z-10 w-full mb-auto flex justify-between items-start">
+          {data.agencyLogo ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={data.agencyLogo} alt={data.agencyName} className="h-16 object-contain" />
+          ) : (
+            <div className="text-3xl font-black tracking-tighter text-white">
+              {data.agencyName}
+            </div>
+          )}
+          <span className="bg-white/10 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md border border-white/20">Pitch Deck</span>
+        </div>
+
+        <div className="relative z-10 w-full my-auto text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] mb-6 text-white/60">
+            Investment Proposal for {data.clientCompany || data.clientName}
+          </p>
+          <h1 className="text-7xl font-black tracking-tighter leading-[0.9] text-white mb-8 drop-shadow-2xl">
+            {data.title}
+          </h1>
+          <div className="w-24 h-2 mx-auto mb-8 rounded-full" style={{ backgroundColor: brandColor }} />
+          <p className="text-2xl text-white/80 max-w-xl mx-auto font-medium">
+            Building the next generation of scalable growth solutions.
+          </p>
+        </div>
+
+        <div className="relative z-10 w-full mt-auto flex justify-between items-end border-t border-white/10 pt-8">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Prepared By</p>
+            <p className="font-bold text-lg">{data.agencyName}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Date</p>
+            <p className="font-bold text-lg">{data.date}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* --- CONTENT PAGES --- */}
+      <div className="p-24 space-y-32 bg-slate-50 text-slate-900">
+
+        {/* Scope - "The Problem / Solution" */}
+        {data.scope && (
+          <section className="print-avoid-break">
+            <div className="flex flex-col mb-10">
+              <span className="text-[100px] font-black leading-none opacity-[0.05] -mb-12 ml-4" style={{ color: brandColor }}>01</span>
+              <h2 className="text-5xl font-black tracking-tighter text-slate-900 relative z-10">The Vision</h2>
+            </div>
+            <div className="bg-white p-12 rounded-[2rem] shadow-lg border border-slate-100 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 opacity-10 rounded-bl-full" style={{ backgroundColor: brandColor }} />
+              <div className="prose prose-xl prose-slate max-w-none text-slate-700 leading-relaxed font-medium whitespace-pre-wrap relative z-10">
+                {data.scope}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Deliverables - "The Product" */}
+        {data.deliverables && (
+          <section className="print-avoid-break">
+            <div className="flex flex-col mb-10">
+              <span className="text-[100px] font-black leading-none opacity-[0.05] -mb-12 ml-4" style={{ color: brandColor }}>02</span>
+              <h2 className="text-5xl font-black tracking-tighter text-slate-900 relative z-10">The Product</h2>
+            </div>
+            <div className="bg-white p-12 rounded-[2rem] shadow-lg border border-slate-100 relative overflow-hidden">
+              <div className="prose prose-xl prose-slate max-w-none text-slate-700 leading-relaxed font-medium whitespace-pre-wrap relative z-10">
+                {data.deliverables}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Timeline - "Traction / Roadmap" */}
+        {data.timeline && (
+          <section className="print-avoid-break">
+            <div className="flex flex-col mb-10">
+              <span className="text-[100px] font-black leading-none opacity-[0.05] -mb-12 ml-4" style={{ color: brandColor }}>03</span>
+              <h2 className="text-5xl font-black tracking-tighter text-slate-900 relative z-10">The Roadmap</h2>
+            </div>
+            <div className="bg-slate-900 text-white p-12 rounded-[2rem] shadow-xl relative overflow-hidden">
+              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `radial-gradient(circle at top right, ${brandColor}, transparent)` }} />
+              <div className="prose prose-xl prose-invert max-w-none leading-relaxed font-medium whitespace-pre-wrap relative z-10">
+                {data.timeline}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Pricing - "The Ask" */}
+        <section className="print-avoid-break">
+          <div className="flex flex-col mb-10">
+            <span className="text-[100px] font-black leading-none opacity-[0.05] -mb-12 ml-4" style={{ color: brandColor }}>04</span>
+            <h2 className="text-5xl font-black tracking-tighter text-slate-900 relative z-10">The Ask</h2>
+          </div>
+          
+          <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
+            <table className="w-full text-left text-base">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-10 py-6 font-bold uppercase tracking-widest text-slate-400 text-xs">Category</th>
+                  <th className="px-10 py-6 font-bold uppercase tracking-widest text-slate-400 text-xs text-center">Qty</th>
+                  <th className="px-10 py-6 font-bold uppercase tracking-widest text-slate-400 text-xs text-right">Allocation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {data.items.length > 0 ? (
+                  data.items.map((item, idx) => (
+                    <tr key={item.id || idx}>
+                      <td className="px-10 py-6 text-slate-900 font-bold text-xl">{item.description}</td>
+                      <td className="px-10 py-6 text-center text-slate-500 font-medium">{item.qty}</td>
+                      <td className="px-10 py-6 text-right font-black text-slate-900 text-xl">${item.total.toFixed(2)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="px-10 py-10 text-center text-slate-400 italic">No allocation specified.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            
+            <div className="p-10 flex justify-between items-center bg-slate-900 text-white">
+              <div className="font-bold text-sm uppercase tracking-widest text-white/50">Total Funding Required</div>
+              <div className="font-black text-6xl drop-shadow-lg" style={{ color: brandColor }}>
+                ${data.totalAmount.toFixed(2)}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Terms & Authorization */}
+        <div className="grid grid-cols-12 gap-12 print-avoid-break mt-16 border-t-2 border-slate-200 pt-16">
+          <div className="col-span-7">
+            <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-6">Terms</h3>
+            <div className="text-xs text-slate-500 leading-relaxed font-medium whitespace-pre-wrap bg-slate-100 p-6 rounded-2xl">
+              {data.terms || "Standard investment/pitch terms apply. Highly confidential."}
+            </div>
+          </div>
+          <div className="col-span-5 space-y-8">
+            <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-6">Signatures</h3>
+            <div>
+              <div className="border-b-2 border-slate-300 h-10 mb-2" />
+              <p className="font-bold text-slate-900 text-sm">{data.clientName}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Investor / Client</p>
+            </div>
+            <div>
+              <div className="border-b-2 border-slate-300 h-10 mb-2" />
+              <p className="font-bold text-slate-900 text-sm">{data.agencyName}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Founder / Agency</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
 }

@@ -2,129 +2,185 @@ import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
 
-function DarkExecutive({ data }: { data: TemplateData }) {
+export const darkExecutiveConfig: TemplateConfig = {
+  id: 'dark-executive',
+  name: 'Dark Executive',
+  description: 'A commanding, ultra-premium dark theme with subtle metallic accents and austere typography.',
+  component: DarkExecutiveTemplate,
+  primaryColor: '#e2e8f0', // Silver/slate text
+  secondaryColor: '#000000', // True black
+  supportsPdf: true,
+  supportsDocx: true,
+  version: '2.0'
+}
+
+export function DarkExecutiveTemplate({ data }: { data: TemplateData }) {
+  const brandColor = data.brandColor || '#94a3b8' // Slate metallic
+  const bgDark = '#09090b' // Zinc 950
+
   return (
-    <div className="max-w-4xl mx-auto bg-[#121212] min-h-screen font-sans text-slate-300 shadow-2xl print:shadow-none print:max-w-none print:color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+    <div className="w-full max-w-[850px] mx-auto font-serif text-slate-300 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px', backgroundColor: bgDark }}>
       
-      {/* Sidebar/Header hybrid */}
-      <div className="flex border-b border-slate-800 print:break-inside-avoid">
-        <div className="w-1/3 bg-[#0a0a0a] p-12 flex flex-col justify-between print:color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+      {/* --- COVER PAGE --- */}
+      <div className="relative min-h-[1100px] flex flex-col justify-between p-24 print-avoid-break overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+        
+        {/* Subtle radial metallic gradient */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.04]" style={{ background: `radial-gradient(circle, ${brandColor} 0%, transparent 70%)` }} />
+        
+        {/* Austere border frame */}
+        <div className="absolute inset-10 border border-slate-800/50 pointer-events-none" />
+
+        <div className="relative z-10 w-full flex justify-between items-center text-slate-100 mb-auto">
           <div>
             {data.agencyLogo ? (
-              <img src={data.agencyLogo} alt={data.agencyName} className="h-10 w-auto object-contain mb-12" style={{ filter: 'brightness(0) invert(1)' }} />
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={data.agencyLogo} alt={data.agencyName} className="h-12 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
             ) : (
-              <h2 className="text-xl font-bold text-white mb-12 tracking-wide">{data.agencyName}</h2>
+              <div className="text-xl tracking-[0.3em] uppercase text-slate-400">
+                {data.agencyName}
+              </div>
             )}
-            
-            <div className="space-y-6 text-sm">
-              <div>
-                <p className="text-slate-500 uppercase tracking-widest text-[10px] mb-1">Prepared For</p>
-                <p className="text-white font-medium">{data.clientName}</p>
-                <p>{data.clientCompany}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 uppercase tracking-widest text-[10px] mb-1">Date</p>
-                <p className="text-white">{data.date}</p>
-              </div>
-            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-600">Strictly Confidential</span>
           </div>
         </div>
-        
-        <div className="w-2/3 p-12 flex items-center bg-[#1a1a1a] print:color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+
+        <div className="relative z-10 w-full my-auto px-8">
+          <div className="w-px h-16 bg-slate-800 mb-8" />
+          <p className="text-[10px] font-sans uppercase tracking-[0.4em] mb-4" style={{ color: brandColor }}>
+            Executive Briefing
+          </p>
+          <h1 className="text-5xl font-light tracking-wide text-slate-100 mb-12 leading-snug">
+            {data.title}
+          </h1>
+          <p className="text-[10px] font-sans uppercase tracking-[0.3em] text-slate-600 mb-2">Presented To</p>
+          <p className="text-xl tracking-wider text-slate-300">{data.clientCompany || data.clientName}</p>
+        </div>
+
+        <div className="relative z-10 w-full mt-auto flex justify-between items-end text-[10px] font-sans uppercase tracking-[0.2em] text-slate-600">
           <div>
-            <p className="text-slate-400 font-medium tracking-widest uppercase text-xs mb-4" style={{ color: data.brandColor || '#38bdf8' }}>Executive Proposal</p>
-            <h1 className="text-5xl font-bold text-white tracking-tight leading-tight">{data.title}</h1>
+            <p className="mb-2">Authored By</p>
+            <p className="text-slate-400">{data.agencyName}</p>
+          </div>
+          <div className="text-right">
+            <p className="mb-2">Date</p>
+            <p className="text-slate-400">{data.date}</p>
           </div>
         </div>
       </div>
 
-      <div className="p-12 space-y-16">
-        
+      {/* --- CONTENT PAGES --- */}
+      <div className="p-24 space-y-24 bg-[#09090b]">
+
         {/* Scope */}
-        <div className="print:break-inside-avoid">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-px bg-slate-700"></div>
-            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Project Scope</h3>
-          </div>
-          <div className="pl-12">
-            <p className="text-slate-400 leading-relaxed whitespace-pre-wrap">{data.scope || 'Scope of work details.'}</p>
-          </div>
-        </div>
+        {data.scope && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-6 mb-12">
+              <div className="h-px w-12 bg-slate-800" />
+              <h2 className="text-[10px] font-sans uppercase tracking-[0.4em] text-slate-400">Executive Summary</h2>
+            </div>
+            <div className="prose prose-lg prose-invert max-w-none text-slate-400 leading-relaxed font-light whitespace-pre-wrap pl-18">
+              {data.scope}
+            </div>
+          </section>
+        )}
 
         {/* Deliverables */}
-        <div className="print:break-inside-avoid">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-px bg-slate-700"></div>
-            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Deliverables</h3>
-          </div>
-          <div className="pl-12">
-            <p className="text-slate-400 leading-relaxed whitespace-pre-wrap">{data.deliverables || 'Deliverables list.'}</p>
-          </div>
-        </div>
+        {data.deliverables && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-6 mb-12">
+              <div className="h-px w-12 bg-slate-800" />
+              <h2 className="text-[10px] font-sans uppercase tracking-[0.4em] text-slate-400">Strategic Deliverables</h2>
+            </div>
+            <div className="border border-slate-800/50 p-12 bg-black/20">
+              <div className="prose prose-lg prose-invert max-w-none text-slate-400 leading-relaxed font-light whitespace-pre-wrap">
+                {data.deliverables}
+              </div>
+            </div>
+          </section>
+        )}
 
-        {/* Investment */}
-        <div className="print:break-inside-avoid">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-px bg-slate-700"></div>
-            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Financial Overview</h3>
+        {/* Timeline */}
+        {data.timeline && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-6 mb-12">
+              <div className="h-px w-12 bg-slate-800" />
+              <h2 className="text-[10px] font-sans uppercase tracking-[0.4em] text-slate-400">Execution Timeline</h2>
+            </div>
+            <div className="prose prose-lg prose-invert max-w-none text-slate-400 leading-relaxed font-light whitespace-pre-wrap pl-8 border-l border-slate-800/50">
+              {data.timeline}
+            </div>
+          </section>
+        )}
+
+        {/* Pricing */}
+        <section className="print-avoid-break">
+          <div className="flex items-center gap-6 mb-12">
+            <div className="h-px w-12 bg-slate-800" />
+            <h2 className="text-[10px] font-sans uppercase tracking-[0.4em] text-slate-400">Financial Authorization</h2>
           </div>
-          <div className="pl-12">
-            <div className="border border-slate-800 rounded-lg overflow-hidden bg-[#0a0a0a]">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#1a1a1a] text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs">Description</th>
-                    <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs text-center">Qty</th>
-                    <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs text-right">Price</th>
-                    <th className="px-6 py-4 font-medium uppercase tracking-wider text-xs text-right">Total</th>
+          
+          <table className="w-full text-left text-sm font-sans tracking-wide">
+            <thead className="border-b border-slate-800">
+              <tr>
+                <th className="px-4 py-6 font-normal uppercase tracking-[0.2em] text-slate-500 text-[10px]">Description</th>
+                <th className="px-4 py-6 font-normal uppercase tracking-[0.2em] text-slate-500 text-[10px] text-center">Qty</th>
+                <th className="px-4 py-6 font-normal uppercase tracking-[0.2em] text-slate-500 text-[10px] text-right">Fee</th>
+                <th className="px-4 py-6 font-normal uppercase tracking-[0.2em] text-slate-500 text-[10px] text-right">Ext</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {data.items.length > 0 ? (
+                data.items.map((item, idx) => (
+                  <tr key={item.id || idx}>
+                    <td className="px-4 py-6 text-slate-300 font-light">{item.description}</td>
+                    <td className="px-4 py-6 text-center text-slate-500 font-light">{item.qty}</td>
+                    <td className="px-4 py-6 text-right text-slate-500 font-light">${item.unitPrice.toFixed(2)}</td>
+                    <td className="px-4 py-6 text-right text-slate-200 font-medium">${item.total.toFixed(2)}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {data.items.map((item, idx) => (
-                    <tr key={item.id || idx}>
-                      <td className="px-6 py-4 text-white">{item.description}</td>
-                      <td className="px-6 py-4 text-center text-slate-400">{item.qty}</td>
-                      <td className="px-6 py-4 text-right text-slate-400">${item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-right text-white font-medium">${item.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="border-t border-slate-700 bg-[#1a1a1a]">
-                  <tr>
-                    <td colSpan={3} className="px-6 py-6 text-right font-bold text-slate-400 uppercase tracking-widest text-xs">Total Amount</td>
-                    <td className="px-6 py-6 text-right font-bold text-xl" style={{ color: data.brandColor || '#38bdf8' }}>${data.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                </tfoot>
-              </table>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-600 italic">No line items.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
+          <div className="flex justify-end pt-8 border-t border-slate-800 mt-4 print-avoid-break">
+            <div className="w-2/3 border border-slate-800/50 p-8 flex justify-between items-center bg-black/20">
+              <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-slate-500">Total Capital Required</span>
+              <span className="text-3xl font-light text-slate-100 tracking-wide">${data.totalAmount.toFixed(2)}</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Timeline & Terms */}
-        <div className="grid grid-cols-2 gap-12 print:break-inside-avoid pl-12">
-          <div className="bg-[#1a1a1a] p-6 rounded-lg border border-slate-800">
-            <h4 className="text-white font-bold mb-2 tracking-wide">Timeline</h4>
-            <p className="text-slate-500 text-sm whitespace-pre-wrap">{data.timeline || 'TBD'}</p>
+        {/* Terms */}
+        <section className="print-avoid-break border-t border-slate-800/80 pt-16 mt-24">
+          <h2 className="text-[10px] font-sans uppercase tracking-[0.4em] mb-8 text-slate-600 text-center">Legal Terms & Conditions</h2>
+          <div className="text-xs text-slate-500 leading-loose whitespace-pre-wrap font-sans max-w-2xl mx-auto">
+            {data.terms || "Standard confidentiality and legal terms apply."}
           </div>
-          <div className="bg-[#1a1a1a] p-6 rounded-lg border border-slate-800">
-            <h4 className="text-white font-bold mb-2 tracking-wide">Terms</h4>
-            <p className="text-slate-500 text-sm whitespace-pre-wrap">{data.terms || 'Standard terms.'}</p>
+        </section>
+
+        {/* Signatures */}
+        <section className="mt-24 pt-16 border-t border-slate-800 print-avoid-break">
+          <div className="grid grid-cols-2 gap-24 text-center">
+            <div>
+              <div className="border-b border-slate-800 h-16 mb-6" />
+              <p className="text-slate-300 tracking-wider text-sm">{data.clientName}</p>
+              <p className="text-[10px] font-sans text-slate-600 mt-2 uppercase tracking-[0.2em]">Authorized Signatory</p>
+            </div>
+            <div>
+              <div className="border-b border-slate-800 h-16 mb-6" />
+              <p className="text-slate-300 tracking-wider text-sm">{data.agencyName}</p>
+              <p className="text-[10px] font-sans text-slate-600 mt-2 uppercase tracking-[0.2em]">Authorized Signatory</p>
+            </div>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>
   )
-}
-
-export const darkExecutiveConfig: TemplateConfig = {
-  id: 'dark-executive',
-  name: 'Dark Executive',
-  description: 'Premium dark mode aesthetic for modern executive presentations.',
-  component: DarkExecutive,
-  primaryColor: '#38bdf8',
-  secondaryColor: '#121212',
-  supportsPdf: true,
-  supportsDocx: false, // Dark background templates do not translate well to DOCX
-  version: '1.0.0'
 }

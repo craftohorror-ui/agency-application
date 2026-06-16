@@ -2,112 +2,175 @@ import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
 
-function LuxuryPremium({ data }: { data: TemplateData }) {
+export const luxuryPremiumConfig: TemplateConfig = {
+  id: 'luxury-premium',
+  name: 'Luxury Premium',
+  description: 'High-end elegant design with serif typography, gold accents, and expansive whitespace.',
+  component: LuxuryPremiumTemplate,
+  primaryColor: '#d4af37', // Gold
+  secondaryColor: '#111827',
+  supportsPdf: true,
+  supportsDocx: false, // Too complex for standard docx generator
+  version: '2.0'
+}
+
+export function LuxuryPremiumTemplate({ data }: { data: TemplateData }) {
+  const brandColor = data.brandColor || '#d4af37'
+
   return (
-    <div className="max-w-4xl mx-auto bg-[#0a0a0a] min-h-screen font-serif text-slate-300 shadow-2xl overflow-hidden print:shadow-none print:max-w-none print:color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-      {/* Hero */}
-      <div className="px-16 pt-24 pb-16 text-center border-b border-[#2a2a2a] print:break-inside-avoid">
-        <div className="mb-12">
+    <div className="w-full max-w-[850px] mx-auto bg-[#faf9f6] font-serif text-slate-900 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+      
+      {/* --- COVER PAGE --- */}
+      <div className="relative min-h-[1100px] flex flex-col justify-between p-24 print-avoid-break text-center overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+        
+        {/* Luxury Border Frame */}
+        <div className="absolute inset-8 border border-slate-200 pointer-events-none" />
+        <div className="absolute inset-10 border border-slate-200 pointer-events-none" />
+
+        <div className="relative z-10 w-full mb-auto mt-12">
           {data.agencyLogo ? (
-            <img src={data.agencyLogo} alt={data.agencyName} className="h-16 w-auto object-contain mx-auto" style={{ filter: 'brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(10deg)' }} />
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={data.agencyLogo} alt={data.agencyName} className="h-20 object-contain mx-auto" />
           ) : (
-            <h2 className="text-2xl tracking-[0.3em] uppercase text-[#d4af37]">{data.agencyName}</h2>
+            <div className="text-3xl tracking-[0.3em] uppercase font-light text-slate-800">
+              {data.agencyName}
+            </div>
           )}
         </div>
-        
-        <p className="text-[#a0a0a0] uppercase tracking-[0.2em] text-xs mb-6 font-sans">Exclusive Proposal</p>
-        <h1 className="text-5xl font-light tracking-wide text-white leading-tight mb-8 font-serif">{data.title}</h1>
-        <div className="h-px w-24 bg-[#d4af37] mx-auto mb-8"></div>
-        <p className="text-lg text-[#a0a0a0] font-sans font-light">Presented to <span className="text-white font-normal">{data.clientName}</span></p>
-        <p className="text-sm text-[#808080] font-sans mt-2">{data.date}</p>
+
+        <div className="relative z-10 w-full my-auto px-12">
+          <p className="text-xs font-sans uppercase tracking-[0.4em] mb-12" style={{ color: brandColor }}>
+            Exclusive Proposal
+          </p>
+          <h1 className="text-6xl font-light tracking-tight leading-snug mb-16 text-slate-900 italic">
+            {data.title}
+          </h1>
+          <div className="flex items-center justify-center gap-4 mb-16">
+            <div className="h-px w-16 bg-slate-300" />
+            <div className="w-2 h-2 rotate-45" style={{ backgroundColor: brandColor }} />
+            <div className="h-px w-16 bg-slate-300" />
+          </div>
+          <p className="text-sm font-sans uppercase tracking-[0.2em] text-slate-500 mb-4">Prepared For</p>
+          <p className="text-2xl font-light text-slate-800">{data.clientCompany || data.clientName}</p>
+        </div>
+
+        <div className="relative z-10 w-full mt-auto text-xs font-sans uppercase tracking-[0.2em] text-slate-400">
+          <p className="mb-2">Confidential & Proprietary</p>
+          <p>{data.date}</p>
+        </div>
       </div>
 
-      <div className="px-16 py-16 space-y-20 font-sans font-light">
-        
+      {/* --- CONTENT PAGES --- */}
+      <div className="p-24 space-y-24 bg-[#faf9f6]">
+
         {/* Scope */}
-        <div className="print:break-inside-avoid text-center">
-          <h3 className="text-sm uppercase tracking-[0.2em] text-[#d4af37] mb-6">The Vision</h3>
-          <p className="text-[#c0c0c0] leading-loose whitespace-pre-wrap max-w-2xl mx-auto text-lg font-serif italic">&quot;{data.scope || 'Executive summary of the engagement.'}&quot;</p>
-        </div>
+        {data.scope && (
+          <section className="print-avoid-break text-center">
+            <h2 className="text-sm font-sans uppercase tracking-[0.3em] mb-8" style={{ color: brandColor }}>The Vision</h2>
+            <div className="prose prose-lg prose-slate max-w-2xl mx-auto text-slate-600 leading-loose whitespace-pre-wrap font-serif italic text-xl">
+              &quot;{data.scope}&quot;
+            </div>
+          </section>
+        )}
 
         {/* Deliverables */}
-        <div className="print:break-inside-avoid">
-          <h3 className="text-sm uppercase tracking-[0.2em] text-[#d4af37] mb-8 text-center">Scope of Engagement</h3>
-          <div className="border border-[#2a2a2a] p-10 bg-[#111]">
-            <p className="text-[#a0a0a0] leading-relaxed whitespace-pre-wrap">{data.deliverables || 'Specific premium deliverables.'}</p>
-          </div>
-        </div>
+        {data.deliverables && (
+          <section className="print-avoid-break">
+            <div className="flex items-center justify-center gap-4 mb-12">
+              <div className="h-px w-24 bg-slate-300" />
+              <h2 className="text-sm font-sans uppercase tracking-[0.3em]" style={{ color: brandColor }}>Key Deliverables</h2>
+              <div className="h-px w-24 bg-slate-300" />
+            </div>
+            <div className="bg-white p-12 border border-slate-200 shadow-sm">
+              <div className="prose prose-lg prose-slate max-w-none text-slate-600 leading-loose whitespace-pre-wrap font-serif">
+                {data.deliverables}
+              </div>
+            </div>
+          </section>
+        )}
 
-        {/* Investment */}
-        <div className="print:break-inside-avoid">
-          <h3 className="text-sm uppercase tracking-[0.2em] text-[#d4af37] mb-8 text-center">Professional Fees</h3>
+        {/* Timeline */}
+        {data.timeline && (
+          <section className="print-avoid-break">
+            <div className="flex items-center justify-center gap-4 mb-12">
+              <div className="h-px w-24 bg-slate-300" />
+              <h2 className="text-sm font-sans uppercase tracking-[0.3em]" style={{ color: brandColor }}>Project Timeline</h2>
+              <div className="h-px w-24 bg-slate-300" />
+            </div>
+            <div className="prose prose-lg prose-slate max-w-none text-slate-600 leading-loose whitespace-pre-wrap font-serif pl-8 border-l border-slate-300">
+              {data.timeline}
+            </div>
+          </section>
+        )}
+
+        {/* Pricing */}
+        <section className="print-avoid-break">
+          <div className="flex items-center justify-center gap-4 mb-12">
+            <div className="h-px w-24 bg-slate-300" />
+            <h2 className="text-sm font-sans uppercase tracking-[0.3em]" style={{ color: brandColor }}>Financial Overview</h2>
+            <div className="h-px w-24 bg-slate-300" />
+          </div>
           
-          <div className="border border-[#2a2a2a] bg-[#111]">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[#2a2a2a] text-[#808080] text-xs uppercase tracking-[0.1em]">
-                  <th className="p-6 font-normal">Service</th>
-                  <th className="p-6 font-normal text-center">Qty</th>
-                  <th className="p-6 font-normal text-right">Fee</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#2a2a2a]">
-                {data.items.map((item, idx) => (
+          <table className="w-full text-left text-sm font-sans mb-12">
+            <thead className="border-b border-slate-300">
+              <tr>
+                <th className="px-4 py-4 font-normal uppercase tracking-widest text-slate-500">Service Description</th>
+                <th className="px-4 py-4 font-normal uppercase tracking-widest text-slate-500 text-center">Qty</th>
+                <th className="px-4 py-4 font-normal uppercase tracking-widest text-slate-500 text-right">Fee</th>
+                <th className="px-4 py-4 font-normal uppercase tracking-widest text-slate-500 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {data.items.length > 0 ? (
+                data.items.map((item, idx) => (
                   <tr key={item.id || idx}>
-                    <td className="p-6 text-[#d0d0d0]">{item.description}</td>
-                    <td className="p-6 text-center text-[#808080]">{item.qty}</td>
-                    <td className="p-6 text-right text-[#d0d0d0]">${item.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-6 text-slate-800 font-serif text-base">{item.description}</td>
+                    <td className="px-4 py-6 text-center text-slate-500">{item.qty}</td>
+                    <td className="px-4 py-6 text-right text-slate-500 font-serif">${item.unitPrice.toFixed(2)}</td>
+                    <td className="px-4 py-6 text-right text-slate-900 font-serif text-base">${item.total.toFixed(2)}</td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-[#d4af37]">
-                  <td colSpan={2} className="p-6 text-right uppercase tracking-[0.1em] text-xs text-[#d4af37]">Total Retainer</td>
-                  <td className="p-6 text-right text-xl text-white tracking-wider">${data.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic">No line items.</td>
                 </tr>
-              </tfoot>
-            </table>
+              )}
+            </tbody>
+          </table>
+          
+          <div className="flex justify-end pt-8 border-t border-slate-300 print-avoid-break">
+            <div className="w-2/3 flex justify-between items-center py-6 px-8 bg-white border border-slate-200 shadow-sm">
+              <span className="font-sans text-xs uppercase tracking-widest text-slate-500">Total Investment</span>
+              <span className="font-serif text-3xl text-slate-900">${data.totalAmount.toFixed(2)}</span>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Timeline & Terms */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 print:break-inside-avoid text-sm">
-          <div>
-            <h4 className="uppercase tracking-[0.2em] text-[#d4af37] mb-4">Timeline</h4>
-            <p className="text-[#a0a0a0] whitespace-pre-wrap leading-relaxed">{data.timeline || 'TBD'}</p>
+        {/* Terms */}
+        <section className="print-avoid-break text-center mt-24">
+          <h2 className="text-xs font-sans uppercase tracking-[0.3em] mb-8 text-slate-400">Terms & Conditions</h2>
+          <div className="text-xs text-slate-500 leading-loose whitespace-pre-wrap font-sans max-w-2xl mx-auto">
+            {data.terms || "Standard premium terms apply."}
           </div>
-          <div>
-            <h4 className="uppercase tracking-[0.2em] text-[#d4af37] mb-4">Terms</h4>
-            <p className="text-[#a0a0a0] whitespace-pre-wrap leading-relaxed">{data.terms || 'Standard terms.'}</p>
-          </div>
-        </div>
+        </section>
 
-        {/* Footer */}
-        <div className="pt-16 border-t border-[#2a2a2a] text-center print:break-inside-avoid">
-          {data.agencyLogo ? (
-            <img src={data.agencyLogo} alt={data.agencyName} className="h-8 w-auto object-contain mx-auto mb-4 opacity-50" style={{ filter: 'brightness(0) invert(1)' }} />
-          ) : (
-            <p className="text-[#808080] uppercase tracking-[0.2em] text-xs mb-4">{data.agencyName}</p>
-          )}
-          <div className="text-[#606060] text-xs space-y-1">
-            {data.agencyEmail && <p>{data.agencyEmail}</p>}
-            {data.agencyPhone && <p>{data.agencyPhone}</p>}
+        {/* Signatures */}
+        <section className="mt-24 pt-16 border-t border-slate-200 print-avoid-break">
+          <div className="grid grid-cols-2 gap-24 text-center">
+            <div>
+              <div className="border-b border-slate-300 h-16 mb-6" />
+              <p className="font-serif text-slate-900 text-lg">{data.clientName}</p>
+              <p className="text-[10px] font-sans text-slate-400 mt-2 uppercase tracking-widest">Client Authorization</p>
+            </div>
+            <div>
+              <div className="border-b border-slate-300 h-16 mb-6" />
+              <p className="font-serif text-slate-900 text-lg">{data.agencyName}</p>
+              <p className="text-[10px] font-sans text-slate-400 mt-2 uppercase tracking-widest">Agency Authorization</p>
+            </div>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>
   )
-}
-
-export const luxuryPremiumConfig: TemplateConfig = {
-  id: 'luxury-premium',
-  name: 'Luxury Premium',
-  description: 'Elegant black and gold aesthetic for high-end engagements.',
-  component: LuxuryPremium,
-  primaryColor: '#d4af37',
-  secondaryColor: '#0a0a0a',
-  supportsPdf: true,
-  supportsDocx: false, // Dark themes are hard to translate to DOCX perfectly
-  version: '1.0.0'
 }

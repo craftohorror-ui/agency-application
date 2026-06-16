@@ -2,95 +2,186 @@ import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
 
-function RealEstateDevelopment({ data }: { data: TemplateData }) {
+export const realEstateDevelopmentConfig: TemplateConfig = {
+  id: 'real-estate-development',
+  name: 'Real Estate Development',
+  description: 'Luxurious and structured layout for property and real estate proposals.',
+  component: RealEstateDevelopmentTemplate,
+  primaryColor: '#0f766e', // Teal
+  secondaryColor: '#f8fafc',
+  supportsPdf: true,
+  supportsDocx: true,
+  version: '2.0'
+}
+
+export function RealEstateDevelopmentTemplate({ data }: { data: TemplateData }) {
+  const brandColor = data.brandColor || '#0f766e'
+
   return (
-    <div className="max-w-4xl mx-auto bg-stone-50 min-h-screen font-serif text-stone-800 shadow-xl print:shadow-none print:max-w-none">
+    <div className="w-full max-w-[850px] mx-auto bg-[#fdfdfd] font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none print:border-none" style={{ minHeight: '1100px' }}>
       
-      {/* Header */}
-      <div className="bg-stone-900 text-stone-100 p-16 text-center print:color-adjust-exact print:break-inside-avoid" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-        <h3 className="uppercase tracking-[0.3em] text-xs font-sans text-stone-400 mb-8">{data.agencyName}</h3>
-        <h1 className="text-5xl font-light mb-6 font-serif">{data.title}</h1>
-        <div className="w-16 h-px bg-stone-500 mx-auto mb-6"></div>
-        <p className="font-sans font-light uppercase tracking-widest text-sm text-stone-300">Investment Proposal for {data.clientName}</p>
+      {/* --- COVER PAGE --- */}
+      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#f0f4f8]" style={{ pageBreakAfter: 'always' }}>
+        
+        {/* Architectural Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `repeating-linear-gradient(45deg, ${brandColor} 0, ${brandColor} 1px, transparent 1px, transparent 20px)` }} />
+        
+        {/* Massive Watermark */}
+        <div className="absolute bottom-10 -right-10 text-[150px] font-black opacity-5 tracking-tighter text-slate-900 pointer-events-none uppercase">
+          ESTATE
+        </div>
+
+        <div className="relative z-10 flex justify-between items-start mb-auto">
+          {data.agencyLogo ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={data.agencyLogo} alt={data.agencyName} className="h-14 object-contain" />
+          ) : (
+            <div className="text-3xl font-serif text-slate-900 tracking-tight">
+              {data.agencyName}
+            </div>
+          )}
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-400">Development Proposal</span>
+        </div>
+
+        <div className="relative z-10 my-auto bg-white p-12 shadow-2xl border border-slate-100 transform -translate-x-6">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="w-12 h-1" style={{ backgroundColor: brandColor }} />
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>
+              Property & Development
+            </p>
+          </div>
+          <h1 className="text-5xl font-serif text-slate-900 leading-tight mb-8">
+            {data.title}
+          </h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Prepared For</p>
+          <p className="text-xl text-slate-800 font-sans">{data.clientCompany || data.clientName}</p>
+        </div>
+
+        <div className="relative z-10 mt-auto grid grid-cols-2 gap-8 text-sm pt-8 border-t border-slate-200">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Developer</p>
+            <p className="font-bold text-slate-900 uppercase tracking-wide">{data.agencyName}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Issue Date</p>
+            <p className="font-bold text-slate-900 uppercase tracking-wide">{data.date}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="px-16 py-16 space-y-16">
-        
-        {/* Project Summary */}
-        <div className="print:break-inside-avoid text-center">
-          <h3 className="font-sans uppercase tracking-widest text-sm font-semibold text-stone-900 mb-6">Project Summary</h3>
-          <p className="text-stone-600 leading-loose text-lg whitespace-pre-wrap max-w-2xl mx-auto">{data.scope || 'Real estate development overview.'}</p>
-        </div>
+      {/* --- CONTENT PAGES --- */}
+      <div className="p-20 space-y-20 bg-white">
 
-        <div className="w-full h-px bg-stone-200 my-8"></div>
+        {/* Scope */}
+        {data.scope && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-2xl font-serif text-slate-400">01.</span>
+              <h2 className="text-2xl font-serif text-slate-900 uppercase tracking-wide">Project Overview</h2>
+            </div>
+            <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed font-sans whitespace-pre-wrap ml-12 border-l border-slate-200 pl-6">
+              {data.scope}
+            </div>
+          </section>
+        )}
 
-        {/* Milestones / Deliverables */}
-        <div className="print:break-inside-avoid">
-          <h3 className="font-sans uppercase tracking-widest text-sm font-semibold text-stone-900 mb-6 text-center">Development Milestones</h3>
-          <p className="text-stone-600 leading-loose whitespace-pre-wrap text-center max-w-2xl mx-auto">{data.deliverables || 'Phases and milestones.'}</p>
-        </div>
+        {/* Deliverables */}
+        {data.deliverables && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-2xl font-serif text-slate-400">02.</span>
+              <h2 className="text-2xl font-serif text-slate-900 uppercase tracking-wide">Development Specifications</h2>
+            </div>
+            <div className="bg-[#f0f4f8] p-8 border border-slate-200 ml-12">
+              <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed font-sans whitespace-pre-wrap">
+                {data.deliverables}
+              </div>
+            </div>
+          </section>
+        )}
 
-        <div className="w-full h-px bg-stone-200 my-8"></div>
+        {/* Timeline */}
+        {data.timeline && (
+          <section className="print-avoid-break">
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-2xl font-serif text-slate-400">03.</span>
+              <h2 className="text-2xl font-serif text-slate-900 uppercase tracking-wide">Project Phasing</h2>
+            </div>
+            <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed font-sans whitespace-pre-wrap ml-12 pl-6 border-l-4" style={{ borderColor: brandColor }}>
+              {data.timeline}
+            </div>
+          </section>
+        )}
 
-        {/* Financials */}
-        <div className="print:break-inside-avoid">
-          <h3 className="font-sans uppercase tracking-widest text-sm font-semibold text-stone-900 mb-8 text-center">Capital Investment</h3>
+        {/* Pricing */}
+        <section className="print-avoid-break">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-2xl font-serif text-slate-400">04.</span>
+            <h2 className="text-2xl font-serif text-slate-900 uppercase tracking-wide">Investment Summary</h2>
+          </div>
           
-          <div className="border border-stone-200 bg-white p-8">
-            <table className="w-full text-left font-sans text-sm">
-              <thead>
-                <tr className="border-b border-stone-200 text-stone-500 uppercase tracking-widest text-xs">
-                  <th className="pb-4 font-medium">Phase / Asset</th>
-                  <th className="pb-4 font-medium text-center">Units</th>
-                  <th className="pb-4 font-medium text-right">Cost</th>
-                  <th className="pb-4 font-medium text-right">Total</th>
+          <div className="ml-12">
+            <table className="w-full text-left text-sm font-sans border border-slate-200">
+              <thead className="bg-[#f0f4f8] text-slate-600">
+                <tr>
+                  <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs border-b border-slate-200 border-r border-slate-200">Cost Center</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-center border-b border-slate-200 border-r border-slate-200">Qty</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right border-b border-slate-200 border-r border-slate-200">Unit Price</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right border-b border-slate-200">Line Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
-                {data.items.map((item, idx) => (
-                  <tr key={item.id || idx}>
-                    <td className="py-4 text-stone-900 font-medium">{item.description}</td>
-                    <td className="py-4 text-center text-stone-500">{item.qty}</td>
-                    <td className="py-4 text-right text-stone-500">${item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td className="py-4 text-right text-stone-900 font-medium">${item.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+              <tbody className="divide-y divide-slate-200 bg-white">
+                {data.items.length > 0 ? (
+                  data.items.map((item, idx) => (
+                    <tr key={item.id || idx}>
+                      <td className="px-6 py-5 text-slate-900 font-medium border-r border-slate-200">{item.description}</td>
+                      <td className="px-6 py-5 text-center text-slate-600 border-r border-slate-200">{item.qty}</td>
+                      <td className="px-6 py-5 text-right text-slate-600 border-r border-slate-200">${item.unitPrice.toFixed(2)}</td>
+                      <td className="px-6 py-5 text-right font-bold text-slate-900">${item.total.toFixed(2)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400 italic">No line items.</td>
                   </tr>
-                ))}
+                )}
               </tbody>
-              <tfoot>
-                <tr className="border-t border-stone-900">
-                  <td colSpan={3} className="pt-6 pb-2 text-right uppercase tracking-widest text-xs font-semibold">Total Estimated Capital</td>
-                  <td className="pt-6 pb-2 text-right text-xl font-bold text-stone-900">${data.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                </tr>
-              </tfoot>
             </table>
+            
+            <div className="flex justify-end">
+              <div className="w-1/2 p-6 flex justify-between items-center bg-[#f0f4f8] border-x border-b border-slate-200">
+                <span className="font-bold text-sm uppercase tracking-widest text-slate-600">Total Capital</span>
+                <span className="font-serif text-3xl font-bold" style={{ color: brandColor }}>${data.totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Timeline & Terms */}
-        <div className="grid grid-cols-2 gap-12 print:break-inside-avoid font-sans text-sm">
-          <div>
-            <h4 className="uppercase tracking-widest font-semibold text-stone-900 mb-4">Projected Timeline</h4>
-            <p className="text-stone-600 whitespace-pre-wrap leading-relaxed">{data.timeline || 'TBD'}</p>
+        {/* Terms */}
+        <section className="print-avoid-break mt-16 pt-12 border-t border-slate-200 ml-12">
+          <h2 className="text-[10px] font-bold uppercase tracking-widest mb-6 text-slate-400">Terms & Conditions</h2>
+          <div className="text-xs text-slate-500 leading-relaxed font-sans whitespace-pre-wrap columns-2 gap-8">
+            {data.terms || "Standard real estate development terms apply."}
           </div>
-          <div>
-            <h4 className="uppercase tracking-widest font-semibold text-stone-900 mb-4">Investment Terms</h4>
-            <p className="text-stone-600 whitespace-pre-wrap leading-relaxed">{data.terms || 'TBD'}</p>
+        </section>
+
+        {/* Signatures */}
+        <section className="mt-16 pt-8 print-avoid-break ml-12">
+          <div className="grid grid-cols-2 gap-16">
+            <div className="border border-slate-200 p-8 bg-slate-50">
+              <div className="border-b-2 border-slate-300 h-10 mb-4" />
+              <p className="font-bold text-slate-900">{data.clientName}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2">Client Signature</p>
+            </div>
+            <div className="border border-slate-200 p-8 bg-slate-50">
+              <div className="border-b-2 border-slate-300 h-10 mb-4" />
+              <p className="font-bold text-slate-900">{data.agencyName}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2">Agency Signature</p>
+            </div>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>
   )
-}
-
-export const realEstateDevelopmentConfig: TemplateConfig = {
-  id: 'real-estate-development',
-  name: 'Real Estate Development',
-  description: 'Sophisticated, stone-toned serif layout for property and development proposals.',
-  component: RealEstateDevelopment,
-  primaryColor: '#1c1917',
-  secondaryColor: '#fafaf9',
-  supportsPdf: true,
-  supportsDocx: true,
-  version: '1.0.0'
 }
