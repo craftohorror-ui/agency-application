@@ -52,7 +52,7 @@ export function ContractEditor({ contractId, initialBody }: ContractEditorProps)
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Changes & Bump Version
+          {isPending ? 'Saving...' : 'Save Changes & Bump Version'}
         </Button>
       </div>
     </form>

@@ -59,19 +59,10 @@ export async function getContract(id: string): Promise<ContractWithRelations | n
 export async function updateContract(id: string, input: Partial<Contract>) {
   const { supabase } = await requireStaff()
   
-  // If we are updating the body, we also bump the version so the trigger snapshots it correctly.
-  const payload = { ...input }
-  
-  if (input.body) {
-    const existing = await getContract(id)
-    if (existing && existing.body !== input.body) {
-      payload.version = existing.version + 1
-    }
-  }
-
-  const { error } = await supabase.from('contracts').update(payload).eq('id', id)
+  const { error } = await supabase.from('contracts').update(input).eq('id', id)
   if (error) throw new Error(error.message)
-  return getContract(id)
+  
+  return true
 }
 
 export async function listContractVersions(contractId: string): Promise<ContractVersion[]> {
