@@ -23,18 +23,13 @@ export default async function PrintProposalPage({ params }: PrintProposalPagePro
   // Fetch Agency Context
   const { data: agency } = await supabase
     .from('agencies')
-    .select('name, logo_url, settings')
+    .select('*')
     .eq('id', profile.agency_id)
     .single()
 
   const templateData = mapProposalToTemplateData(
     proposal, 
-    { 
-      name: agency?.name || 'Our Agency',
-      logoUrl: agency?.logo_url,
-      email: null,
-      phone: null
-    }
+    agency || {}
   )
 
   const templates = TemplateRegistry.getAll()

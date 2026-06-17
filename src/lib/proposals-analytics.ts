@@ -69,7 +69,7 @@ export async function getProposalFromToken(token: string) {
   const { data: proposal, error: propError } = await admin
     .from('proposals')
     .select(`
-      title, scope, deliverables, timeline, terms, amount, template_id,
+      title, scope, deliverables, timeline, terms, amount, template_id, branding_snapshot, created_at,
       items:proposal_items ( id, description, qty, unit_price ),
       client:clients ( name, company )
     `)
@@ -78,13 +78,14 @@ export async function getProposalFromToken(token: string) {
 
   if (propError || !proposal) throw new Error('Proposal not found')
 
+  // 4. Fetch the full agency data securely using service_role
   const { data: agency } = await admin
     .from('agencies')
-    .select('name')
+    .select('*')
     .eq('id', link.agency_id)
     .single()
 
-  return { link, proposal, agencyName: agency?.name }
+  return { link, proposal, agency }
 }
 
 export async function initializeProposalSession(linkId: string, proposalId: string, agencyId: string, ip: string, userAgent: string) {

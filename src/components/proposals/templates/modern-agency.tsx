@@ -1,6 +1,8 @@
 import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const modernAgencyConfig: TemplateConfig = {
   id: 'modern-agency',
@@ -194,6 +196,18 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
             </div>
             <div className="bg-slate-100 p-8 rounded-2xl text-sm text-slate-600 leading-relaxed whitespace-pre-wrap border border-slate-200 shadow-inner">
               {data.terms}
+              {data.termsConditions && (
+                <div className="mt-8 pt-6 border-t border-slate-200/60">
+                  <h4 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-xs">Agency Terms & Conditions</h4>
+                  <div className="whitespace-pre-wrap">{data.termsConditions}</div>
+                </div>
+              )}
+              {data.privacyPolicy && (
+                <div className="mt-6">
+                  <h4 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-xs">Privacy Policy</h4>
+                  <div className="whitespace-pre-wrap">{data.privacyPolicy}</div>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -223,6 +237,8 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
         </section>
 
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="proposal" />
+      </div>
   )
 }

@@ -21,6 +21,17 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
   const invoice = await getInvoice(resolvedParams.id)
   if (!invoice) notFound()
 
+  // Fetch Agency Context for fallback
+  const { profile, supabase } = await requireStaff()
+  const { data: agency } = await supabase
+    .from('agencies')
+    .select('*')
+    .eq('id', profile.agency_id)
+    .single()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const branding = { ...(agency || {}), ...((invoice.branding_snapshot as any) || {}) }
+
   const payments = await listPayments(invoice.id)
 
   function formatStatus(s: string) {
@@ -132,6 +143,20 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
           )}
+
+          <div className="text-center text-sm text-muted-foreground mt-8 pt-4 border-t">
+            <p className="font-semibold">{branding.legal_name || branding.agency_name || branding.name || 'Our Agency'}</p>
+            <p>
+              {branding.registration_number && `Reg: ${branding.registration_number} • `}
+              {branding.tax_id && `Tax ID: ${branding.tax_id}`}
+            </p>
+            {branding.default_invoice_footer && (
+              <p className="mt-2">{branding.default_invoice_footer}</p>
+            )}
+            {branding.default_legal_disclaimer && (
+              <p className="mt-2 text-xs opacity-70 max-w-xl mx-auto">{branding.default_legal_disclaimer}</p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">

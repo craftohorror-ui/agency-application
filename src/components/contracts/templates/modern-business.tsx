@@ -1,5 +1,7 @@
 import React from 'react'
 import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const modernBusinessContractConfig: ContractTemplateConfig = {
   id: 'modern-business',
@@ -54,6 +56,18 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
       <div className="p-16 space-y-8">
         <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-blue-600 whitespace-pre-wrap">
           {data.body}
+              {data.termsConditions && (
+                <div className="mt-12 pt-8 border-t border-slate-200">
+                  <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
+                  <div className="whitespace-pre-wrap">{data.termsConditions}</div>
+                </div>
+              )}
+              {data.privacyPolicy && (
+                <div className="mt-8">
+                  <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Privacy Policy</h4>
+                  <div className="whitespace-pre-wrap">{data.privacyPolicy}</div>
+                </div>
+              )}
         </div>
       </div>
 
@@ -87,6 +101,8 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
           </div>
         </div>
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="contract" />
+      </div>
   )
 }

@@ -49,16 +49,17 @@ export default async function PrintContractPage({ params, searchParams }: PagePr
   // Actually, we can just grab agency context from the client.
   // Let me check if clients have agency_id. If not, how do we get agency?
   // I will just fetch agency via the creator's profile.
-  let agencyData = { name: 'Our Agency', logoUrl: undefined as string | undefined }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let agencyData: any = { name: 'Our Agency', logoUrl: undefined as string | undefined }
   
   if (profile?.agency_id) {
     const { data: agency } = await supabaseAdmin
       .from('agencies')
-      .select('name, logo_url')
+      .select('*')
       .eq('id', profile.agency_id)
       .single()
     if (agency) {
-      agencyData = { name: agency.name, logoUrl: agency.logo_url }
+      agencyData = agency
     }
   }
 
@@ -71,10 +72,7 @@ export default async function PrintContractPage({ params, searchParams }: PagePr
     return <div className="p-8 text-red-500 font-mono">Template not found: {templateId}</div>
   }
 
-  const templateData = mapContractToTemplateData(adminContract, {
-    name: agencyData.name,
-    logoUrl: agencyData.logoUrl
-  })
+  const templateData = mapContractToTemplateData(adminContract, agencyData)
 
   const TemplateComponent = selectedTemplate.component
 

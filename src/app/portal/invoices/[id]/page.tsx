@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireClient } from '@/lib/auth'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getPortalInvoice } from '@/lib/invoices'
 import { listPortalPayments } from '@/lib/payments'
 import { Button } from '@/components/ui/button'
@@ -12,11 +13,22 @@ interface PageProps {
 }
 
 export default async function PortalInvoiceDetailPage({ params }: PageProps) {
-  await requireClient()
+  const { profile } = await requireClient()
   const resolvedParams = await params
 
   const invoice = await getPortalInvoice(resolvedParams.id)
   if (!invoice) notFound()
+
+  // Fetch Agency Context for fallback using admin client
+  const adminSupabase = createAdminClient()
+  const { data: agency } = await adminSupabase
+    .from('agencies')
+    .select('*')
+    .eq('id', profile.agency_id)
+    .single()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const branding = { ...(agency || {}), ...((invoice.branding_snapshot as any) || {}) }
 
   const payments = await listPortalPayments(invoice.id)
 
@@ -120,6 +132,20 @@ export default async function PortalInvoiceDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
           )}
+
+          <div className="text-center text-sm text-muted-foreground mt-8 pt-4 border-t">
+            <p className="font-semibold">{branding.legal_name || branding.agency_name || branding.name || 'Our Agency'}</p>
+            <p>
+              {branding.registration_number && `Reg: ${branding.registration_number} • `}
+              {branding.tax_id && `Tax ID: ${branding.tax_id}`}
+            </p>
+            {branding.default_invoice_footer && (
+              <p className="mt-2">{branding.default_invoice_footer}</p>
+            )}
+            {branding.default_legal_disclaimer && (
+              <p className="mt-2 text-xs opacity-70 max-w-xl mx-auto">{branding.default_legal_disclaimer}</p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">

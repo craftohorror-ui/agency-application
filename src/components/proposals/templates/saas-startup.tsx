@@ -1,6 +1,8 @@
 import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const saasStartupConfig: TemplateConfig = {
   id: 'saas-startup',
@@ -193,6 +195,8 @@ export function SaaSStartupTemplate({ data }: { data: TemplateData }) {
         </div>
 
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="proposal" />
+      </div>
   )
 }

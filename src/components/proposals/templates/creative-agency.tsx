@@ -1,6 +1,8 @@
 import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const creativeAgencyConfig: TemplateConfig = {
   id: 'creative-agency',
@@ -186,6 +188,8 @@ export function CreativeAgencyTemplate({ data }: { data: TemplateData }) {
         </div>
 
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="proposal" />
+      </div>
   )
 }

@@ -1,6 +1,8 @@
 import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const minimalProfessionalConfig: TemplateConfig = {
   id: 'minimal-professional',
@@ -159,6 +161,8 @@ export function MinimalProfessionalTemplate({ data }: { data: TemplateData }) {
         </section>
 
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="proposal" />
+      </div>
   )
 }

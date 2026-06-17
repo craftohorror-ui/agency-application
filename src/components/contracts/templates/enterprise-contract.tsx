@@ -1,5 +1,7 @@
 import React from 'react'
 import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const enterpriseContractConfig: ContractTemplateConfig = {
   id: 'enterprise-contract',
@@ -58,6 +60,18 @@ export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
       <div className="p-16 space-y-8 bg-white text-justify">
         <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-sky-900 prose-headings:font-normal prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-2 prose-p:font-serif prose-p:text-slate-800 prose-p:leading-loose whitespace-pre-wrap">
           {data.body}
+              {data.termsConditions && (
+                <div className="mt-12 pt-8 border-t border-slate-200">
+                  <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
+                  <div className="whitespace-pre-wrap">{data.termsConditions}</div>
+                </div>
+              )}
+              {data.privacyPolicy && (
+                <div className="mt-8">
+                  <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Privacy Policy</h4>
+                  <div className="whitespace-pre-wrap">{data.privacyPolicy}</div>
+                </div>
+              )}
         </div>
       </div>
 
@@ -91,6 +105,8 @@ export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
           </div>
         </div>
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="contract" />
+      </div>
   )
 }

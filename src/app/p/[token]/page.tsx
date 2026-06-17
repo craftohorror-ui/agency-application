@@ -40,17 +40,17 @@ export default async function PublicProposalPage({ params }: PublicProposalPageP
     throw err
   }
 
-  const { link, proposal, agencyName } = result
+  const { link, proposal, agency } = result
 
   // Fallback to modern-agency if template_id is somehow missing
   const templates = TemplateRegistry.getAll()
   const activeTemplateConfig = TemplateRegistry.getById(proposal.template_id) || templates[0]
   const ActiveComponent = activeTemplateConfig.component
 
-  // Use the agencyName fetched securely by the service role
+  // Use the agency fetched securely by the service role
   const templateData = mapProposalToTemplateData(
     proposal, 
-    { name: agencyName || 'Our Agency' }
+    agency || {}
   )
 
   return (

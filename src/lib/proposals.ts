@@ -77,11 +77,20 @@ export async function createProposal(input: CreateProposalInput, items: CreatePr
     logo_dark_url: agencySettings.logo_dark_url,
     primary_color: agencySettings.primary_color || '#0f172a',
     secondary_color: agencySettings.secondary_color || '#334155',
+    accent_color: agencySettings.accent_color || '#2563eb',
     terms_and_conditions: agencySettings.terms_and_conditions,
     privacy_policy: agencySettings.privacy_policy,
     legal_name: agencySettings.legal_name,
+    registration_number: agencySettings.registration_number,
     tax_id: agencySettings.tax_id,
-    website: agencySettings.website
+    website: agencySettings.website,
+    linkedin_url: agencySettings.linkedin_url,
+    instagram_url: agencySettings.instagram_url,
+    facebook_url: agencySettings.facebook_url,
+    default_proposal_footer: agencySettings.default_proposal_footer,
+    default_contract_footer: agencySettings.default_contract_footer,
+    default_invoice_footer: agencySettings.default_invoice_footer,
+    default_legal_disclaimer: agencySettings.default_legal_disclaimer
   }
 
   const amount = items.reduce((acc, item) => acc + (item.qty * item.unit_price), 0)
@@ -248,11 +257,20 @@ By signing below, the Parties acknowledge that they have read, understood, and a
     logo_dark_url: agencySettings.logo_dark_url,
     primary_color: agencySettings.primary_color || '#0f172a',
     secondary_color: agencySettings.secondary_color || '#334155',
+    accent_color: agencySettings.accent_color || '#2563eb',
     terms_and_conditions: agencySettings.terms_and_conditions,
     privacy_policy: agencySettings.privacy_policy,
     legal_name: agencySettings.legal_name,
+    registration_number: agencySettings.registration_number,
     tax_id: agencySettings.tax_id,
-    website: agencySettings.website
+    website: agencySettings.website,
+    linkedin_url: agencySettings.linkedin_url,
+    instagram_url: agencySettings.instagram_url,
+    facebook_url: agencySettings.facebook_url,
+    default_proposal_footer: agencySettings.default_proposal_footer,
+    default_contract_footer: agencySettings.default_contract_footer,
+    default_invoice_footer: agencySettings.default_invoice_footer,
+    default_legal_disclaimer: agencySettings.default_legal_disclaimer
   }
 
   const { data: contract, error } = await supabase

@@ -22,13 +22,20 @@ export interface TemplateData {
   totalAmount: number
   items: TemplateLineItem[]
   brandColor: string
+  legalName?: string | null
+  registrationNumber?: string | null
+  taxId?: string | null
+  termsConditions?: string | null
+  privacyPolicy?: string | null
+  proposalFooter?: string | null
 }
 
 // Map from the DB raw proposal to TemplateData
 export function mapProposalToTemplateData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   proposal: any,
-  agencyContext: { name: string; logoUrl?: string | null; email?: string | null; phone?: string | null },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  agencyContext: any = {},
   brandColor: string = '#0f172a'
 ): TemplateData {
   const clientName = proposal.client?.name || proposal.lead?.name || 'Client'
@@ -47,14 +54,19 @@ export function mapProposalToTemplateData(
     ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(proposal.created_at))
     : new Date().toLocaleDateString()
 
+  // Fallback priority:
+  // 1. Snapshot stored in proposal
+  // 2. Live agency context passed in
+  const snap = proposal.branding_snapshot || {}
+  
   return {
     title: proposal.title || 'Proposal',
     date: dateStr,
     clientName,
     clientCompany,
-    agencyName: agencyContext.name || 'Our Agency',
-    agencyLogo: agencyContext.logoUrl,
-    agencyEmail: agencyContext.email,
+    agencyName: snap.agency_name || agencyContext.name || 'Our Agency',
+    agencyLogo: snap.logo_url || agencyContext.logo_url || agencyContext.logoUrl,
+    agencyEmail: agencyContext.email, // Not in snapshot currently
     agencyPhone: agencyContext.phone,
     scope: proposal.scope || '',
     deliverables: proposal.deliverables || '',
@@ -62,7 +74,13 @@ export function mapProposalToTemplateData(
     terms: proposal.terms || '',
     totalAmount: Number(proposal.amount),
     items,
-    brandColor
+    brandColor: snap.primary_color || brandColor,
+    legalName: snap.legal_name || agencyContext.legal_name,
+    registrationNumber: snap.registration_number || agencyContext.registration_number,
+    taxId: snap.tax_id || agencyContext.tax_id,
+    termsConditions: snap.terms_and_conditions || agencyContext.terms_and_conditions,
+    privacyPolicy: snap.privacy_policy || agencyContext.privacy_policy,
+    proposalFooter: snap.default_proposal_footer || agencyContext.default_proposal_footer,
   }
 }
 

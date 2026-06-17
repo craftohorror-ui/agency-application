@@ -1,6 +1,8 @@
 import React from 'react'
 import { TemplateData } from '@/lib/templates'
 import { TemplateConfig } from '@/lib/template-registry'
+import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+
 
 export const corporateConfig: TemplateConfig = {
   id: 'corporate',
@@ -188,6 +190,18 @@ export function CorporateTemplate({ data }: CorporateTemplateProps) {
             </div>
             <div className="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap bg-slate-50 p-6 rounded border border-slate-200">
               {data.terms}
+              {data.termsConditions && (
+                <div className="mt-8 pt-6 border-t border-slate-200/60">
+                  <h4 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-xs">Agency Terms & Conditions</h4>
+                  <div className="whitespace-pre-wrap">{data.termsConditions}</div>
+                </div>
+              )}
+              {data.privacyPolicy && (
+                <div className="mt-6">
+                  <h4 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-xs">Privacy Policy</h4>
+                  <div className="whitespace-pre-wrap">{data.privacyPolicy}</div>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -218,6 +232,8 @@ export function CorporateTemplate({ data }: CorporateTemplateProps) {
         </section>
 
       </div>
-    </div>
+    
+        <AgencyTemplateFooter data={data} type="proposal" />
+      </div>
   )
 }

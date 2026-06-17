@@ -26,19 +26,13 @@ export default async function ProposalDetailPage({ params }: PageProps) {
   // Fetch Agency Context
   const { data: agency } = await supabase
     .from('agencies')
-    .select('name, logo_url, settings')
+    .select('*')
     .eq('id', profile.agency_id)
     .single()
 
   const templateData = mapProposalToTemplateData(
     proposal, 
-    { 
-      name: agency?.name || 'Our Agency',
-      logoUrl: agency?.logo_url,
-      // Attempt to extract email/phone if stored in settings jsonb, else null
-      email: null,
-      phone: null
-    }
+    agency || {}
   )
 
   function formatStatus(s: string) {

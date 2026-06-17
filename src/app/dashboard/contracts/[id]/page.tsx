@@ -25,16 +25,13 @@ export default async function ContractDetailPage({ params }: PageProps) {
   // Fetch Agency Context
   const { data: agency } = await supabase
     .from('agencies')
-    .select('name, logo_url')
+    .select('*')
     .eq('id', profile.agency_id)
     .single()
 
   const templateData = mapContractToTemplateData(
     contract, 
-    { 
-      name: agency?.name || 'Our Agency',
-      logoUrl: agency?.logo_url
-    }
+    agency || {}
   )
 
   const versions = await listContractVersions(contract.id)
