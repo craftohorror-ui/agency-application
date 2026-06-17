@@ -141,7 +141,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
 
               <div className="flex justify-between items-end">
                 <div className="text-sm font-bold uppercase tracking-widest text-slate-400">Total Investment</div>
-                <div className="font-black text-4xl" style={{ color: primaryColor }}>
+                <div className="font-black text-4xl text-white">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
                 </div>
               </div>
