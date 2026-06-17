@@ -10,7 +10,7 @@ const wrapNumericValues = (text: string) => {
   const parts = text.split(regex);
   return parts.map((part, i) => {
     if (i % 2 === 1) {
-      return <span key={i} className={contractDesignTokens.typography.numeric}>{part}</span>;
+      return <span key={i} className={`${contractDesignTokens.typography.numeric} ${contractDesignTokens.typography.tableIdentifier}`}>{part}</span>;
     }
     return part;
   });
@@ -65,14 +65,36 @@ export const PremiumMarkdownComponents: Components = {
   thead: ({ _node, ...props }: any) => (
     <thead className="bg-black/5 border-b border-current/20" {...props} />
   ),
-  th: ({ _node, ...props }: any) => (
-    <th className="p-6 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0" {...props} />
-  ),
+  th: ({ _node, ...props }: any) => {
+    const getText = (children: any): string => {
+      if (typeof children === 'string') return children;
+      if (Array.isArray(children)) return children.map(getText).join('');
+      if (React.isValidElement(children)) return getText((children.props as any).children);
+      return '';
+    };
+    
+    const textContent = getText(props.children).toLowerCase();
+    let widthClass = "";
+    
+    if (textContent.includes("service") || textContent.includes("item") || textContent.includes("description") || textContent.includes("deliverable")) {
+      widthClass = "w-[55%]";
+    } else if (textContent.includes("qty") || textContent.includes("quantity")) {
+      widthClass = "w-[15%]";
+    } else if (textContent.includes("rate") || textContent.includes("price")) {
+      widthClass = "w-[15%]";
+    } else if (textContent.includes("amount") || textContent.includes("total")) {
+      widthClass = "w-[15%]";
+    }
+
+    return (
+      <th className={`p-6 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0 ${widthClass}`} {...props} />
+    );
+  },
   tbody: ({ _node, ...props }: any) => (
     <tbody className="divide-y divide-current/10" {...props} />
   ),
   td: ({ _node, ...props }: any) => (
-    <td className={`p-8 align-top text-lg leading-relaxed border-r border-current/10 last:border-r-0 ${contractDesignTokens.typography.dataValue}`} {...props}>
+    <td className={`p-8 align-top text-lg leading-relaxed border-r border-current/10 last:border-r-0 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
       {formatChildren(props.children)}
     </td>
   ),

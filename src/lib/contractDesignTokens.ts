@@ -10,7 +10,8 @@ export const contractDesignTokens = {
     signatureTitle: "text-sm font-bold uppercase tracking-widest mb-2",
     signatureValue: "text-lg font-medium",
     numeric: "font-sans tabular-nums tracking-normal font-semibold",
-    dataValue: "break-words overflow-wrap-anywhere min-w-0"
+    tableHumanContent: "break-normal whitespace-normal min-w-0",
+    tableIdentifier: "break-words [overflow-wrap:anywhere] min-w-0"
   },
   spacing: {
     sectionTop: "mt-24",
