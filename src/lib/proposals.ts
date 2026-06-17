@@ -205,40 +205,47 @@ export async function convertProposalToContract(id: string) {
     }
   }
 
-  const itemsList = proposal.items.map(i => `- ${i.qty}x ${i.description} @ $${i.unit_price} each`).join('\n')
+  const formattedDeliverables = proposal.deliverables
+    ? proposal.deliverables.split('\n').filter(d => d.trim()).map(d => {
+        const clean = d.trim()
+        return clean.startsWith('-') || clean.startsWith('•') || clean.startsWith('*') ? clean : `* ${clean}`
+      }).join('\n\n')
+    : '* Deliverables will be provided as outlined and mutually agreed upon.';
+
+  const itemsList = proposal.items.map(i => `* **${i.qty}x ${i.description}** — $${i.unit_price} each`).join('\n\n')
+
+  const formattedPaymentTerms = proposal.terms 
+    ? proposal.terms.split('\n').filter(t => t.trim()).map(t => {
+        const clean = t.trim()
+        return clean.startsWith('-') || clean.startsWith('•') || clean.startsWith('*') ? clean : `* ${clean}`
+      }).join('\n\n')
+    : '* Invoices shall be paid within the agreed upon terms.';
 
   const agencyName = agencySettings.legal_name || agencySettings.name || 'Agency'
   const repName = repProfile.full_name || 'Authorized Representative'
-  const repTitle = repProfile.title ? `\n${repProfile.title}` : ''
-  const repEmail = repProfile.email ? `\nEmail: ${repProfile.email}` : ''
-  const repPhone = repProfile.phone ? `\nPhone: ${repProfile.phone}` : ''
-  
   const clientName = proposal.client?.name || 'Client'
   const clientCompany = proposal.client?.company || clientName
-  const clientEmail = proposal.client?.email ? `\nEmail: ${proposal.client.email}` : ''
-  const clientPhone = proposal.client?.phone ? `\nPhone: ${proposal.client.phone}` : ''
-  const clientAddress = proposal.client?.address ? `\n\nBusiness Address:\n${proposal.client.address}` : ''
-
   const agreementNumber = `CTR-${new Date().getFullYear()}-${proposal.id.slice(0, 8).toUpperCase()}`
 
-  const taxIdBlock = agencySettings.tax_id ? `Tax ID: ${agencySettings.tax_id}\n` : ''
-  const regNoBlock = agencySettings.registration_number ? `Registration No: ${agencySettings.registration_number}\n` : ''
+  const contractBody = `# MASTER SERVICE AGREEMENT
 
-  const contractBody = `MASTER SERVICE AGREEMENT
+**Agreement Number:** ${agreementNumber}  
+**Effective Date:** ${new Date().toLocaleDateString()}
 
-Agreement Number: ${agreementNumber}
+---
 
-Effective Date: ${new Date().toLocaleDateString()}
+## PARTIES
 
-This Master Service Agreement ("Agreement")
-is entered into between:
+### Agency
 
 **${agencyName.toUpperCase()}**
-${taxIdBlock}${regNoBlock}
-Represented By:
-${repName}${repTitle}
+${agencySettings.registration_number ? `Registration No:\n${agencySettings.registration_number}\n\n` : ''}${agencySettings.tax_id ? `GSTIN / Tax ID:\n${agencySettings.tax_id}\n\n` : ''}Represented By:
+${repName}
+${repProfile.title || 'Authorized Representative'}
 
-AND
+---
+
+### Client
 
 **${clientCompany.toUpperCase()}**
 
@@ -250,31 +257,53 @@ Together referred to as the "Parties".
 ---
 
 ## 1. SERVICES
+
 ${proposal.scope || 'Services will be provided as outlined and mutually agreed upon.'}
 
+---
+
 ## 2. DELIVERABLES
-${proposal.deliverables || 'Deliverables will be provided as outlined and mutually agreed upon.'}
+
+${formattedDeliverables}
+
+---
 
 ## 3. TIMELINE
-${proposal.timeline || 'The timeline will be mutually agreed upon prior to the commencement of work.'}
+
+**${proposal.timeline || 'Timeline to be mutually agreed upon prior to commencement.'}**
+
+---
 
 ## 4. COMMERCIAL TERMS
 
-**Total Fees:** $${proposal.amount}
+### CONTRACT VALUE
+**$${proposal.amount.toLocaleString()}**
 
-**Line Items:**
+### LINE ITEMS
 ${itemsList}
 
+---
+
 ## 5. PAYMENT TERMS
-${proposal.terms || 'Invoices shall be paid within the agreed upon terms.'}
+
+${formattedPaymentTerms}
+
+---
 
 ## 6. CONFIDENTIALITY
+
 Each Party agrees to retain in confidence the non-public information and know-how transmitted or disclosed to them by the other Party in the course of performing this Agreement. Neither Party shall disclose such information to any third party without prior written consent.
 
+---
+
 ## 7. TERMINATION
+
 Either Party may terminate this Agreement for convenience upon providing thirty (30) days prior written notice to the other Party. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the date of termination.
 
+---
+
 ## 8. GOVERNING LAW
+
 This Agreement shall be governed by and construed in accordance with the laws of the applicable jurisdiction, without regard to its conflict of law principles.
 `
   
