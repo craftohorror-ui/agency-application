@@ -270,6 +270,11 @@ export interface Invoice {
   is_recurring: boolean
   recurring_interval: string | null
   notes: string | null
+  currency: string
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  tax_type: string
+  template_id: string
   created_at: string
   updated_at: string
   branding_snapshot: Record<string, unknown> | null

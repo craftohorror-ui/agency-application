@@ -24,6 +24,11 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
   const issue_date = formData.get('issue_date') as string
   const due_date = formData.get('due_date') as string
   const tax_rate = parseFloat(formData.get('tax_rate') as string) || 0
+  const tax_type = formData.get('tax_type') as string || 'none'
+  const currency = formData.get('currency') as string || 'USD'
+  const discount_type = formData.get('discount_type') as 'percentage' | 'fixed' || 'fixed'
+  const discount_value = parseFloat(formData.get('discount_value') as string) || 0
+  const template_id = formData.get('template_id') as string || 'modern-business'
   const notes = formData.get('notes') as string
   const status = formData.get('status') as InvoiceStatus
 
@@ -47,6 +52,11 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
       issue_date,
       due_date,
       tax_rate,
+      tax_type,
+      currency,
+      discount_type,
+      discount_value,
+      template_id,
       notes,
       status
     }, items)
@@ -68,6 +78,11 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
   const issue_date = formData.get('issue_date') as string
   const due_date = formData.get('due_date') as string
   const tax_rate = parseFloat(formData.get('tax_rate') as string) || 0
+  const tax_type = formData.get('tax_type') as string || 'none'
+  const currency = formData.get('currency') as string || 'USD'
+  const discount_type = formData.get('discount_type') as 'percentage' | 'fixed' || 'fixed'
+  const discount_value = parseFloat(formData.get('discount_value') as string) || 0
+  const template_id = formData.get('template_id') as string || 'modern-business'
   const notes = formData.get('notes') as string
   const status = formData.get('status') as InvoiceStatus
 
@@ -90,6 +105,11 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
       issue_date,
       due_date,
       tax_rate,
+      tax_type,
+      currency,
+      discount_type,
+      discount_value,
+      template_id,
       notes,
       status
     }, items)
@@ -147,4 +167,11 @@ export async function generateInvoiceFromProjectAction(projectId: string) {
   revalidatePath(`/dashboard/projects/${projectId}`)
   revalidatePath('/dashboard/invoices')
   redirect(`/dashboard/invoices/${invoiceId}?success=Invoice+marked+as+paid`)
+}
+
+export async function updateInvoiceTemplateAction(id: string, templateId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await updateInvoice(id, { template_id: templateId } as any)
+  revalidatePath(`/dashboard/invoices/${id}`)
+  revalidatePath('/dashboard/invoices')
 }

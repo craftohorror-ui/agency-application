@@ -14,10 +14,25 @@ export interface InvoiceWithRelations extends Invoice {
 // CORE CALCULATIONS
 // -------------------------------------------------------------
 
-function calculateTotals(items: { qty: number; unit_price: number }[], taxRate: number) {
+function calculateTotals(
+  items: { qty: number; unit_price: number }[], 
+  taxRate: number,
+  discountType: string = 'fixed',
+  discountValue: number = 0
+) {
   const subtotal = items.reduce((sum, item) => sum + (item.qty * item.unit_price), 0)
-  const taxAmount = (subtotal * taxRate) / 100
-  const total = subtotal + taxAmount
+  
+  let discountAmount = 0
+  if (discountType === 'percentage') {
+    discountAmount = subtotal * (discountValue / 100)
+  } else {
+    discountAmount = discountValue
+  }
+  
+  const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount)
+  const taxAmount = (subtotalAfterDiscount * taxRate) / 100
+  const total = subtotalAfterDiscount + taxAmount
+  
   return { subtotal, taxAmount, total }
 }
 
@@ -41,7 +56,7 @@ export async function recalculateInvoice(id: string) {
 
   const { data: invoice } = await supabase
     .from('invoices')
-    .select('status, due_date, tax_rate, amount_paid')
+    .select('status, due_date, tax_rate, amount_paid, discount_type, discount_value')
     .eq('id', id)
     .single()
 
@@ -52,7 +67,12 @@ export async function recalculateInvoice(id: string) {
     .select('qty, unit_price')
     .eq('invoice_id', id)
 
-  const { subtotal, taxAmount, total } = calculateTotals(items || [], invoice.tax_rate)
+  const { subtotal, taxAmount, total } = calculateTotals(
+    items || [], 
+    invoice.tax_rate, 
+    invoice.discount_type, 
+    invoice.discount_value
+  )
   const newStatus = determineStatus(invoice.amount_paid, total, invoice.due_date, invoice.status)
 
   await supabase.from('invoices').update({
@@ -127,6 +147,11 @@ export type CreateInvoiceInput = {
   issue_date: string
   due_date: string
   tax_rate?: number
+  tax_type?: string
+  currency?: string
+  discount_type?: string
+  discount_value?: number
+  template_id?: string
   notes?: string | null
 }
 

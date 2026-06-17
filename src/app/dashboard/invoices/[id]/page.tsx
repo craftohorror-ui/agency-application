@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { recordPaymentAction, deletePaymentAction, updateInvoiceStatusAction, deleteInvoiceAction } from '../actions'
+import { InvoiceExportModal } from '@/components/invoices/invoice-export-modal'
+import { mapInvoiceToTemplateData } from '@/lib/invoice-template-registry'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -48,8 +50,10 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency || 'USD' }).format(amount)
   }
+
+  const templateData = mapInvoiceToTemplateData(invoice, agency)
 
   const outstandingBalance = invoice.total - invoice.amount_paid
 
@@ -64,6 +68,11 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className='flex gap-2 flex-wrap'>
+          <InvoiceExportModal 
+            invoiceId={invoice.id} 
+            initialTemplateId={invoice.template_id || 'modern-business'}
+            templateData={templateData}
+          />
           <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
             <Button variant="outline">Edit Invoice</Button>
           </Link>

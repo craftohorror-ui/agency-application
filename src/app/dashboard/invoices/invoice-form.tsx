@@ -32,19 +32,35 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
   const [items, setItems] = useState<CreateInvoiceItemInput[]>(
     invoice?.items?.map(i => ({ description: i.description, qty: i.qty, unit_price: i.unit_price })) || []
   )
+  const [currency, setCurrency] = useState<string>(invoice?.currency || 'USD')
+  const [discountType, setDiscountType] = useState<string>(invoice?.discount_type || 'fixed')
+  const [discountValue, setDiscountValue] = useState<number>(invoice?.discount_value || 0)
+  const [taxType, setTaxType] = useState<string>(invoice?.tax_type || 'none')
   const [taxRate, setTaxRate] = useState<number>(invoice?.tax_rate || 0)
 
   const [subtotal, setSubtotal] = useState(0)
+  const [discountAmount, setDiscountAmount] = useState(0)
   const [taxAmount, setTaxAmount] = useState(0)
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
     const newSubtotal = items.reduce((sum, item) => sum + (item.qty * item.unit_price), 0)
-    const newTaxAmount = (newSubtotal * taxRate) / 100
+    
+    let newDiscountAmount = 0
+    if (discountType === 'percentage') {
+      newDiscountAmount = newSubtotal * (discountValue / 100)
+    } else {
+      newDiscountAmount = discountValue
+    }
+    
+    const subtotalAfterDiscount = Math.max(0, newSubtotal - newDiscountAmount)
+    const newTaxAmount = (subtotalAfterDiscount * taxRate) / 100
+    
     setSubtotal(newSubtotal)
+    setDiscountAmount(newDiscountAmount)
     setTaxAmount(newTaxAmount)
-    setTotal(newSubtotal + newTaxAmount)
-  }, [items, taxRate])
+    setTotal(subtotalAfterDiscount + newTaxAmount)
+  }, [items, taxRate, discountType, discountValue])
 
   const addItem = () => {
     setItems([...items, { description: '', qty: 1, unit_price: 0 }])
@@ -61,7 +77,7 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)
   }
 
   return (
@@ -110,6 +126,44 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <select
+                  id="currency"
+                  name="currency"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                >
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="AUD">AUD ($)</option>
+                  <option value="CAD">CAD ($)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template_id">Template</Label>
+                <select
+                  id="template_id"
+                  name="template_id"
+                  defaultValue={invoice?.template_id || 'modern-business'}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                >
+                  <option value="modern-business">Modern Business</option>
+                  <option value="executive-invoice">Executive Invoice</option>
+                  <option value="consulting-invoice">Consulting Invoice</option>
+                  <option value="marketing-invoice">Marketing Agency</option>
+                  <option value="saas-invoice">SaaS Invoice</option>
+                  <option value="enterprise-invoice">Enterprise Invoice</option>
+                </select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -211,20 +265,66 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
                 <span className="font-medium text-muted-foreground">Subtotal</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
+              
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="tax_rate" className="text-muted-foreground">Tax Rate (%)</Label>
+                  <select
+                    id="discount_type"
+                    name="discount_type"
+                    value={discountType}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground"
+                  >
+                    <option value="fixed">Discount ($)</option>
+                    <option value="percentage">Discount (%)</option>
+                  </select>
                   <Input
-                    id="tax_rate"
-                    name="tax_rate"
+                    id="discount_value"
+                    name="discount_value"
                     type="number"
                     step="0.01"
                     min="0"
-                    max="100"
-                    value={taxRate}
-                    onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
                     className="w-20 h-8"
                   />
+                </div>
+                <span>-{formatCurrency(discountAmount)}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <select
+                    id="tax_type"
+                    name="tax_type"
+                    value={taxType}
+                    onChange={(e) => setTaxType(e.target.value)}
+                    className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground"
+                  >
+                    <option value="none">No Tax</option>
+                    <option value="gst">GST</option>
+                    <option value="vat">VAT</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  {taxType !== 'none' && (
+                    <>
+                      <Label htmlFor="tax_rate" className="text-muted-foreground ml-2">Rate (%)</Label>
+                      <Input
+                        id="tax_rate"
+                        name="tax_rate"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={taxRate}
+                        onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
+                        className="w-20 h-8"
+                      />
+                    </>
+                  )}
+                  {taxType === 'none' && (
+                    <input type="hidden" name="tax_rate" value="0" />
+                  )}
                 </div>
                 <span>{formatCurrency(taxAmount)}</span>
               </div>
