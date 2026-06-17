@@ -97,7 +97,7 @@ export function ConvertToInvoiceButton({ proposalId, clientId, disabled }: Conve
               Cancel
             </Button>
             {existingInvoices.length > 0 && (
-              <Button variant="secondary" onClick={() => router.push(`/dashboard/invoices/${existingInvoices[0].id}`)} disabled={isConverting}>
+              <Button variant="outline" onClick={() => router.push(`/dashboard/invoices/${existingInvoices[0].id}`)} disabled={isConverting}>
                 Open Existing
               </Button>
             )}

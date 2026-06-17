@@ -12,6 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createInvoiceAction, updateInvoiceAction, type InvoiceFormState } from './actions'
 import type { InvoiceWithRelations, CreateInvoiceItemInput } from '@/lib/invoices'
 
+interface ProjectInvoiceItem {
+  description: string
+  qty: number | string
+  unit_price: number | string
+}
+
 interface InvoiceFormProps {
   invoice?: InvoiceWithRelations
   clients: { id: string; name: string; company: string | null }[]
@@ -102,7 +108,7 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
         if (!confirmed) return
       }
 
-      const mappedItems = data.map((item: any) => ({
+      const mappedItems = data.map((item: ProjectInvoiceItem) => ({
         description: item.description,
         qty: Number(item.qty),
         unit_price: Number(item.unit_price)
