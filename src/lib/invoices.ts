@@ -11,6 +11,23 @@ export interface InvoiceWithRelations extends Invoice {
 }
 
 // -------------------------------------------------------------
+// ENHANCEMENT MAPPER (Temporary until migration)
+// -------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapInvoiceEnhancements(invoice: any) {
+  if (!invoice) return invoice
+  if (invoice.currency === undefined) {
+    invoice.currency = invoice.branding_snapshot?.currency || 'USD'
+    invoice.discount_type = invoice.branding_snapshot?.discount_type || 'fixed'
+    invoice.discount_value = invoice.branding_snapshot?.discount_value || 0
+    invoice.tax_type = invoice.branding_snapshot?.tax_type || 'none'
+    invoice.template_id = invoice.branding_snapshot?.template_id || 'modern-business'
+  }
+  return invoice
+}
+
+// -------------------------------------------------------------
 // CORE CALCULATIONS
 // -------------------------------------------------------------
 
@@ -56,7 +73,7 @@ export async function recalculateInvoice(id: string) {
 
   const { data: invoice } = await supabase
     .from('invoices')
-    .select('status, due_date, tax_rate, amount_paid, discount_type, discount_value')
+    .select('status, due_date, tax_rate, amount_paid, branding_snapshot')
     .eq('id', id)
     .single()
 
@@ -67,11 +84,14 @@ export async function recalculateInvoice(id: string) {
     .select('qty, unit_price')
     .eq('invoice_id', id)
 
+  const discount_type = invoice.branding_snapshot?.discount_type || 'fixed'
+  const discount_value = invoice.branding_snapshot?.discount_value || 0
+
   const { subtotal, taxAmount, total } = calculateTotals(
     items || [], 
     invoice.tax_rate, 
-    invoice.discount_type, 
-    invoice.discount_value
+    discount_type, 
+    discount_value
   )
   const newStatus = determineStatus(invoice.amount_paid, total, invoice.due_date, invoice.status)
 
@@ -120,7 +140,7 @@ export async function listInvoices(search?: string, status?: InvoiceStatus) {
   const { data, error, count } = await query
   if (error) throw new Error(error.message)
 
-  return { invoices: data as InvoiceWithRelations[], count }
+  return { invoices: (data || []).map(mapInvoiceEnhancements) as InvoiceWithRelations[], count }
 }
 
 export async function getInvoice(id: string): Promise<InvoiceWithRelations | null> {
@@ -137,7 +157,7 @@ export async function getInvoice(id: string): Promise<InvoiceWithRelations | nul
     .maybeSingle()
 
   if (error) throw new Error(error.message)
-  return data as InvoiceWithRelations | null
+  return mapInvoiceEnhancements(data) as InvoiceWithRelations | null
 }
 
 export type CreateInvoiceInput = {
@@ -193,18 +213,25 @@ export async function createInvoice(input: CreateInvoiceInput, items: CreateInvo
   // Use agency default notes/disclaimer if none provided
   const notes = input.notes || agencySettings.default_invoice_footer
 
+  // Temporary fix: strip new columns that aren't in the DB yet
+  const { tax_type, currency, discount_type, discount_value, template_id, ...safeInput } = input
+
   const { data: invoice, error: invError } = await supabase
     .from('invoices')
     .insert({
-      ...input,
+      ...safeInput,
       notes,
       tax_rate: taxRate,
       subtotal,
       tax_amount: taxAmount,
       total,
       amount_paid: 0,
-      status: input.status || 'draft',
-      branding_snapshot
+      status: safeInput.status || 'draft',
+      branding_snapshot: {
+        ...branding_snapshot,
+        // Store template data here temporarily until migration runs
+        tax_type, currency, discount_type, discount_value, template_id
+      }
     })
     .select('*')
     .single()
@@ -225,9 +252,28 @@ export async function createInvoice(input: CreateInvoiceInput, items: CreateInvo
 export async function updateInvoice(id: string, input: Partial<CreateInvoiceInput>, items?: CreateInvoiceItemInput[]) {
   const { supabase } = await requireStaff()
 
+  // Temporary fix: strip new columns that aren't in the DB yet
+  const { tax_type, currency, discount_type, discount_value, template_id, ...safeInput } = input
+
+  // Fetch current branding snapshot to preserve and update
+  const { data: existing } = await supabase.from('invoices').select('branding_snapshot').eq('id', id).single()
+  const existingSnapshot = existing?.branding_snapshot || {}
+  
+  const updatedSnapshot = {
+    ...existingSnapshot,
+    tax_type: tax_type !== undefined ? tax_type : existingSnapshot.tax_type,
+    currency: currency !== undefined ? currency : existingSnapshot.currency,
+    discount_type: discount_type !== undefined ? discount_type : existingSnapshot.discount_type,
+    discount_value: discount_value !== undefined ? discount_value : existingSnapshot.discount_value,
+    template_id: template_id !== undefined ? template_id : existingSnapshot.template_id,
+  }
+
   const { error: invError } = await supabase
     .from('invoices')
-    .update(input)
+    .update({
+      ...safeInput,
+      branding_snapshot: updatedSnapshot
+    })
     .eq('id', id)
 
   if (invError) throw new Error(invError.message)
@@ -266,7 +312,7 @@ export async function listPortalInvoices() {
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
-  return data as InvoiceWithRelations[]
+  return (data || []).map(mapInvoiceEnhancements) as InvoiceWithRelations[]
 }
 
 export async function getPortalInvoice(id: string): Promise<InvoiceWithRelations | null> {
@@ -285,7 +331,7 @@ export async function getPortalInvoice(id: string): Promise<InvoiceWithRelations
     .maybeSingle()
 
   if (error) throw new Error(error.message)
-  return data as InvoiceWithRelations | null
+  return mapInvoiceEnhancements(data) as InvoiceWithRelations | null
 }
 
 export async function generateInvoiceFromProject(projectId: string) {
