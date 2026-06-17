@@ -10,10 +10,11 @@ interface PageProps {
 }
 
 export default async function EditInvoicePage({ params }: PageProps) {
-  await requireStaff()
-  const resolvedParams = await params
+  try {
+    await requireStaff()
+    const resolvedParams = await params
 
-  const invoice = await getInvoice(resolvedParams.id)
+    const invoice = await getInvoice(resolvedParams.id)
   if (!invoice) notFound()
 
   const { clients } = await listClients()
@@ -29,4 +30,12 @@ export default async function EditInvoicePage({ params }: PageProps) {
       <InvoiceForm invoice={invoice} clients={clients} projects={projects} />
     </div>
   )
+  } catch (err: any) {
+    return (
+      <div className="p-8 bg-red-50 text-red-900 overflow-auto">
+        <h1 className="text-2xl font-bold mb-4">Runtime Error Diagnosis (Edit Page)</h1>
+        <pre className="whitespace-pre-wrap">{err.stack || err.message || String(err)}</pre>
+      </div>
+    )
+  }
 }

@@ -17,10 +17,11 @@ interface PageProps {
 }
 
 export default async function InvoiceDetailPage({ params }: PageProps) {
-  await requireStaff()
-  const resolvedParams = await params
+  try {
+    await requireStaff()
+    const resolvedParams = await params
 
-  const invoice = await getInvoice(resolvedParams.id)
+    const invoice = await getInvoice(resolvedParams.id)
   if (!invoice) notFound()
 
   // Fetch Agency Context for fallback
@@ -247,4 +248,12 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
       </div>
     </div>
   )
+  } catch (err: any) {
+    return (
+      <div className="p-8 bg-red-50 text-red-900 overflow-auto">
+        <h1 className="text-2xl font-bold mb-4">Runtime Error Diagnosis</h1>
+        <pre className="whitespace-pre-wrap">{err.stack || err.message || String(err)}</pre>
+      </div>
+    )
+  }
 }
