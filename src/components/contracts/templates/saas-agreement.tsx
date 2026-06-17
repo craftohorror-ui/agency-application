@@ -1,6 +1,8 @@
 import React from 'react'
 import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-template-registry'
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 
 export const saasAgreementConfig: ContractTemplateConfig = {
@@ -62,8 +64,10 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
 
       {/* Main Content */}
       <div className="p-16 space-y-8 bg-slate-50 text-slate-800">
-        <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-violet-600 whitespace-pre-wrap">
-          {data.body}
+        <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-violet-600">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {data.body}
+          </ReactMarkdown>
               {data.termsConditions && (
                 <div className="mt-12 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>

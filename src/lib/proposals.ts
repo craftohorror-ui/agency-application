@@ -230,88 +230,52 @@ Agreement Number: ${agreementNumber}
 
 Effective Date: ${new Date().toLocaleDateString()}
 
-Between
+This Master Service Agreement ("Agreement")
+is entered into between:
 
-${agencyName}
+**${agencyName.toUpperCase()}**
 ${taxIdBlock}${regNoBlock}
 Represented By:
 ${repName}${repTitle}
 
 AND
 
-${clientCompany}
+**${clientCompany.toUpperCase()}**
 
 Represented By:
 ${clientName}
 
----
-
-## Parties
-
-This Master Service Agreement ("Agreement") is entered into on ${new Date().toLocaleDateString()} by and between:
-
-### Agency
-${agencyName}
-${agencySettings.registration_number ? `Registration Number:\n${agencySettings.registration_number}\n\n` : ''}${agencySettings.tax_id ? `Tax ID:\n${agencySettings.tax_id}\n\n` : ''}Authorized Representative:
-${repName}${repEmail}${repPhone}
-
-(Hereinafter referred to as "Agency")
-
-### Client
-${clientCompany}
-
-Authorized Representative:
-${clientName}${clientEmail}${clientPhone}${clientAddress}
-
-(Hereinafter referred to as "Client")
-
-Collectively referred to as "Parties".
+Together referred to as the "Parties".
 
 ---
 
-## Services
+## 1. SERVICES
 ${proposal.scope || 'Services will be provided as outlined and mutually agreed upon.'}
 
-## Deliverables
+## 2. DELIVERABLES
 ${proposal.deliverables || 'Deliverables will be provided as outlined and mutually agreed upon.'}
 
-## Project Timeline
+## 3. TIMELINE
 ${proposal.timeline || 'The timeline will be mutually agreed upon prior to the commencement of work.'}
 
----
-
-## Commercial Terms
+## 4. COMMERCIAL TERMS
 
 **Total Fees:** $${proposal.amount}
 
 **Line Items:**
 ${itemsList}
 
-**Payment Terms:**
+## 5. PAYMENT TERMS
 ${proposal.terms || 'Invoices shall be paid within the agreed upon terms.'}
 
----
+## 6. CONFIDENTIALITY
+Each Party agrees to retain in confidence the non-public information and know-how transmitted or disclosed to them by the other Party in the course of performing this Agreement. Neither Party shall disclose such information to any third party without prior written consent.
 
-## Signatures
+## 7. TERMINATION
+Either Party may terminate this Agreement for convenience upon providing thirty (30) days prior written notice to the other Party. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the date of termination.
 
-**CLIENT**
-
-Name: ${clientName}
-Company: ${clientCompany}
-
-Signature: ___________________________
-
-Date: ___________________________
-
-
-**AGENCY**
-
-Name: ${repName}
-${repProfile.title ? `Position: ${repProfile.title}\n` : ''}Company: ${agencyName}
-
-Signature: ___________________________
-
-Date: ___________________________
+## 8. GOVERNING LAW
+This Agreement shall be governed by and construed in accordance with the laws of the applicable jurisdiction, without regard to its conflict of law principles.
 `
   
   const branding_snapshot = {

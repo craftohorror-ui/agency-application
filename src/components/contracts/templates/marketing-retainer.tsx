@@ -1,6 +1,8 @@
 import React from 'react'
 import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-template-registry'
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 
 export const marketingRetainerConfig: ContractTemplateConfig = {
@@ -54,8 +56,10 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
 
       {/* Content */}
       <div className="px-16 py-8 space-y-8 bg-white mx-8 rounded-3xl shadow-sm border border-rose-50 mb-16">
-        <div className="prose prose-rose max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-rose-950 prose-p:text-slate-600 prose-p:leading-loose whitespace-pre-wrap">
-          {data.body}
+        <div className="prose prose-rose max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-rose-950 prose-p:text-slate-600 prose-p:leading-loose">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {data.body}
+          </ReactMarkdown>
               {data.termsConditions && (
                 <div className="mt-12 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
