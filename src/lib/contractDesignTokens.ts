@@ -9,7 +9,7 @@ export const contractDesignTokens = {
     legal: "text-sm leading-relaxed",
     signatureTitle: "text-sm font-bold uppercase tracking-widest mb-2",
     signatureValue: "text-lg font-medium",
-    numeric: "tabular-nums tracking-normal font-semibold",
+    numeric: "font-sans tabular-nums tracking-normal font-semibold",
     dataValue: "break-words overflow-wrap-anywhere min-w-0"
   },
   spacing: {

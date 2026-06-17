@@ -6,7 +6,7 @@ import { Components } from 'react-markdown';
 import { contractDesignTokens } from '@/lib/contractDesignTokens';
 
 const wrapNumericValues = (text: string) => {
-  const regex = /(\$\d+(?:,\d{3})*(?:\.\d+)?|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b[A-Z]+-[A-Z0-9-]+\b|\b\d+\s+(?:Days|Months|Weeks|Years)\b|\b\d+(?:,\d{3})*(?:\.\d+)?\b)/;
+  const regex = /(\$\d+(?:,\d{3})*(?:\.\d+)?|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b[A-Z]+-[A-Z0-9-]+\b|\b(?:[A-Z]+[0-9]+[A-Z0-9]*|[0-9]+[A-Z]+[A-Z0-9]*)\b|\b\d+\s+(?:Days|Months|Weeks|Years)\b|\b\d+(?:,\d{3})*(?:\.\d+)?\b)/;
   const parts = text.split(regex);
   return parts.map((part, i) => {
     if (i % 2 === 1) {
@@ -59,7 +59,7 @@ export const PremiumMarkdownComponents: Components = {
   ),
   table: ({ _node, ...props }: any) => (
     <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} [&_strong]:text-2xl [&_strong]:font-black [&_strong]:tracking-tight`}>
-      <table className="w-full text-left border-collapse" {...props} />
+      <table className="w-full text-left border-collapse table-fixed" {...props} />
     </div>
   ),
   thead: ({ _node, ...props }: any) => (
