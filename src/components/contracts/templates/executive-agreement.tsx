@@ -24,32 +24,32 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-slate-50 min-h-[1056px] text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Cover Page */}
-      <div className="h-[1056px] flex flex-col justify-between p-16 bg-slate-900 text-slate-100 print:bg-slate-900 print:break-after-page print:color-adjust-exact">
-        <div className="flex justify-between items-start mt-8">
+      <div className="flex flex-col p-16 bg-slate-900 text-slate-100 print:bg-slate-900 print:break-after-page print:color-adjust-exact">
+        <div className="flex justify-between items-start mt-4">
           <div>
             <h2 className="text-3xl font-black tracking-[0.3em] uppercase text-slate-100">{data.agencyName}</h2>
             {data.agencyLogo && <img src={data.agencyLogo} alt="Logo" className="h-16 mt-6 brightness-0 invert" />}
           </div>
         </div>
 
-        <div className="space-y-10 max-w-3xl mt-12 mb-12">
-          <div className="w-24 h-1 bg-[#D4AF37] mb-12"></div>
-          <h1 className={`${contractDesignTokens.typography.coverTitle} tracking-wide uppercase`}>
+        <div className="space-y-10 max-w-3xl mt-24 mb-16">
+          <div className="w-24 h-1 bg-[#D4AF37] mb-8"></div>
+          <h1 className={`${contractDesignTokens.typography.coverTitle} tracking-wide uppercase break-words`}>
             {data.title}
           </h1>
           <p className="text-2xl text-slate-400 font-sans tracking-[0.4em] uppercase mt-8 border-l-2 border-[#D4AF37] pl-6">Confidential Agreement</p>
         </div>
 
-        <div className="border-t border-slate-700/50 pt-16">
-          <div className="grid grid-cols-2 gap-16 font-sans">
-            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30">
+        <div className="border-t border-slate-700/50 pt-12 mt-12">
+          <div className="flex flex-wrap gap-8 font-sans">
+            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30 flex-1 min-w-[280px]">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-[0.3em] mb-4">Prepared For</h3>
-              <p className="text-2xl font-black text-slate-100">{data.clientName}</p>
-              {data.clientCompany && <p className="text-lg text-slate-400 mt-2">{data.clientCompany}</p>}
+              <p className="text-2xl font-black text-slate-100 break-words">{data.clientName}</p>
+              {data.clientCompany && <p className="text-lg text-slate-400 mt-2 break-words">{data.clientCompany}</p>}
             </div>
-            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30">
+            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30 flex-1 min-w-[280px]">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-[0.3em] mb-4">Effective Date</h3>
-              <p className={`text-2xl font-black text-slate-100 ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
+              <p className={`text-2xl font-black text-slate-100 break-words ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
             </div>
           </div>
         </div>
