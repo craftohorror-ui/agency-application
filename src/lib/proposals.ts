@@ -6,7 +6,7 @@ import type { Proposal, ProposalItem, ProposalStatus } from '@/lib/types'
 
 export interface ProposalWithRelations extends Proposal {
   items: ProposalItem[]
-  client: { id: string; name: string; company: string | null } | null
+  client: { id: string; name: string; company: string | null; email: string | null; phone: string | null; address: string | null; } | null
   lead: { id: string; name: string; company: string | null } | null
 }
 
@@ -15,7 +15,7 @@ export async function listProposals(search?: string, status?: ProposalStatus) {
 
   let query = supabase
     .from('proposals')
-    .select('*, client:clients(id, name, company), lead:leads(id, name, company)', { count: 'exact' })
+    .select('*, client:clients(id, name, company, email, phone, address), lead:leads(id, name, company)', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (search?.trim()) {
@@ -40,7 +40,7 @@ export async function getProposal(id: string): Promise<ProposalWithRelations | n
     .select(`
       *,
       items:proposal_items(*),
-      client:clients(id, name, company),
+      client:clients(id, name, company, email, phone, address),
       lead:leads(id, name, company)
     `)
     .eq('id', id)
@@ -184,72 +184,135 @@ export async function convertProposalToProject(id: string) {
 }
 
 export async function convertProposalToContract(id: string) {
-  const { supabase, user } = await requireStaff()
+  const { supabase, user, profile } = await requireStaff()
   
   const proposal = await getProposal(id)
   if (!proposal) throw new Error('Proposal not found')
   if (!proposal.client_id) throw new Error('Proposal must be linked to a client to convert to contract')
 
+  const agencySettings = await getCurrentAgencySettings()
+
+  let repProfile = profile
+  if (!repProfile.full_name || !repProfile.email) {
+    const { data: owner } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('agency_id', profile.agency_id)
+      .eq('role', 'owner')
+      .single()
+    if (owner) {
+      repProfile = owner
+    }
+  }
+
   const itemsList = proposal.items.map(i => `- ${i.qty}x ${i.description} @ $${i.unit_price} each`).join('\n')
+
+  const agencyName = agencySettings.legal_name || agencySettings.name || 'Agency'
+  const repName = repProfile.full_name || 'Authorized Representative'
+  const repTitle = repProfile.title ? `\n${repProfile.title}` : ''
+  const repEmail = repProfile.email ? `\nEmail: ${repProfile.email}` : ''
+  const repPhone = repProfile.phone ? `\nPhone: ${repProfile.phone}` : ''
+  
+  const clientName = proposal.client?.name || 'Client'
+  const clientCompany = proposal.client?.company || clientName
+  const clientEmail = proposal.client?.email ? `\nEmail: ${proposal.client.email}` : ''
+  const clientPhone = proposal.client?.phone ? `\nPhone: ${proposal.client.phone}` : ''
+  const clientAddress = proposal.client?.address ? `\n\nBusiness Address:\n${proposal.client.address}` : ''
+
+  const agreementNumber = `CTR-${new Date().getFullYear()}-${proposal.id.slice(0, 8).toUpperCase()}`
+
+  const taxIdBlock = agencySettings.tax_id ? `Tax ID: ${agencySettings.tax_id}\n` : ''
+  const regNoBlock = agencySettings.registration_number ? `Registration No: ${agencySettings.registration_number}\n` : ''
 
   const contractBody = `MASTER SERVICE AGREEMENT
 
-PARTIES
+Agreement Number: ${agreementNumber}
 
-This Master Service Agreement ("Agreement") is entered into and made effective as of ${new Date().toLocaleDateString()} (the "Effective Date"), by and between:
+Effective Date: ${new Date().toLocaleDateString()}
 
-**Agency:**
-Our Agency
-(Hereinafter referred to as the "Agency")
+Between
 
-**Client:**
-${proposal.client?.name || 'Client'}
-${proposal.client?.company || ''}
-(Hereinafter referred to as the "Client")
+${agencyName}
+${taxIdBlock}${regNoBlock}
+Represented By:
+${repName}${repTitle}
 
-Collectively referred to as the "Parties".
+AND
 
-1. SERVICES
-The Agency agrees to perform and deliver the professional services outlined below (the "Services"). The Agency shall perform these Services in a professional, timely, and workmanlike manner in accordance with industry standards.
+${clientCompany}
+
+Represented By:
+${clientName}
+
+---
+
+## Parties
+
+This Master Service Agreement ("Agreement") is entered into on ${new Date().toLocaleDateString()} by and between:
+
+### Agency
+${agencyName}
+${agencySettings.registration_number ? `Registration Number:\n${agencySettings.registration_number}\n\n` : ''}${agencySettings.tax_id ? `Tax ID:\n${agencySettings.tax_id}\n\n` : ''}Authorized Representative:
+${repName}${repEmail}${repPhone}
+
+(Hereinafter referred to as "Agency")
+
+### Client
+${clientCompany}
+
+Authorized Representative:
+${clientName}${clientEmail}${clientPhone}${clientAddress}
+
+(Hereinafter referred to as "Client")
+
+Collectively referred to as "Parties".
+
+---
+
+## Services
 ${proposal.scope || 'Services will be provided as outlined and mutually agreed upon.'}
 
-2. DELIVERABLES
-In connection with the Services, the Agency will provide the following specific deliverables to the Client:
+## Deliverables
 ${proposal.deliverables || 'Deliverables will be provided as outlined and mutually agreed upon.'}
 
-3. PROJECT TIMELINE
-The Parties agree to the following timeline for the execution and completion of the Services:
+## Project Timeline
 ${proposal.timeline || 'The timeline will be mutually agreed upon prior to the commencement of work.'}
 
-4. FEES AND PAYMENT TERMS
-In consideration of the Services performed, the Client agrees to pay the Agency the total sum of **$${proposal.amount}**.
+---
+
+## Commercial Terms
+
+**Total Fees:** $${proposal.amount}
 
 **Line Items:**
 ${itemsList}
 
 **Payment Terms:**
-${proposal.terms || 'Invoices shall be paid within the agreed upon terms. The Agency reserves the right to suspend services for any undisputed past-due invoices.'}
+${proposal.terms || 'Invoices shall be paid within the agreed upon terms.'}
 
-5. CLIENT RESPONSIBILITIES
-The Client agrees to provide timely access to all materials, information, and personnel necessary for the Agency to perform the Services. Delays in Client feedback or provision of assets may result in corresponding extensions to the Project Timeline.
+---
 
-6. CONFIDENTIALITY
-Each Party agrees to retain in confidence the non-public information and know-how transmitted or disclosed to them by the other Party in the course of performing this Agreement. Neither Party shall disclose such information to any third party without prior written consent.
+## Signatures
 
-7. INTELLECTUAL PROPERTY
-Upon receipt of full and final payment, the Agency grants the Client all rights, title, and interest in and to the final Deliverables. The Agency retains the right to use the Deliverables for promotional and portfolio purposes, unless otherwise agreed in writing.
+**CLIENT**
 
-8. LIMITATION OF LIABILITY
-In no event shall the Agency be liable for any indirect, incidental, special, or consequential damages arising out of or related to this Agreement. The Agency's total liability shall not exceed the total fees paid by the Client under this Agreement.
+Name: ${clientName}
+Company: ${clientCompany}
 
-9. TERMINATION
-Either Party may terminate this Agreement for convenience upon providing thirty (30) days prior written notice to the other Party. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the date of termination.
+Signature: ___________________________
 
-10. ACCEPTANCE
-By signing below, the Parties acknowledge that they have read, understood, and agreed to be bound by the terms and conditions of this Agreement.
+Date: ___________________________
+
+
+**AGENCY**
+
+Name: ${repName}
+${repProfile.title ? `Position: ${repProfile.title}\n` : ''}Company: ${agencyName}
+
+Signature: ___________________________
+
+Date: ___________________________
 `
-
-  const agencySettings = await getCurrentAgencySettings()
   
   const branding_snapshot = {
     agency_name: agencySettings.name,
