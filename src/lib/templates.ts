@@ -57,6 +57,7 @@ export function mapProposalToTemplateData(
   // Fallback priority:
   // 1. Snapshot stored in proposal
   // 2. Live agency context passed in
+  const ctx = agencyContext || {}
   const snap = proposal.branding_snapshot || {}
   
   return {
@@ -64,10 +65,10 @@ export function mapProposalToTemplateData(
     date: dateStr,
     clientName,
     clientCompany,
-    agencyName: snap.agency_name || agencyContext.name || 'Our Agency',
-    agencyLogo: snap.logo_url || agencyContext.logo_url || agencyContext.logoUrl,
-    agencyEmail: agencyContext.email, // Not in snapshot currently
-    agencyPhone: agencyContext.phone,
+    agencyName: snap.agency_name || ctx.name || 'Our Agency',
+    agencyLogo: snap.logo_url || ctx.logo_url || ctx.logoUrl,
+    agencyEmail: ctx.email, // Not in snapshot currently
+    agencyPhone: ctx.phone,
     scope: proposal.scope || '',
     deliverables: proposal.deliverables || '',
     timeline: proposal.timeline || '',
@@ -75,12 +76,12 @@ export function mapProposalToTemplateData(
     totalAmount: Number(proposal.amount),
     items,
     brandColor: snap.primary_color || brandColor,
-    legalName: snap.legal_name || agencyContext.legal_name,
-    registrationNumber: snap.registration_number || agencyContext.registration_number,
-    taxId: snap.tax_id || agencyContext.tax_id,
-    termsConditions: snap.terms_and_conditions || agencyContext.terms_and_conditions,
-    privacyPolicy: snap.privacy_policy || agencyContext.privacy_policy,
-    proposalFooter: snap.default_proposal_footer || agencyContext.default_proposal_footer,
+    legalName: snap.legal_name || ctx.legal_name,
+    registrationNumber: snap.registration_number || ctx.registration_number,
+    taxId: snap.tax_id || ctx.tax_id,
+    termsConditions: snap.terms_and_conditions || ctx.terms_and_conditions,
+    privacyPolicy: snap.privacy_policy || ctx.privacy_policy,
+    proposalFooter: snap.default_proposal_footer || ctx.default_proposal_footer,
   }
 }
 

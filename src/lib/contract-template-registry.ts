@@ -64,6 +64,8 @@ export function mapContractToTemplateData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agencyContext: any = {}
 ): ContractTemplateData {
+  // Default parameters don't apply to null, so we must enforce a safe fallback
+  const ctx = agencyContext || {}
   const snap = contract.branding_snapshot || {}
 
   return {
@@ -72,21 +74,21 @@ export function mapContractToTemplateData(
     body: contract.body,
     clientName: contract.client?.name || 'Unknown Client',
     clientCompany: contract.client?.company || undefined,
-    agencyName: snap.agency_name || agencyContext.name || 'Our Agency',
-    agencyLogo: snap.logo_url || agencyContext.logo_url || agencyContext.logoUrl || undefined,
+    agencyName: snap.agency_name || ctx.name || 'Our Agency',
+    agencyLogo: snap.logo_url || ctx.logo_url || ctx.logoUrl || undefined,
     date: new Date(contract.created_at).toLocaleDateString(),
     status: contract.status,
     version: contract.version,
     signedByName: contract.signed_by_name || undefined,
     signedAt: contract.signed_at ? new Date(contract.signed_at).toLocaleString() : undefined,
     signerIp: contract.signer_ip || undefined,
-    brandColor: snap.primary_color || agencyContext.primary_color || undefined,
-    legalName: snap.legal_name || agencyContext.legal_name || undefined,
-    registrationNumber: snap.registration_number || agencyContext.registration_number || undefined,
-    taxId: snap.tax_id || agencyContext.tax_id || undefined,
-    termsConditions: snap.terms_and_conditions || agencyContext.terms_and_conditions || undefined,
-    privacyPolicy: snap.privacy_policy || agencyContext.privacy_policy || undefined,
-    contractFooter: snap.default_contract_footer || agencyContext.default_contract_footer || undefined,
+    brandColor: snap.primary_color || ctx.primary_color || undefined,
+    legalName: snap.legal_name || ctx.legal_name || undefined,
+    registrationNumber: snap.registration_number || ctx.registration_number || undefined,
+    taxId: snap.tax_id || ctx.tax_id || undefined,
+    termsConditions: snap.terms_and_conditions || ctx.terms_and_conditions || undefined,
+    privacyPolicy: snap.privacy_policy || ctx.privacy_policy || undefined,
+    contractFooter: snap.default_contract_footer || ctx.default_contract_footer || undefined,
   }
 }
 

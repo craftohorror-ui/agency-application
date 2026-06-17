@@ -82,6 +82,8 @@ export function mapInvoiceToTemplateData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agencyContext: any = {}
 ): InvoiceTemplateData {
+  // Default parameters don't apply to null, so we must enforce a safe fallback
+  const ctx = agencyContext || {}
   const snap = invoice.branding_snapshot || {}
   
   const subtotal = invoice.subtotal || 0
@@ -103,12 +105,12 @@ export function mapInvoiceToTemplateData(
     clientName: invoice.client?.name || 'Unknown Client',
     clientCompany: invoice.client?.company || undefined,
     
-    agencyName: snap.agency_name || agencyContext.name || 'Our Agency',
-    agencyLogo: snap.logo_url || agencyContext.logo_url || agencyContext.logoUrl || undefined,
-    brandColor: snap.primary_color || agencyContext.primary_color || undefined,
-    agencyPhone: snap.phone || agencyContext.phone || undefined,
-    agencyEmail: snap.email || agencyContext.email || undefined,
-    agencyWebsite: snap.website || agencyContext.website || undefined,
+    agencyName: snap.agency_name || ctx.name || 'Our Agency',
+    agencyLogo: snap.logo_url || ctx.logo_url || ctx.logoUrl || undefined,
+    brandColor: snap.primary_color || ctx.primary_color || undefined,
+    agencyPhone: snap.phone || ctx.phone || undefined,
+    agencyEmail: snap.email || ctx.email || undefined,
+    agencyWebsite: snap.website || ctx.website || undefined,
     
     projectName: invoice.project?.name || undefined,
     contractReference: invoice.project?.contract_id ? `CTR-${invoice.project.contract_id.substring(0, 8).toUpperCase()}` : undefined,
@@ -126,7 +128,7 @@ export function mapInvoiceToTemplateData(
     balanceDue: Math.max(0, (invoice.total || 0) - (invoice.amount_paid || 0)),
     
     notes: invoice.notes,
-    paymentInstructions: snap.payment_instructions || agencyContext.payment_instructions || undefined,
+    paymentInstructions: snap.payment_instructions || ctx.payment_instructions || undefined,
     
     payments: invoice.payments || []
   }
