@@ -3,6 +3,7 @@ import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-tem
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
 import ReactMarkdown from 'react-markdown'
 import { PremiumMarkdownComponents } from '../premium-markdown'
+import { contractDesignTokens } from '@/lib/contractDesignTokens'
 import remarkGfm from 'remark-gfm'
 
 
@@ -16,6 +17,8 @@ export const marketingRetainerConfig: ContractTemplateConfig = {
   supportsDocx: true,
   version: '1.0.0',
   component: MarketingRetainer
+
+
 }
 
 export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
@@ -26,31 +29,33 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
         <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-bl-[100%] opacity-10"></div>
         <div className="absolute -top-12 left-12 w-32 h-32 bg-rose-300 rounded-full opacity-20"></div>
 
-        <div className="relative z-10 flex justify-between items-center mb-16">
-          {data.agencyLogo ? (
-            <img src={data.agencyLogo} alt="Logo" className="h-12" />
-          ) : (
-            <h2 className="text-2xl font-black tracking-tighter text-rose-600">{data.agencyName}</h2>
-          )}
-          <span className="font-bold text-rose-900 tracking-wider text-sm uppercase">Retainer Agreement</span>
+        <div className="relative z-10 flex justify-between items-start mb-16">
+          <div className="mt-8">
+            {data.agencyLogo ? (
+              <img src={data.agencyLogo} alt="Logo" className="h-16" />
+            ) : (
+              <h2 className="text-4xl font-black tracking-tighter text-rose-600">{data.agencyName}</h2>
+            )}
+          </div>
+          <span className="font-bold text-rose-900 tracking-[0.2em] text-sm uppercase bg-rose-100/50 px-4 py-2 rounded-full border border-rose-200/50 mt-8">Retainer Agreement</span>
         </div>
 
-        <div className="relative z-10 space-y-6 max-w-2xl mt-12 mb-16">
-          <h1 className="text-6xl font-black text-rose-950 tracking-tight leading-[1.1]">
+        <div className="relative z-10 space-y-10 max-w-3xl mt-24 mb-24">
+          <h1 className={`${contractDesignTokens.typography.coverTitle} text-rose-950`}>
             {data.title}
           </h1>
-          <div className="w-20 h-3 bg-rose-500"></div>
+          <div className="w-24 h-4 bg-rose-500 rounded-full"></div>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-8 bg-white p-8 shadow-sm border border-rose-100 rounded-2xl">
+        <div className="relative z-10 grid grid-cols-2 gap-16 bg-white p-12 shadow-sm border border-rose-100 rounded-[2.5rem]">
           <div>
-            <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-1">Prepared For</h3>
-            <p className="text-xl font-bold text-rose-950">{data.clientName}</p>
-            {data.clientCompany && <p className="text-rose-700">{data.clientCompany}</p>}
+            <h3 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] mb-4">Prepared For</h3>
+            <p className="text-2xl font-black text-rose-950">{data.clientName}</p>
+            {data.clientCompany && <p className="text-lg text-rose-700 mt-2">{data.clientCompany}</p>}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-1">Effective Date</h3>
-            <p className="text-xl font-bold text-rose-950">{data.date}</p>
+            <h3 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] mb-4">Effective Date</h3>
+            <p className="text-2xl font-black text-rose-950">{data.date}</p>
           </div>
         </div>
       </div>
@@ -77,31 +82,31 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 bg-rose-950 text-rose-50 print:break-inside-avoid">
-        <h3 className="text-3xl font-black mb-8 text-white">Let&apos;s Get Started</h3>
-        <p className="text-rose-200 mb-12 max-w-md">Please sign below to authorize the commencement of our partnership.</p>
+      <div className="p-20 bg-rose-950 text-rose-50 print:break-inside-avoid">
+        <h3 className="text-5xl font-black mb-8 text-white tracking-tight">Let&apos;s Get Started</h3>
+        <p className="text-rose-200 mb-16 max-w-xl text-lg leading-relaxed">Please sign below to authorize the commencement of our partnership. All digital signatures are legally binding.</p>
         
-        <div className="grid grid-cols-2 gap-16 font-sans">
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold text-rose-400 uppercase tracking-wider">Client Approval</h4>
-            <div className="h-16 border-b-2 border-rose-800 flex items-end pb-2">
+        <div className="grid grid-cols-2 gap-20 font-sans">
+          <div className="space-y-6">
+            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 inline-block px-3 py-1 rounded-full border border-rose-800">Client Approval</h4>
+            <div className="h-24 border-b-2 border-rose-800 flex items-end pb-3">
               {data.signedByName ? (
-                <span className="font-serif italic text-3xl text-white">{data.signedByName}</span>
+                <span className="font-serif italic text-4xl text-white">{data.signedByName}</span>
               ) : null}
             </div>
             <div>
-              <p className="font-bold text-white">{data.clientName}</p>
-              <p className="text-sm text-rose-300 mt-2">Date: {data.signedAt || '_________________'}</p>
+              <p className="font-bold text-white text-xl tracking-tight">{data.clientName}</p>
+              <p className="text-xs text-rose-300 mt-4 font-mono tracking-widest uppercase">Date: {data.signedAt || 'PENDING'}</p>
             </div>
           </div>
           
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold text-rose-400 uppercase tracking-wider">Agency Approval</h4>
-            <div className="h-16 border-b-2 border-rose-800 flex items-end pb-2">
+          <div className="space-y-6">
+            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 inline-block px-3 py-1 rounded-full border border-rose-800">Agency Approval</h4>
+            <div className="h-24 border-b-2 border-rose-800 flex items-end pb-3">
             </div>
             <div>
-              <p className="font-bold text-white">{data.agencyName}</p>
-              <p className="text-sm text-rose-300 mt-2">Date: _________________</p>
+              <p className="font-bold text-white text-xl tracking-tight">{data.agencyName}</p>
+              <p className="text-xs text-rose-300 mt-4 font-mono tracking-widest uppercase">Date: PENDING</p>
             </div>
           </div>
         </div>

@@ -3,7 +3,10 @@ import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-tem
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
 import ReactMarkdown from 'react-markdown'
 import { PremiumMarkdownComponents } from '../premium-markdown'
+import { contractDesignTokens } from '@/lib/contractDesignTokens'
 import remarkGfm from 'remark-gfm'
+
+
 
 
 export const consultingAgreementConfig: ContractTemplateConfig = {
@@ -26,32 +29,35 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
 
       {/* Header */}
       <div className="pt-24 px-20 pb-16">
-        <div className="flex justify-between items-end border-b-2 border-indigo-100 pb-8 mb-12">
+        <div className="flex justify-between items-start pb-8 mb-16">
           <div>
-            <h2 className="text-sm font-bold tracking-widest uppercase text-indigo-600 mb-2">Consulting Agreement</h2>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              {data.title}
-            </h1>
+            <h2 className="text-sm font-bold tracking-[0.2em] uppercase text-indigo-600 mb-6 bg-indigo-50 inline-block px-4 py-2 rounded-full border border-indigo-100">Consulting Agreement</h2>
           </div>
           <div className="text-right">
             {data.agencyLogo ? (
-              <img src={data.agencyLogo} alt="Logo" className="h-10 mb-2" />
+              <img src={data.agencyLogo} alt="Logo" className="h-12 mb-2" />
             ) : (
               <h2 className="text-xl font-bold text-slate-900">{data.agencyName}</h2>
             )}
-            <p className="text-sm text-slate-500 font-sans">{data.date}</p>
+            <p className="text-sm text-slate-400 font-mono tracking-widest mt-4 uppercase">{data.date}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-12 font-sans bg-indigo-50/50 p-8 rounded-tr-3xl rounded-bl-3xl">
+        <div className="mb-24">
+          <h1 className={`${contractDesignTokens.typography.coverTitle} font-serif`}>
+            {data.title}
+          </h1>
+        </div>
+
+        <div className="grid grid-cols-2 gap-16 font-sans bg-indigo-50/50 p-12 rounded-tr-[3rem] rounded-bl-[3rem] border border-indigo-100/50">
           <div>
-            <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-widest mb-2">Consultant</h3>
-            <p className="text-base font-bold text-slate-900">{data.agencyName}</p>
+            <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-[0.2em] mb-4">Consultant</h3>
+            <p className="text-2xl font-black text-slate-900">{data.agencyName}</p>
           </div>
           <div>
-            <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-widest mb-2">Client</h3>
-            <p className="text-base font-bold text-slate-900">{data.clientName}</p>
-            {data.clientCompany && <p className="text-sm text-slate-600">{data.clientCompany}</p>}
+            <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-[0.2em] mb-4">Client</h3>
+            <p className="text-2xl font-black text-slate-900">{data.clientName}</p>
+            {data.clientCompany && <p className="text-lg text-slate-600 mt-2">{data.clientCompany}</p>}
           </div>
         </div>
       </div>
@@ -78,30 +84,30 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="px-20 py-16 mt-8 bg-slate-50 print:break-inside-avoid">
-        <h3 className="text-2xl font-bold text-indigo-900 mb-10">Signatures</h3>
+      <div className="px-20 py-20 mt-16 bg-slate-50 print:break-inside-avoid border-t border-slate-200">
+        <h3 className="text-3xl font-black text-indigo-900 mb-12 tracking-tight">Signatures</h3>
         
-        <div className="grid grid-cols-2 gap-16 font-sans">
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold text-indigo-600 uppercase tracking-wider">Client</h4>
-            <div className="h-20 border-b border-slate-300 flex items-end pb-2">
+        <div className="grid grid-cols-2 gap-20 font-sans">
+          <div className="space-y-6">
+            <h4 className="text-xs font-bold text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 border border-indigo-100 inline-block px-3 py-1 rounded">Client</h4>
+            <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">
               {data.signedByName ? (
-                <span className="font-serif italic text-3xl text-indigo-900">{data.signedByName}</span>
+                <span className="font-serif italic text-4xl text-indigo-900">{data.signedByName}</span>
               ) : null}
             </div>
             <div>
-              <p className="font-bold text-slate-900">{data.clientName}</p>
-              <p className="text-sm text-slate-500 mt-2">Date: {data.signedAt || '_________________'}</p>
+              <p className="font-bold text-slate-900 text-lg">{data.clientName}</p>
+              <p className="text-xs text-slate-400 mt-4 font-mono tracking-widest uppercase">Date: {data.signedAt || 'PENDING'}</p>
             </div>
           </div>
           
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold text-indigo-600 uppercase tracking-wider">Consultant</h4>
-            <div className="h-20 border-b border-slate-300 flex items-end pb-2">
+          <div className="space-y-6">
+            <h4 className="text-xs font-bold text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 border border-indigo-100 inline-block px-3 py-1 rounded">Consultant</h4>
+            <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">
             </div>
             <div>
-              <p className="font-bold text-slate-900">{data.agencyName}</p>
-              <p className="text-sm text-slate-500 mt-2">Date: _________________</p>
+              <p className="font-bold text-slate-900 text-lg">{data.agencyName}</p>
+              <p className="text-xs text-slate-400 mt-4 font-mono tracking-widest uppercase">Date: PENDING</p>
             </div>
           </div>
         </div>

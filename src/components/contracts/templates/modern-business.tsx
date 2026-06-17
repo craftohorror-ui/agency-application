@@ -3,6 +3,7 @@ import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-tem
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
 import ReactMarkdown from 'react-markdown'
 import { PremiumMarkdownComponents } from '../premium-markdown'
+import { contractDesignTokens } from '@/lib/contractDesignTokens'
 import remarkGfm from 'remark-gfm'
 
 
@@ -25,32 +26,35 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
       <div className="h-[1056px] flex flex-col justify-between p-16 border-b-8 border-blue-600 print:break-after-page">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">{data.agencyName}</h2>
-            {data.agencyLogo && <img src={data.agencyLogo} alt="Logo" className="h-12 mt-4" />}
+            <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">{data.agencyName}</h2>
+            {data.agencyLogo && <img src={data.agencyLogo} alt="Logo" className="h-14 mt-6" />}
           </div>
           <div className="text-right">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold tracking-widest uppercase rounded-full">
-              Contract Agreement
-            </span>
+            <div className={`inline-flex items-center gap-3 px-5 py-2.5 ${contractDesignTokens.colors.modernBusiness.bg} rounded-full`}>
+              <span className={`w-2 h-2 rounded-full ${contractDesignTokens.colors.modernBusiness.accent.split(' ')[0]}`}></span>
+              <span className={`text-xs font-bold tracking-widest uppercase ${contractDesignTokens.colors.modernBusiness.text}`}>
+                Contract Agreement
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6 max-w-2xl">
-          <h1 className="text-6xl font-black text-slate-900 tracking-tight leading-tight">
+        <div className="space-y-8 max-w-3xl mt-20">
+          <h1 className={contractDesignTokens.typography.coverTitle}>
             {data.title}
           </h1>
-          <div className="w-24 h-2 bg-blue-600 rounded-full"></div>
+          <div className={`w-32 h-2 ${contractDesignTokens.colors.modernBusiness.accent.split(' ')[0]} rounded-full`}></div>
         </div>
 
-        <div className="grid grid-cols-2 gap-12 pt-12 border-t">
+        <div className="grid grid-cols-2 gap-16 pt-16 mt-auto border-t border-slate-200">
           <div>
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Prepared For</h3>
-            <p className="text-xl font-medium text-slate-900">{data.clientName}</p>
-            {data.clientCompany && <p className="text-slate-500">{data.clientCompany}</p>}
+            <h3 className={contractDesignTokens.typography.metadata}>Prepared For</h3>
+            <p className="text-2xl font-bold text-slate-900 mt-3">{data.clientName}</p>
+            {data.clientCompany && <p className="text-lg text-slate-500 mt-1">{data.clientCompany}</p>}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Date</h3>
-            <p className="text-xl font-medium text-slate-900">{data.date}</p>
+            <h3 className={contractDesignTokens.typography.metadata}>Effective Date</h3>
+            <p className="text-2xl font-bold text-slate-900 mt-3">{data.date}</p>
           </div>
         </div>
       </div>
@@ -77,31 +81,32 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
       </div>
 
       {/* Signatures */}
-      <div className="p-16 pt-8 mt-8 border-t print:break-inside-avoid">
-        <h3 className="text-2xl font-bold text-slate-900 mb-8">Acceptance & Signatures</h3>
-        <p className="text-slate-500 mb-12">By signing below, the parties agree to the terms and conditions outlined in this contract.</p>
+      <div className="p-16 pt-12 mt-24 border-t-2 border-slate-100 print:break-inside-avoid">
+        <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-4">Acceptance & Signatures</h3>
+        <p className="text-lg text-slate-500 mb-16 max-w-2xl leading-relaxed">By signing below, the parties agree to the terms and conditions outlined in this contract, acknowledging full understanding and mutual consent.</p>
         
-        <div className="grid grid-cols-2 gap-16">
-          <div className="space-y-4">
-            <div className="h-16 border-b-2 border-slate-300 flex items-end pb-2">
+        <div className="grid grid-cols-2 gap-20">
+          <div className="space-y-6">
+            <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">
               {data.signedByName ? (
-                <span className="font-serif italic text-2xl text-slate-800">{data.signedByName}</span>
+                <span className="font-serif italic text-4xl text-slate-800">{data.signedByName}</span>
               ) : null}
             </div>
             <div>
-              <p className="font-bold text-slate-900">Client Signature</p>
-              <p className="text-slate-500">{data.clientName}</p>
-              <p className="text-sm text-slate-400 mt-2">Date: {data.signedAt || '_________________'}</p>
+              <p className={contractDesignTokens.typography.signatureTitle}>Client Signature</p>
+              <p className={contractDesignTokens.typography.signatureValue}>{data.clientName}</p>
+              {data.clientCompany && <p className="text-slate-500">{data.clientCompany}</p>}
+              <p className="text-sm text-slate-400 mt-4 font-mono bg-slate-50 inline-block px-3 py-1 rounded">Date: {data.signedAt || 'PENDING'}</p>
             </div>
           </div>
           
-          <div className="space-y-4">
-            <div className="h-16 border-b-2 border-slate-300 flex items-end pb-2">
+          <div className="space-y-6">
+            <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">
             </div>
             <div>
-              <p className="font-bold text-slate-900">Agency Signature</p>
-              <p className="text-slate-500">{data.agencyName}</p>
-              <p className="text-sm text-slate-400 mt-2">Date: _________________</p>
+              <p className={contractDesignTokens.typography.signatureTitle}>Agency Signature</p>
+              <p className={contractDesignTokens.typography.signatureValue}>{data.agencyName}</p>
+              <p className="text-sm text-slate-400 mt-4 font-mono bg-slate-50 inline-block px-3 py-1 rounded">Date: PENDING</p>
             </div>
           </div>
         </div>

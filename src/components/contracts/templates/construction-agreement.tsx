@@ -3,6 +3,7 @@ import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-tem
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
 import ReactMarkdown from 'react-markdown'
 import { PremiumMarkdownComponents } from '../premium-markdown'
+import { contractDesignTokens } from '@/lib/contractDesignTokens'
 import remarkGfm from 'remark-gfm'
 
 
@@ -23,27 +24,27 @@ export function ConstructionAgreement({ data }: { data: ContractTemplateData }) 
     <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-900 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-x-[16px] border-orange-500">
       {/* Structural Header */}
       <div className="p-16 border-b-4 border-orange-950 bg-stone-50 print:break-after-page">
-        <div className="flex justify-between items-end mb-16">
-          <div className="space-y-2">
+        <div className="flex justify-between items-start mb-16">
+          <div className="space-y-4">
             {data.agencyLogo ? (
-              <img src={data.agencyLogo} alt="Logo" className="h-16" />
+              <img src={data.agencyLogo} alt="Logo" className="h-16 mt-4" />
             ) : (
-              <h2 className="text-4xl font-black tracking-tighter text-orange-950 uppercase">{data.agencyName}</h2>
+              <h2 className="text-4xl font-black tracking-tighter text-orange-950 uppercase mt-4">{data.agencyName}</h2>
             )}
-            <p className="text-orange-700 font-bold tracking-widest text-sm uppercase">General Contracting Agreement</p>
+            <p className="text-orange-700 font-black tracking-[0.2em] text-sm uppercase bg-orange-100/50 inline-block px-3 py-1">General Contracting Agreement</p>
           </div>
           <div className="text-right">
-            <div className="bg-orange-500 text-white font-bold tracking-widest text-xs uppercase px-4 py-2 border-2 border-orange-950">
+            <div className="bg-orange-500 text-white font-black tracking-widest text-xs uppercase px-5 py-3 border-2 border-orange-950 shadow-[4px_4px_0_0_#431407]">
               Contract No. {data.id?.split('-')[0] || '1001'}
             </div>
           </div>
         </div>
 
-        <div className="space-y-6 max-w-2xl mt-12 mb-16">
-          <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none uppercase">
+        <div className="space-y-8 max-w-4xl mt-24 mb-24">
+          <h1 className={`${contractDesignTokens.typography.coverTitle} uppercase`}>
             {data.title}
           </h1>
-          <div className="w-full h-1 bg-orange-200"></div>
+          <div className="w-full h-2 bg-orange-500"></div>
         </div>
 
         <div className="grid grid-cols-2 gap-0 border-2 border-orange-950 bg-white">
@@ -81,31 +82,31 @@ export function ConstructionAgreement({ data }: { data: ContractTemplateData }) 
       </div>
 
       {/* Signatures */}
-      <div className="p-16 bg-stone-100 border-t-4 border-orange-950 print:break-inside-avoid">
-        <h3 className="text-3xl font-black text-orange-950 mb-2 uppercase">Execution of Contract</h3>
-        <p className="text-slate-600 mb-10 font-medium">By signing below, the parties agree to be bound by the terms and conditions herein.</p>
+      <div className="p-16 bg-stone-100 border-t-8 border-orange-950 print:break-inside-avoid">
+        <h3 className="text-4xl font-black text-orange-950 mb-4 uppercase tracking-tight">Execution of Contract</h3>
+        <p className="text-slate-600 mb-16 font-medium text-xl max-w-2xl">By signing below, the parties agree to be bound by the terms and conditions herein.</p>
         
-        <div className="grid grid-cols-2 gap-12 font-sans">
-          <div className="bg-white p-6 border-2 border-slate-300 shadow-sm relative">
-            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6">Client / Owner</h4>
-            <div className="h-16 border-b-2 border-slate-800 flex items-end pb-2">
+        <div className="grid grid-cols-2 gap-16 font-sans">
+          <div className="bg-white p-10 border-4 border-slate-300 shadow-[8px_8px_0_0_#cbd5e1] relative">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-6 bg-slate-100 inline-block px-3 py-1 border border-slate-300">Client / Owner</h4>
+            <div className="h-24 border-b-4 border-slate-800 flex items-end pb-3">
               {data.signedByName ? (
-                <span className="font-serif italic text-3xl text-slate-900">{data.signedByName}</span>
+                <span className="font-serif italic text-4xl text-slate-900">{data.signedByName}</span>
               ) : null}
             </div>
-            <div className="mt-4">
-              <p className="font-bold text-slate-900 uppercase">{data.clientName}</p>
-              <p className="text-sm text-slate-500 mt-1 font-medium">Date: {data.signedAt || '_________________'}</p>
+            <div className="mt-6">
+              <p className="font-black text-slate-900 text-xl uppercase">{data.clientName}</p>
+              <p className="text-xs text-slate-500 mt-4 font-black tracking-widest uppercase">Date: {data.signedAt || 'PENDING'}</p>
             </div>
           </div>
           
-          <div className="bg-white p-6 border-2 border-slate-300 shadow-sm relative">
-            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6">Contractor</h4>
-            <div className="h-16 border-b-2 border-slate-800 flex items-end pb-2">
+          <div className="bg-white p-10 border-4 border-slate-300 shadow-[8px_8px_0_0_#cbd5e1] relative">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-6 bg-slate-100 inline-block px-3 py-1 border border-slate-300">Contractor</h4>
+            <div className="h-24 border-b-4 border-slate-800 flex items-end pb-3">
             </div>
-            <div className="mt-4">
-              <p className="font-bold text-slate-900 uppercase">{data.agencyName}</p>
-              <p className="text-sm text-slate-500 mt-1 font-medium">Date: _________________</p>
+            <div className="mt-6">
+              <p className="font-black text-slate-900 text-xl uppercase">{data.agencyName}</p>
+              <p className="text-xs text-slate-500 mt-4 font-black tracking-widest uppercase">Date: PENDING</p>
             </div>
           </div>
         </div>

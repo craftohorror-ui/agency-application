@@ -205,14 +205,17 @@ export async function convertProposalToContract(id: string) {
     }
   }
 
-  const formattedDeliverables = proposal.deliverables
+  const formattedDeliverablesRows = proposal.deliverables
     ? proposal.deliverables.split('\n').filter(d => d.trim()).map(d => {
-        const clean = d.trim()
-        return clean.startsWith('-') || clean.startsWith('•') || clean.startsWith('*') ? clean : `* ${clean}`
-      }).join('\n\n')
-    : '* Deliverables will be provided as outlined and mutually agreed upon.';
+        const clean = d.trim().replace(/^[-*•]\s*/, '')
+        return `| ${clean} |`
+      }).join('\n')
+    : '| Deliverables will be provided as outlined and mutually agreed upon. |';
 
-  const itemsList = proposal.items.map(i => `* **${i.qty}x ${i.description}** — $${i.unit_price} each`).join('\n\n')
+  const formattedDeliverables = `| DELIVERABLE DESCRIPTION |\n|---|\n${formattedDeliverablesRows}`
+
+  const itemsListRows = proposal.items.map(i => `| **${i.qty}x** | **${i.description}** | $${i.unit_price} each |`).join('\n')
+  const itemsList = `| QTY | SERVICE OR ITEM | RATE |\n|---|---|---|\n${itemsListRows}`
 
   const formattedPaymentTerms = proposal.terms 
     ? proposal.terms.split('\n').filter(t => t.trim()).map(t => {
