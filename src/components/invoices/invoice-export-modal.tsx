@@ -129,37 +129,106 @@ export function InvoiceExportModal({ invoiceId, initialTemplateId, templateData 
                 }`}
               >
                 {/* CSS Thumbnail Mockup */}
-                <div className="h-24 mb-4 rounded border bg-white flex shadow-sm overflow-hidden select-none opacity-80 group-hover:opacity-100 transition-opacity">
-                  {t.id === 'consulting-invoice' /* Creative Studio */ && (
-                    <div className="w-2 h-full" style={{ backgroundColor: t.primaryColor }} />
+                <div className="h-24 mb-4 rounded border border-slate-200 bg-white flex shadow-sm overflow-hidden select-none opacity-80 group-hover:opacity-100 transition-opacity relative">
+                  
+                  {/* Creative Studio (Dark Sidebar) */}
+                  {t.id === 'consulting-invoice' && (
+                    <>
+                      <div className="w-[35%] h-full" style={{ backgroundColor: t.primaryColor }}>
+                        <div className="w-4 h-1 bg-white/20 m-2 rounded" />
+                        <div className="w-8 h-1 bg-white/20 m-2 rounded mt-4" />
+                      </div>
+                      <div className="flex-1 p-2 flex flex-col justify-between">
+                        <div className="flex justify-end"><div className="w-8 h-3 rounded" style={{ backgroundColor: t.secondaryColor }} /></div>
+                        <div className="w-full h-8 rounded mt-1 bg-slate-50" />
+                        <div className="flex justify-end"><div className="w-6 h-4 rounded" style={{ backgroundColor: t.secondaryColor }} /></div>
+                      </div>
+                    </>
                   )}
-                  <div className="flex-1 p-2 flex flex-col gap-1.5">
-                    {/* Header Mock */}
-                    {t.id === 'executive-invoice' ? (
-                      <div className="flex flex-col items-center gap-1 border-b pb-1">
+
+                  {/* SaaS Invoice (Teal Angled) */}
+                  {t.id === 'saas-invoice' && (
+                    <div className="flex-1 flex flex-col justify-between relative">
+                      <div className="h-3 w-full" style={{ backgroundColor: t.primaryColor }} />
+                      <div className="px-2 py-1 flex-1 flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
+                          <div className="w-6 h-2 rounded bg-slate-200" />
+                          <div className="w-8 h-4 rounded" style={{ backgroundColor: t.primaryColor }} />
+                        </div>
+                        <div className="w-full h-4 rounded bg-slate-50 mt-1" />
+                        <div className="flex justify-between items-end mt-1">
+                          <div className="w-4 h-1 rounded bg-slate-200" />
+                          <div className="w-6 h-3 rounded" style={{ backgroundColor: t.primaryColor }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Modern Business (Gradient Diagonal) */}
+                  {t.id === 'modern-business' && (
+                    <div className="flex-1 flex flex-col relative">
+                      <div className="h-10 w-full" style={{ background: `linear-gradient(135deg, ${t.primaryColor} 0%, #0f172a 100%)`, clipPath: 'polygon(0 0, 100% 0, 100% 80%, 0% 100%)' }} />
+                      <div className="px-2 -mt-3 relative z-10 flex flex-col items-center">
+                        <div className="w-10 h-6 bg-white rounded shadow-sm border border-slate-100" />
+                        <div className="w-full h-2 bg-slate-100 rounded mt-1" />
+                        <div className="w-full h-2 bg-slate-100 rounded mt-0.5" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Enterprise Invoice (Grid & Blocks) */}
+                  {t.id === 'enterprise-invoice' && (
+                    <div className="flex-1 p-2 flex flex-col">
+                      <div className="w-full h-1" style={{ backgroundColor: t.primaryColor }} />
+                      <div className="flex justify-between items-center mt-1 pb-1 border-b" style={{ borderColor: t.primaryColor }}>
+                        <div className="w-6 h-1.5 rounded" style={{ backgroundColor: t.primaryColor }} />
+                        <div className="w-8 h-1.5 rounded bg-slate-200" />
+                      </div>
+                      <div className="flex gap-1 mt-1 border-b border-dashed border-slate-200 pb-1">
+                        <div className="flex-1 h-3 rounded bg-slate-100" />
+                        <div className="flex-1 h-3 rounded text-[4px] font-bold text-white flex items-center justify-center" style={{ backgroundColor: t.primaryColor }}>$$</div>
+                      </div>
+                      <div className="flex justify-between items-end mt-1">
+                        <div className="w-4 h-2 rounded bg-slate-200" />
+                        <div className="w-8 h-2 rounded" style={{ backgroundColor: t.primaryColor }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Marketing Invoice (Vibrant Pills) */}
+                  {t.id === 'marketing-invoice' && (
+                    <div className="flex-1 p-2 flex flex-col justify-between bg-[#fdfdfd] relative overflow-hidden">
+                      <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full opacity-20" style={{ backgroundColor: t.primaryColor }} />
+                      <div className="flex justify-between items-center mb-1 relative z-10">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: t.primaryColor }} />
-                        <div className="w-12 h-1.5 rounded" style={{ backgroundColor: t.primaryColor }} />
+                        <div className="w-8 h-2 rounded-full" style={{ backgroundColor: t.primaryColor }} />
                       </div>
-                    ) : (
-                      <div className="flex justify-between items-center pb-1">
-                        <div className="w-10 h-2 rounded" style={{ backgroundColor: t.primaryColor }} />
-                        <div className="w-8 h-1.5 bg-slate-200 rounded" />
+                      <div className="flex gap-1 mb-1 relative z-10">
+                        <div className="flex-1 h-4 rounded bg-white shadow-sm border border-slate-100" />
+                        <div className="flex-1 h-4 rounded bg-white shadow-sm border border-slate-100" />
                       </div>
-                    )}
-                    
-                    {/* Body Mock */}
-                    <div className={`flex ${t.id === 'saas-invoice' ? 'flex-col gap-1' : 'justify-between gap-2'} mt-1`}>
-                      <div className={`w-8 h-6 rounded ${t.id === 'saas-invoice' ? 'w-full border' : 'bg-slate-100'}`} />
-                      <div className={`w-12 h-6 rounded ${t.id === 'saas-invoice' ? 'w-full border' : 'bg-slate-100'}`} />
+                      <div className="w-full h-4 rounded bg-white shadow-sm border border-slate-100 relative z-10" />
                     </div>
-                    
-                    {/* Table Mock */}
-                    <div className="mt-auto space-y-0.5">
-                      <div className="w-full h-1 bg-slate-200" />
-                      <div className="w-full h-1 bg-slate-100" />
-                      <div className="w-full h-1 bg-slate-100" />
+                  )}
+
+                  {/* Executive Invoice (Minimalist Luxury) */}
+                  {t.id === 'executive-invoice' && (
+                    <div className="flex-1 p-2 flex flex-col bg-[#fafafa]">
+                      <div className="absolute inset-1 border border-slate-200" />
+                      <div className="relative z-10 flex flex-col h-full justify-between p-1">
+                        <div className="flex justify-between items-end border-b border-slate-900 pb-1 mb-1">
+                          <div className="w-6 h-1.5 bg-slate-900" />
+                          <div className="w-8 h-1 bg-slate-400" />
+                        </div>
+                        <div className="w-full h-4 bg-slate-100 mb-1" />
+                        <div className="flex justify-between items-end">
+                          <div className="w-4 h-0.5 bg-slate-400" />
+                          <div className="w-6 h-2 border-b-2 border-slate-900" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
                 </div>
 
                 <div className="flex items-center justify-between mb-1.5 relative z-10">
