@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     // Test getInvoice
     const invoice = await getInvoice(data.id)
     return NextResponse.json({ success: true, invoice })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message, stack: err.stack })
+  } catch (err: unknown) {
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack : undefined })
   }
 }
