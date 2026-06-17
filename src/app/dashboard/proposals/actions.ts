@@ -2,7 +2,7 @@
 
 import { redirect, unstable_rethrow } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createProposal, updateProposal, deleteProposal, convertProposalToContract, convertProposalToProject, duplicateProposal } from '@/lib/proposals'
+import { createProposal, updateProposal, deleteProposal, convertProposalToContract, convertProposalToProject, duplicateProposal, convertProposalToInvoice, checkExistingInvoiceForProposal } from '@/lib/proposals'
 import { generatePublicLink, revokePublicLink } from '@/lib/proposals-analytics'
 import type { ProposalStatus } from '@/lib/types'
 
@@ -155,3 +155,15 @@ export async function revokePublicLinkAction(linkId: string, proposalId: string)
   await revokePublicLink(linkId)
   revalidatePath(`/dashboard/proposals/${proposalId}`)
 }
+
+export async function checkExistingInvoiceAction(proposalId: string, clientId: string) {
+  return await checkExistingInvoiceForProposal(proposalId, clientId)
+}
+
+export async function convertProposalToInvoiceAction(id: string) {
+  const invoice = await convertProposalToInvoice(id)
+  revalidatePath('/dashboard/proposals')
+  revalidatePath('/dashboard/invoices')
+  redirect(`/dashboard/invoices/${invoice.id}?success=Proposal+converted+to+invoice`)
+}
+

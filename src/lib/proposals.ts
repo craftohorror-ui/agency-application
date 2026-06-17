@@ -3,6 +3,7 @@ import 'server-only'
 import { requireStaff } from '@/lib/auth'
 import { getCurrentAgencySettings } from '@/lib/agencies'
 import type { Proposal, ProposalItem, ProposalStatus } from '@/lib/types'
+import { createInvoice } from '@/lib/invoices'
 
 export interface ProposalWithRelations extends Proposal {
   items: ProposalItem[]
@@ -393,3 +394,69 @@ export async function duplicateProposal(id: string) {
 
   return getProposal(newProposal.id)
 }
+
+export async function convertProposalToInvoice(id: string) {
+  const { supabase, user } = await requireStaff()
+  
+  const proposal = await getProposal(id)
+  if (!proposal) throw new Error('Proposal not found')
+  if (!proposal.client_id) throw new Error('Proposal must be linked to a client to convert to invoice')
+
+  const items = proposal.items.map(item => ({
+    description: item.description,
+    qty: item.qty,
+    unit_price: item.unit_price
+  }))
+
+  const issueDate = new Date()
+  const dueDate = new Date()
+  dueDate.setDate(dueDate.getDate() + 30)
+
+  // Use proposal.terms for notes if available, falling back to default handled in createInvoice
+  const notes = proposal.terms || undefined
+
+  const invoice = await createInvoice({
+    client_id: proposal.client_id,
+    status: 'draft',
+    currency: 'USD',
+    template_id: 'modern-business',
+    issue_date: issueDate.toISOString().split('T')[0],
+    due_date: dueDate.toISOString().split('T')[0],
+    tax_rate: 0,
+    notes
+  }, items)
+
+  if (!invoice) throw new Error('Failed to create invoice from proposal')
+
+  // Inject source_proposal_id into the branding_snapshot of the created invoice to protect against duplicates
+  const { data: updatedInvoice, error } = await supabase
+    .from('invoices')
+    .update({
+      branding_snapshot: {
+        ...(invoice.branding_snapshot as Record<string, unknown> || {}),
+        source_proposal_id: proposal.id
+      }
+    })
+    .eq('id', invoice.id)
+    .select('*')
+    .single()
+
+  if (error) throw new Error('Failed to mark invoice source: ' + error.message)
+
+  return updatedInvoice
+}
+
+export async function checkExistingInvoiceForProposal(proposalId: string, clientId: string) {
+  const { supabase } = await requireStaff()
+  
+  // We use contains to find if branding_snapshot has source_proposal_id
+  const { data: invoices, error } = await supabase
+    .from('invoices')
+    .select('id, number, status, created_at')
+    .eq('client_id', clientId)
+    .contains('branding_snapshot', { source_proposal_id: proposalId })
+    
+  if (error) throw new Error('Failed to check existing invoices: ' + error.message)
+  return invoices || []
+}
+

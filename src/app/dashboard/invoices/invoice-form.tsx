@@ -80,6 +80,42 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)
   }
 
+  const handleProjectChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const projectId = e.target.value
+    if (!projectId) return
+
+    try {
+      const res = await fetch(`/api/projects/${projectId}/items`)
+      if (!res.ok) throw new Error('Failed to fetch items')
+      const data = await res.json()
+      
+      if (!data || data.length === 0) {
+        toast('No source line items were found for this project.')
+        return
+      }
+
+      // Check if current items are anything other than empty defaults
+      const hasManualItems = items.some(item => item.description.trim() !== '' || item.unit_price > 0 || item.qty > 1)
+      
+      if (hasManualItems) {
+        const confirmed = window.confirm('This invoice already contains line items.\n\nDo you want to replace them with items from the selected project?')
+        if (!confirmed) return
+      }
+
+      const mappedItems = data.map((item: any) => ({
+        description: item.description,
+        qty: Number(item.qty),
+        unit_price: Number(item.unit_price)
+      }))
+
+      setItems(mappedItems)
+      toast.success('Line items loaded from project')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to auto-populate project items')
+    }
+  }
+
   return (
     <form action={formAction} className="space-y-8">
       <input type="hidden" name="items" value={JSON.stringify(items)} />
@@ -119,6 +155,7 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
                 id="project_id"
                 name="project_id"
                 defaultValue={invoice?.project_id || ''}
+                onChange={handleProjectChange}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">No Project</option>

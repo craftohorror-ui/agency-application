@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { deleteProposalAction, convertProposalToContractAction, convertProposalToProjectAction, duplicateProposalAction } from '../actions'
 import { ProposalExportModal } from '@/components/proposals/proposal-export-modal'
+import { ConvertToInvoiceButton } from '@/components/proposals/convert-to-invoice-button'
 import { mapProposalToTemplateData } from '@/lib/templates'
 
 interface PageProps {
@@ -187,6 +188,9 @@ export default async function ProposalDetailPage({ params }: PageProps) {
                   Convert to Project
                 </Button>
               </form>
+
+              <ConvertToInvoiceButton proposalId={proposal.id} clientId={proposal.client_id} disabled={!proposal.client_id} />
+
               {!proposal.client_id && (
                 <p className="text-xs text-muted-foreground text-center">
                   * Must be linked to a Client to convert.
