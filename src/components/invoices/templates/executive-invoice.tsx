@@ -1,10 +1,9 @@
 import React from 'react'
 import { InvoiceTemplateData, InvoiceTemplateConfig } from '@/lib/invoice-template-registry'
 import { InvoiceErrorBoundary } from './components/InvoiceErrorBoundary'
-import { modernBusinessInvoiceConfig as fallbackConfig } from './modern-business'
 
 function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
-  const primaryColor = data.brandColor || '#0f172a'
+  const primaryColor = data.brandColor || '#111827'
 
   const formatDate = (dateString: string) => {
     try {
@@ -14,145 +13,157 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
   }
 
   return (
-    <div className="bg-[#fafafa] text-slate-900 max-w-[800px] mx-auto text-[13px] font-serif relative shadow-sm min-h-[1056px] flex flex-col p-16">
+    <div className="bg-white text-slate-900 max-w-[850px] mx-auto font-serif shadow-sm min-h-[1100px] flex flex-col border-x border-slate-200">
       
-      {/* Outer Border Box */}
-      <div className="absolute inset-4 border border-slate-300 pointer-events-none"></div>
-      <div className="absolute inset-5 border border-slate-200 pointer-events-none"></div>
-
-      <div className="relative z-10 flex-1 flex flex-col">
+      {/* Luxury Dark Header */}
+      <div className="text-white p-16 flex flex-col justify-between" style={{ backgroundColor: primaryColor }}>
         
-        {/* Header */}
-        <div className="flex justify-between items-end border-b border-slate-900 pb-8 mb-12">
-          <div className="w-1/2">
+        <div className="flex justify-between items-start mb-16">
+          <div className="text-center md:text-left">
             {data.agencyLogo ? (
-              <img src={data.agencyLogo} alt={data.agencyName} className="h-12 w-auto object-contain object-left mb-4" />
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={data.agencyLogo} alt={data.agencyName} className="h-16 object-contain" />
             ) : (
-              <h2 className="text-2xl tracking-widest uppercase text-slate-900 mb-2">{data.agencyName}</h2>
+              <div className="text-2xl tracking-[0.3em] uppercase font-light text-white/90">
+                {data.agencyName}
+              </div>
             )}
-            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase font-sans">{data.agencyWebsite || 'Luxury Services'}</p>
           </div>
-
-          <div className="text-right w-1/2">
-            <h1 className="text-3xl tracking-[0.3em] uppercase text-slate-900 mb-6">Invoice</h1>
-            <table className="w-full text-right text-[11px] font-sans tracking-widest text-slate-500 uppercase">
-              <tbody>
-                <tr>
-                  <td className="py-1">Reference No.</td>
-                  <td className="py-1 text-slate-900">{data.number}</td>
-                </tr>
-                <tr>
-                  <td className="py-1">Date of Issue</td>
-                  <td className="py-1 text-slate-900">{formatDate(data.issueDate)}</td>
-                </tr>
-                {data.dueDate && (
-                  <tr>
-                    <td className="py-1">Date Due</td>
-                    <td className="py-1 text-slate-900">{formatDate(data.dueDate)}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="text-right">
+            <h1 className="text-4xl font-light tracking-[0.2em] uppercase text-white mb-2">Invoice</h1>
+            <p className="text-xs tracking-[0.3em] uppercase text-white/50">Confidential</p>
           </div>
         </div>
 
-        {/* Client Info */}
-        <div className="flex gap-16 mb-16 font-sans">
-          <div className="w-1/2">
-            <h3 className="text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-200 pb-2 mb-4">Invoiced To</h3>
-            <h4 className="text-base font-medium text-slate-900 tracking-wider mb-1">{data.clientName}</h4>
-            {data.clientCompany && <p className="text-xs text-slate-600 mb-2">{data.clientCompany}</p>}
+        <div className="flex justify-between items-end">
+          <div className="space-y-6">
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-white/50 mb-2">Prepared For</p>
+              <h2 className="text-2xl font-medium text-white tracking-wide">{data.clientCompany || data.clientName}</h2>
+              <p className="text-sm text-white/70 mt-1 font-sans">{data.clientName}</p>
+            </div>
           </div>
-          <div className="w-1/2">
-            <h3 className="text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-200 pb-2 mb-4">Payable To</h3>
-            <h4 className="text-base font-medium text-slate-900 tracking-wider mb-1">{data.agencyName}</h4>
-            {data.agencyEmail && <p className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-wrap mb-2">{data.agencyEmail}</p>}
+          
+          <div className="text-right flex gap-12 text-sm font-sans">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/50 mb-2">Invoice No.</p>
+              <p className="text-white tracking-widest">{data.number}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/50 mb-2">Date</p>
+              <p className="text-white tracking-widest">{formatDate(data.issueDate)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-16 flex-1 flex flex-col bg-white">
+        
+        {/* Status & Due Date */}
+        <div className="flex justify-between items-center mb-16 pb-8 border-b border-slate-200">
+          <div className="flex gap-16 font-sans">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-400 mb-2">Payment Status</p>
+              <p className="text-sm font-semibold tracking-widest text-slate-900 uppercase">{data.status || 'DRAFT'}</p>
+            </div>
+            {data.dueDate && (
+              <div>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-400 mb-2">Due Date</p>
+                <p className="text-sm font-medium tracking-widest text-slate-900">{formatDate(data.dueDate)}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Line Items */}
-        <div className="mb-16 font-sans flex-1">
-          <table className="w-full text-left">
-            <thead>
+        {/* Minimalist Line Items */}
+        <div className="mb-16">
+          <h3 className="text-lg font-light tracking-wide uppercase mb-6 border-b pb-4 border-slate-200">Financial Overview</h3>
+          
+          <table className="w-full text-left font-sans text-sm">
+            <thead className="border-b-2 border-slate-900">
               <tr>
-                <th className="py-3 text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-900 font-normal">Description</th>
-                <th className="py-3 text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-900 font-normal text-center">Qty</th>
-                <th className="py-3 text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-900 font-normal text-right">Unit Price</th>
-                <th className="py-3 text-[9px] uppercase tracking-[0.3em] text-slate-400 border-b border-slate-900 font-normal text-right">Amount</th>
+                <th className="py-4 font-semibold uppercase tracking-wider text-slate-500 text-[11px]">Service Area</th>
+                <th className="py-4 font-semibold uppercase tracking-wider text-slate-500 text-[11px] text-center">Qty</th>
+                <th className="py-4 font-semibold uppercase tracking-wider text-slate-500 text-[11px] text-right">Rate</th>
+                <th className="py-4 font-semibold uppercase tracking-wider text-slate-500 text-[11px] text-right">Subtotal</th>
               </tr>
             </thead>
-            <tbody>
-              {data.items.map((item, index) => (
-                <tr key={index}>
-                  <td className="py-5 border-b border-slate-200">
-                    <p className="text-[13px] text-slate-900 tracking-wide">{item.description}</p>
-                  </td>
-                  <td className="py-5 border-b border-slate-200 text-center text-[12px] text-slate-500">
-                    {item.qty}
-                  </td>
-                  <td className="py-5 border-b border-slate-200 text-right text-[12px] text-slate-500">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(item.unit_price)}
-                  </td>
-                  <td className="py-5 border-b border-slate-200 text-right text-[13px] text-slate-900">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(item.unit_price * item.qty)}
-                  </td>
+            <tbody className="divide-y divide-slate-100">
+              {data.items.length > 0 ? (
+                data.items.map((item, index) => (
+                  <tr key={index}>
+                    <td className="py-6 pr-4 text-slate-800 font-medium text-sm">{item.description}</td>
+                    <td className="py-6 px-4 text-center text-slate-500">{item.qty}</td>
+                    <td className="py-6 px-4 text-right text-slate-500 font-mono tracking-tighter">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(item.unit_price)}
+                    </td>
+                    <td className="py-6 text-right font-semibold text-slate-900 font-mono tracking-tighter">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(item.unit_price * item.qty)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-400 italic">No line items specified.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
+          
+          {/* Executive Totals */}
+          <div className="flex justify-end pt-8 border-t-2 border-slate-900">
+            <div className="w-80 space-y-4 font-sans">
+              <div className="flex justify-between items-center text-sm">
+                <span className="font-medium text-slate-500 tracking-wider uppercase">Subtotal</span>
+                <span className="font-mono text-slate-700">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.subtotal)}</span>
+              </div>
+              {data.discountAmount > 0 && (
+                <div className="flex justify-between items-center text-sm text-red-600">
+                  <span className="font-medium tracking-wider uppercase">Discount</span>
+                  <span className="font-mono">-{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.discountAmount)}</span>
+                </div>
+              )}
+              {data.taxAmount > 0 && (
+                <div className="flex justify-between items-center text-sm pb-4 border-b border-slate-200">
+                  <span className="font-medium text-slate-500 tracking-wider uppercase">Tax</span>
+                  <span className="font-mono text-slate-700">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.taxAmount)}</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-end pt-2">
+                <span className="font-semibold tracking-wider uppercase text-slate-900">Total Due</span>
+                <span className="font-light text-3xl font-serif text-slate-900">
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Totals & Signature */}
-        <div className="flex justify-between items-end gap-12 font-sans">
-          
-          <div className="flex-1">
+        {/* Footer info */}
+        <div className="mt-auto pt-16 border-t border-slate-200 grid grid-cols-2 gap-16 font-sans">
+          <div>
+            {data.paymentInstructions && (
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Payment Terms</h4>
+                <p className="text-xs font-medium text-slate-600 leading-relaxed whitespace-pre-wrap">{data.paymentInstructions}</p>
+              </div>
+            )}
+          </div>
+          <div>
             {data.notes && (
-              <div className="mb-6">
-                <h3 className="text-[9px] uppercase tracking-[0.3em] text-slate-400 mb-2 border-b border-slate-200 pb-2 inline-block">Terms & Conditions</h3>
-                <p className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-wrap">{data.notes}</p>
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Additional Notes</h4>
+                <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap">{data.notes}</p>
               </div>
             )}
             
-            {/* Signature Block */}
-            <div className="mt-12 w-48 border-t border-slate-900 pt-3 text-center">
-              <h4 className="text-[9px] uppercase tracking-[0.3em] text-slate-900">Authorized Signatory</h4>
+            <div className="mt-8 pt-8 border-t border-slate-100 text-xs text-slate-400 space-y-1">
+              <p className="font-semibold text-slate-600">{data.agencyName}</p>
+              {data.agencyEmail && <p>{data.agencyEmail}</p>}
+              {data.agencyWebsite && <p>{data.agencyWebsite}</p>}
             </div>
           </div>
-
-          <div className="w-[300px]">
-            <table className="w-full text-[12px]">
-              <tbody>
-                <tr>
-                  <td className="py-3 text-slate-500 tracking-widest uppercase text-[10px]">Subtotal</td>
-                  <td className="py-3 text-right text-slate-900">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.subtotal)}</td>
-                </tr>
-                {data.discountAmount > 0 && (
-                  <tr>
-                    <td className="py-3 text-slate-500 tracking-widest uppercase text-[10px] border-t border-slate-100">Discount</td>
-                    <td className="py-3 text-right text-slate-900 border-t border-slate-100">-{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.discountAmount)}</td>
-                  </tr>
-                )}
-                {data.taxAmount > 0 && (
-                  <tr>
-                    <td className="py-3 text-slate-500 tracking-widest uppercase text-[10px] border-t border-slate-100">Tax</td>
-                    <td className="py-3 text-right text-slate-900 border-t border-slate-100">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.taxAmount)}</td>
-                  </tr>
-                )}
-                <tr>
-                  <td className="py-5 text-slate-900 tracking-widest uppercase text-[12px] font-medium border-t border-slate-900 border-b-4 border-b-slate-900">Total Due</td>
-                  <td className="py-5 text-right text-slate-900 text-xl tracking-wider border-t border-slate-900 border-b-4 border-b-slate-900">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-slate-200 text-center font-sans">
-          <p className="text-[9px] uppercase tracking-[0.3em] text-slate-400">Thank you for your valued business</p>
         </div>
 
       </div>
@@ -162,7 +173,7 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
 
 export function ExecutiveInvoiceErrorBoundary(props: { data: InvoiceTemplateData }) {
   return (
-    <InvoiceErrorBoundary fallbackTemplate={<fallbackConfig.component data={props.data} />}>
+    <InvoiceErrorBoundary fallbackTemplate={<div className="p-8 text-center text-red-500">Failed to render Executive template.</div>}>
       <ExecutiveInvoiceTemplate data={props.data} />
     </InvoiceErrorBoundary>
   )
@@ -171,11 +182,11 @@ export function ExecutiveInvoiceErrorBoundary(props: { data: InvoiceTemplateData
 export const executiveInvoiceConfig: InvoiceTemplateConfig = {
   id: 'executive-invoice',
   name: 'Executive Minimal',
-  description: 'A refined, minimalist luxury layout with high-fashion aesthetics and serif typography.',
+  description: 'Luxury consulting style with exquisite typography, dark cover layout, and elegant spacing.',
   component: ExecutiveInvoiceErrorBoundary,
-  primaryColor: '#0f172a',
-  secondaryColor: '#f8fafc',
+  primaryColor: '#111827',
+  secondaryColor: '#ffffff',
   supportsPdf: true,
   supportsDocx: true,
-  version: '2.0.0'
+  version: '3.0.0'
 }
