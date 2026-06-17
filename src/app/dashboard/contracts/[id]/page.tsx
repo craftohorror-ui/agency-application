@@ -10,6 +10,7 @@ import { mapContractToTemplateData } from '@/lib/contract-template-registry'
 import { ContractEditor } from '@/components/contracts/contract-editor'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { PremiumMarkdownComponents } from '@/components/contracts/premium-markdown'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -89,8 +90,8 @@ export default async function ContractDetailPage({ params }: PageProps) {
               {contract.status === 'draft' ? (
                 <ContractEditor contractId={contract.id} initialBody={contract.body} />
               ) : (
-                <div className="rounded-md border bg-white p-8 prose prose-slate max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <div className="rounded-md border bg-slate-50 p-12 text-slate-800">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
                     {contract.body}
                   </ReactMarkdown>
                 </div>

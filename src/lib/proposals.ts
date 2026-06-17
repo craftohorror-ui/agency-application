@@ -227,82 +227,66 @@ export async function convertProposalToContract(id: string) {
   const clientCompany = proposal.client?.company || clientName
   const agreementNumber = `CTR-${new Date().getFullYear()}-${proposal.id.slice(0, 8).toUpperCase()}`
 
+  const agencyReg = agencySettings.registration_number ? `Reg: ${agencySettings.registration_number}` : ''
+  const agencyTax = agencySettings.tax_id ? `Tax ID: ${agencySettings.tax_id}` : ''
+  const agencyDetails = [agencyReg, agencyTax].filter(Boolean).join(' | ')
+
+  const overviewTable = `| AGREEMENT OVERVIEW | DETAILS |
+|---|---|
+| **Agreement Number** | ${agreementNumber} |
+| **Effective Date** | ${new Date().toLocaleDateString()} |`
+
+  const partiesTable = `| ROLE | LEGAL ENTITY | REPRESENTATIVE | DETAILS |
+|---|---|---|---|
+| **Agency** | **${agencyName.toUpperCase()}** | ${repName} | ${agencyDetails} |
+| **Client** | **${clientCompany.toUpperCase()}** | ${clientName} | |`
+
+  const commercialTable = `| CONTRACT VALUE | TIMELINE |
+|---|---|
+| **$${proposal.amount.toLocaleString()}** | **${proposal.timeline || 'To be mutually agreed'}** |`
+
   const contractBody = `# MASTER SERVICE AGREEMENT
 
-**Agreement Number:** ${agreementNumber}  
-**Effective Date:** ${new Date().toLocaleDateString()}
-
----
+${overviewTable}
 
 ## PARTIES
 
-### Agency
-
-**${agencyName.toUpperCase()}**
-${agencySettings.registration_number ? `Registration No:\n${agencySettings.registration_number}\n\n` : ''}${agencySettings.tax_id ? `GSTIN / Tax ID:\n${agencySettings.tax_id}\n\n` : ''}Represented By:
-${repName}
-${repProfile.title || 'Authorized Representative'}
-
----
-
-### Client
-
-**${clientCompany.toUpperCase()}**
-
-Represented By:
-${clientName}
-
-Together referred to as the "Parties".
-
----
+${partiesTable}
 
 ## 1. SERVICES
 
 ${proposal.scope || 'Services will be provided as outlined and mutually agreed upon.'}
 
----
-
 ## 2. DELIVERABLES
 
 ${formattedDeliverables}
 
----
+## 3. COMMERCIAL TERMS
 
-## 3. TIMELINE
-
-**${proposal.timeline || 'Timeline to be mutually agreed upon prior to commencement.'}**
-
----
-
-## 4. COMMERCIAL TERMS
-
-### CONTRACT VALUE
-**$${proposal.amount.toLocaleString()}**
+${commercialTable}
 
 ### LINE ITEMS
 ${itemsList}
 
----
-
-## 5. PAYMENT TERMS
+## 4. PAYMENT TERMS
 
 ${formattedPaymentTerms}
 
 ---
 
-## 6. CONFIDENTIALITY
+## 5. CONFIDENTIALITY
 
 Each Party agrees to retain in confidence the non-public information and know-how transmitted or disclosed to them by the other Party in the course of performing this Agreement. Neither Party shall disclose such information to any third party without prior written consent.
 
 ---
 
-## 7. TERMINATION
+## 6. TERMINATION
 
 Either Party may terminate this Agreement for convenience upon providing thirty (30) days prior written notice to the other Party. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the date of termination.
 
 ---
 
-## 8. GOVERNING LAW
+## 7. GOVERNING LAW
 
 This Agreement shall be governed by and construed in accordance with the laws of the applicable jurisdiction, without regard to its conflict of law principles.
 `

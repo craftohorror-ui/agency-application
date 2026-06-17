@@ -2,6 +2,7 @@ import React from 'react'
 import { ContractTemplateData, ContractTemplateConfig } from '@/lib/contract-template-registry'
 import { AgencyTemplateFooter } from '@/components/AgencyTemplateFooter'
 import ReactMarkdown from 'react-markdown'
+import { PremiumMarkdownComponents } from '../premium-markdown'
 import remarkGfm from 'remark-gfm'
 
 
@@ -55,7 +56,7 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
       {/* Main Content */}
       <div className="p-16 space-y-8 bg-white">
         <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-slate-900 prose-headings:font-normal prose-p:font-sans prose-p:text-slate-600 prose-p:leading-loose">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
