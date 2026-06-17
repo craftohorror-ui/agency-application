@@ -231,7 +231,7 @@ export async function generateInvoiceDocx(data: InvoiceTemplateData, config: Inv
 
           new Paragraph({ text: '', spacing: { before: 800 } }),
 
-          ...(data.payments && data.payments.length > 0 ? [
+          ...(data.showPaymentHistory && data.payments && data.payments.length > 0 ? [
             new Paragraph({ text: 'Payment History', heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }),
             new Table({
               width: { size: 100, type: WidthType.PERCENTAGE },

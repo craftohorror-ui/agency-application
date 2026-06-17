@@ -181,7 +181,7 @@ function ModernBusinessV2Template({ data }: { data: InvoiceTemplateData }) {
           </div>
         </div>
 
-        {data.payments && data.payments.length > 0 && (
+        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
           <div className="mt-8">
             <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-[10px]">Payment History</h4>
             <div className="border border-slate-200 rounded overflow-hidden">

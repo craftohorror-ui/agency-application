@@ -158,7 +158,7 @@ function EnterpriseInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
           </div>
         </div>
 
-        {data.payments && data.payments.length > 0 && (
+        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
           <div className="mb-12 flex-1 border-l-4" style={{ borderColor: primaryColor }}>
             <h3 className="text-xl font-bold text-slate-900 uppercase tracking-wide mb-6 pl-4 border-b border-slate-200 pb-4">Payment Record</h3>
             <div className="pl-4">

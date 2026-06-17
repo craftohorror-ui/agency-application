@@ -150,7 +150,7 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
           </div>
         </div>
 
-        {data.payments && data.payments.length > 0 && (
+        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
           <div className="mt-12 font-sans mb-8">
             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-200 pb-2">Payment History</h4>
             <table className="w-full text-left text-xs">

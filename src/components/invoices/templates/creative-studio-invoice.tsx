@@ -185,7 +185,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
           </div>
         </div>
 
-        {data.payments && data.payments.length > 0 && (
+        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
           <div className="mt-8">
             <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-slate-400 border-l-4 pl-3" style={{ borderColor: primaryColor }}>Payment History</h4>
             <div className="border border-slate-200">

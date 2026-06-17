@@ -183,7 +183,7 @@ function MarketingInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
           </div>
         </div>
 
-        {data.payments && data.payments.length > 0 && (
+        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
           <div className="mb-12 bg-slate-50 p-8 rounded-3xl border border-slate-100 shadow-sm mt-8">
             <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }}></span>

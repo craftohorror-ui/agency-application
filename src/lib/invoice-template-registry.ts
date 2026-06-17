@@ -43,6 +43,7 @@ export interface InvoiceTemplateData {
   
   // Payments
   payments: Array<{ amount: number, paid_at: string, method?: string | null, reference?: string | null }>
+  showPaymentHistory?: boolean
 }
 
 export interface InvoiceTemplateConfig {
@@ -130,6 +131,7 @@ export function mapInvoiceToTemplateData(
     notes: invoice.notes,
     paymentInstructions: snap.payment_instructions || ctx.payment_instructions || undefined,
     
-    payments: invoice.payments || []
+    payments: invoice.payments || [],
+    showPaymentHistory: invoice.showPaymentHistory === true
   }
 }
