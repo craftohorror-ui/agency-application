@@ -151,9 +151,21 @@ function SaaSInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
               )}
               
               <div className="flex justify-between items-center pt-2">
-                <span className="font-bold uppercase tracking-widest text-slate-900 text-xs">Total Due</span>
-                <span className="font-black text-2xl font-mono" style={{ color: primaryColor }}>
+                <span className="font-bold uppercase tracking-widest text-slate-900 text-xs">Invoice Total</span>
+                <span className="font-black text-xl font-mono text-slate-900">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-bold uppercase tracking-widest text-emerald-500 text-[10px]">Amount Paid</span>
+                <span className="font-bold text-sm font-mono text-emerald-500">
+                  -{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amountPaid)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-slate-200 mt-2">
+                <span className="font-bold uppercase tracking-widest text-slate-900 text-xs">Balance Due</span>
+                <span className="font-black text-2xl font-mono" style={{ color: primaryColor }}>
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.balanceDue)}
                 </span>
               </div>
             </div>
@@ -181,6 +193,37 @@ function SaaSInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
             </div>
           )}
         </div>
+
+        {data.payments && data.payments.length > 0 && (
+          <div className="mt-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Payment History
+            </h3>
+            <div className="overflow-hidden border border-slate-100 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    <th className="py-3 px-4 font-bold uppercase tracking-widest text-slate-400">Date</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-widest text-slate-400">Method</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-widest text-slate-400">Reference</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-widest text-slate-400 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {data.payments.map((p, i) => (
+                    <tr key={i} className="hover:bg-slate-50/50">
+                      <td className="py-3 px-4 text-slate-700 font-semibold">{formatDate(p.paid_at)}</td>
+                      <td className="py-3 px-4 text-slate-600 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
+                      <td className="py-3 px-4 text-slate-500">{p.reference || '-'}</td>
+                      <td className="py-3 px-4 text-slate-900 font-bold text-right font-mono">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

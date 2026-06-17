@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getInvoice } from '@/lib/invoices'
+import { listPayments } from '@/lib/payments'
 import { getInvoiceTemplate, mapInvoiceToTemplateData } from '@/lib/invoice-template-registry'
 import { requireStaff } from '@/lib/auth'
 
@@ -21,7 +22,7 @@ export default async function PrintInvoicePage({ params, searchParams }: PrintPa
   const templateParam = resolvedSearch.template as string
   const templateId = templateParam || invoice.template_id || 'modern-business'
 
-  // Fetch Agency
+  // Fetch Agency & Payments
   const { profile, supabase } = await requireStaff()
   const { data: agency } = await supabase
     .from('agencies')
@@ -29,7 +30,8 @@ export default async function PrintInvoicePage({ params, searchParams }: PrintPa
     .eq('id', profile.agency_id)
     .single()
 
-  const templateData = mapInvoiceToTemplateData(invoice, agency)
+  const payments = await listPayments(invoice.id)
+  const templateData = mapInvoiceToTemplateData({ ...invoice, payments }, agency)
   const selectedTemplate = getInvoiceTemplate(templateId) || getInvoiceTemplate('modern-business')
 
   if (!selectedTemplate) {

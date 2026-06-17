@@ -53,7 +53,7 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency || 'USD' }).format(amount)
   }
 
-  const templateData = mapInvoiceToTemplateData(invoice, agency)
+  const templateData = mapInvoiceToTemplateData({ ...invoice, payments }, agency)
 
   const outstandingBalance = invoice.total - invoice.amount_paid
 

@@ -137,10 +137,24 @@ function ModernBusinessV2Template({ data }: { data: InvoiceTemplateData }) {
               
               <div className="flex justify-between items-end pt-2">
                 <div>
-                  <p className="font-bold text-sm uppercase tracking-widest text-slate-900">Total Investment</p>
+                  <p className="font-bold text-sm uppercase tracking-widest text-slate-900">Total Invoice Amount</p>
                 </div>
-                <div className="font-black text-3xl" style={{ color: primaryColor }}>
+                <div className="font-black text-xl" style={{ color: primaryColor }}>
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center text-green-600 font-medium pt-3">
+                <span>Amount Paid</span>
+                <span>-{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amountPaid)}</span>
+              </div>
+              
+              <div className="flex justify-between items-end pt-3 border-t border-slate-200 mt-3">
+                <div>
+                  <p className="font-bold text-sm uppercase tracking-widest text-slate-900">Balance Due</p>
+                </div>
+                <div className="font-black text-2xl" style={{ color: primaryColor }}>
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.balanceDue)}
                 </div>
               </div>
             </div>
@@ -148,7 +162,7 @@ function ModernBusinessV2Template({ data }: { data: InvoiceTemplateData }) {
         </div>
 
         {/* Footer info */}
-        <div className="grid grid-cols-2 gap-12 mt-auto pt-12 border-t-2 border-slate-100">
+        <div className="grid grid-cols-2 gap-12 mt-auto pt-12 border-t-2 border-slate-100 mb-8">
           <div>
             {data.paymentInstructions && (
               <div className="bg-slate-50 p-6 rounded border border-slate-200">
@@ -166,6 +180,34 @@ function ModernBusinessV2Template({ data }: { data: InvoiceTemplateData }) {
             )}
           </div>
         </div>
+
+        {data.payments && data.payments.length > 0 && (
+          <div className="mt-8">
+            <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-[10px]">Payment History</h4>
+            <div className="border border-slate-200 rounded overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="py-2 px-4 font-semibold text-slate-600">Date</th>
+                    <th className="py-2 px-4 font-semibold text-slate-600">Method</th>
+                    <th className="py-2 px-4 font-semibold text-slate-600">Reference</th>
+                    <th className="py-2 px-4 font-semibold text-slate-600 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data.payments.map((p, i) => (
+                    <tr key={i} className="bg-white">
+                      <td className="py-2 px-4 text-slate-700">{formatDate(p.paid_at)}</td>
+                      <td className="py-2 px-4 text-slate-700 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
+                      <td className="py-2 px-4 text-slate-700">{p.reference || '-'}</td>
+                      <td className="py-2 px-4 text-slate-900 font-medium text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

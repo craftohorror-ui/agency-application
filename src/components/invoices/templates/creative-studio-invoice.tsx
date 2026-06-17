@@ -139,10 +139,22 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
                 </div>
               </div>
 
-              <div className="flex justify-between items-end">
-                <div className="text-sm font-bold uppercase tracking-widest text-slate-400">Total Investment</div>
-                <div className="font-black text-4xl text-white">
+              <div className="flex justify-between items-end mb-4">
+                <div className="text-sm font-bold uppercase tracking-widest text-slate-400">Invoice Total</div>
+                <div className="font-black text-xl text-white">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-sm mb-4">
+                <div className="font-bold uppercase tracking-widest text-green-400">Amount Paid</div>
+                <div className="font-black text-green-400">
+                  -{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amountPaid)}
+                </div>
+              </div>
+              <div className="flex justify-between items-end pt-4 border-t border-white/20">
+                <div className="text-sm font-bold uppercase tracking-widest text-slate-300">Balance Due</div>
+                <div className="font-black text-3xl text-white">
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.balanceDue)}
                 </div>
               </div>
             </div>
@@ -150,7 +162,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
         </div>
 
         {/* Footer info */}
-        <div className="grid grid-cols-2 gap-12 mt-auto pt-12 border-t-4 border-slate-100">
+        <div className="grid grid-cols-2 gap-12 mt-auto pt-12 border-t-4 border-slate-100 mb-8">
           <div>
             {data.paymentInstructions && (
               <div>
@@ -172,6 +184,34 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
             )}
           </div>
         </div>
+
+        {data.payments && data.payments.length > 0 && (
+          <div className="mt-8">
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-slate-400 border-l-4 pl-3" style={{ borderColor: primaryColor }}>Payment History</h4>
+            <div className="border border-slate-200">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500">
+                  <tr>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Date</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Method</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Reference</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data.payments.map((p, i) => (
+                     <tr key={i} className="bg-white">
+                      <td className="py-3 px-6 text-slate-800 font-medium">{formatDate(p.paid_at)}</td>
+                      <td className="py-3 px-6 text-slate-600 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
+                      <td className="py-3 px-6 text-slate-600">{p.reference || '-'}</td>
+                      <td className="py-3 px-6 text-slate-900 font-bold text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

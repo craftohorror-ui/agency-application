@@ -161,15 +161,58 @@ function MarketingInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
                 )}
                 
                 <div className="border-t border-white/20 pt-5 mt-5 flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Total Due</span>
-                  <span className="text-3xl font-black text-white">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Invoice Total</span>
+                  <span className="text-xl font-black text-white">
                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-green-400">Amount Paid</span>
+                  <span className="text-sm font-black text-green-400">
+                    -{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amountPaid)}
+                  </span>
+                </div>
+                <div className="border-t border-white/20 pt-5 mt-2 flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Balance Due</span>
+                  <span className="text-3xl font-black text-white">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.balanceDue)}
                   </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {data.payments && data.payments.length > 0 && (
+          <div className="mb-12 bg-slate-50 p-8 rounded-3xl border border-slate-100 shadow-sm mt-8">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }}></span>
+              Payment History
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-slate-400">Date</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-slate-400">Method</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-slate-400">Reference</th>
+                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-slate-400 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {data.payments.map((p, i) => (
+                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-6 text-slate-700 font-bold">{formatDate(p.paid_at)}</td>
+                      <td className="py-3 px-6 text-slate-600 capitalize font-medium">{p.method?.replace('_', ' ') || '-'}</td>
+                      <td className="py-3 px-6 text-slate-500 font-medium">{p.reference || '-'}</td>
+                      <td className="py-3 px-6 text-slate-900 font-black text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

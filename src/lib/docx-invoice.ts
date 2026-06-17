@@ -231,6 +231,32 @@ export async function generateInvoiceDocx(data: InvoiceTemplateData, config: Inv
 
           new Paragraph({ text: '', spacing: { before: 800 } }),
 
+          ...(data.payments && data.payments.length > 0 ? [
+            new Paragraph({ text: 'Payment History', heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({ children: [new Paragraph({ text: 'Date', run: { bold: true } })] }),
+                    new TableCell({ children: [new Paragraph({ text: 'Method', run: { bold: true } })] }),
+                    new TableCell({ children: [new Paragraph({ text: 'Reference', run: { bold: true } })] }),
+                    new TableCell({ children: [new Paragraph({ text: 'Amount', run: { bold: true }, alignment: AlignmentType.RIGHT })] })
+                  ]
+                }),
+                ...data.payments.map(p => new TableRow({
+                  children: [
+                    new TableCell({ children: [new Paragraph({ text: new Date(p.paid_at).toLocaleDateString() })] }),
+                    new TableCell({ children: [new Paragraph({ text: p.method?.replace('_', ' ') || '-' })] }),
+                    new TableCell({ children: [new Paragraph({ text: p.reference || '-' })] }),
+                    new TableCell({ children: [new Paragraph({ text: p.amount.toFixed(2), alignment: AlignmentType.RIGHT })] })
+                  ]
+                }))
+              ]
+            }),
+            new Paragraph({ text: '', spacing: { before: 800 } }),
+          ] : []),
+
           ...(data.paymentInstructions ? [
             new Paragraph({ text: 'Payment Instructions', heading: HeadingLevel.HEADING_2 }),
             new Paragraph({ text: data.paymentInstructions, spacing: { after: 400 } })

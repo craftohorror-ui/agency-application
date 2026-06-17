@@ -131,14 +131,50 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
               )}
               
               <div className="flex justify-between items-end pt-2">
-                <span className="font-semibold tracking-wider uppercase text-slate-900">Total Due</span>
-                <span className="font-light text-3xl font-serif text-slate-900">
+                <span className="font-semibold tracking-wider uppercase text-slate-900">Invoice Total</span>
+                <span className="font-light text-xl font-serif text-slate-900">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.total)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm pt-4">
+                <span className="font-medium text-green-600 tracking-wider uppercase">Amount Paid</span>
+                <span className="font-mono text-green-600">-{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amountPaid)}</span>
+              </div>
+              <div className="flex justify-between items-end pt-4 border-t-2 border-slate-900 mt-4">
+                <span className="font-semibold tracking-wider uppercase text-slate-900">Balance Due</span>
+                <span className="font-light text-3xl font-serif text-slate-900">
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.balanceDue)}
                 </span>
               </div>
             </div>
           </div>
         </div>
+
+        {data.payments && data.payments.length > 0 && (
+          <div className="mt-12 font-sans mb-8">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-200 pb-2">Payment History</h4>
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr>
+                  <th className="py-2 pr-4 font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Date</th>
+                  <th className="py-2 px-4 font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Method</th>
+                  <th className="py-2 px-4 font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Reference</th>
+                  <th className="py-2 pl-4 font-semibold text-slate-500 text-right uppercase tracking-wider text-[10px]">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {data.payments.map((p, i) => (
+                  <tr key={i}>
+                    <td className="py-3 pr-4 text-slate-700">{formatDate(p.paid_at)}</td>
+                    <td className="py-3 px-4 text-slate-700 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
+                    <td className="py-3 px-4 text-slate-700">{p.reference || '-'}</td>
+                    <td className="py-3 pl-4 text-slate-900 font-mono text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Footer info */}
         <div className="mt-auto pt-16 border-t border-slate-200 grid grid-cols-2 gap-16 font-sans">
