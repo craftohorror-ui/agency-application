@@ -1,39 +1,20 @@
-export { modernBusinessInvoiceConfig } from './modern-business'
-// Create aliases for the other 5 for now, using the modern-business component as the base but different configs to fulfill the requirement without exploding code size immediately.
-import { modernBusinessInvoiceConfig } from './modern-business'
-import type { InvoiceTemplateConfig } from '@/lib/invoice-template-registry'
+import { modernBusinessInvoiceConfig as modernBusinessV2Config } from './modern-business-v2'
+import { executiveInvoiceConfig } from './executive-invoice'
+import { creativeStudioInvoiceConfig } from './creative-studio-invoice'
+import { marketingInvoiceConfig } from './marketing-invoice'
+import { saasInvoiceConfig } from './saas-invoice'
+import { enterpriseInvoiceConfig } from './enterprise-invoice'
 
-export const executiveInvoiceConfig: InvoiceTemplateConfig = {
-  ...modernBusinessInvoiceConfig,
-  id: 'executive-invoice',
-  name: 'Executive Invoice',
-  description: 'A refined, minimalist layout for executive services.',
+// We map modernBusinessInvoiceConfig back to modern-business-v2 for seamless integration
+export const modernBusinessInvoiceConfig = {
+  ...modernBusinessV2Config,
+  id: 'modern-business' // Ensure ID is exact for backwards compatibility
 }
 
-export const consultingInvoiceConfig: InvoiceTemplateConfig = {
-  ...modernBusinessInvoiceConfig,
-  id: 'consulting-invoice',
-  name: 'Consulting Invoice',
-  description: 'Optimized for consulting retainers and hourly billing.',
-}
-
-export const marketingInvoiceConfig: InvoiceTemplateConfig = {
-  ...modernBusinessInvoiceConfig,
-  id: 'marketing-invoice',
-  name: 'Marketing Agency',
-  description: 'Vibrant and bold layout for creative agencies.',
-}
-
-export const saasInvoiceConfig: InvoiceTemplateConfig = {
-  ...modernBusinessInvoiceConfig,
-  id: 'saas-invoice',
-  name: 'SaaS Invoice',
-  description: 'Clean, tech-forward design for software subscriptions.',
-}
-
-export const enterpriseInvoiceConfig: InvoiceTemplateConfig = {
-  ...modernBusinessInvoiceConfig,
-  id: 'enterprise-invoice',
-  name: 'Enterprise Invoice',
-  description: 'Highly detailed, traditional layout for enterprise procurement.',
+export {
+  executiveInvoiceConfig,
+  creativeStudioInvoiceConfig as consultingInvoiceConfig, // Map ID for backwards compatibility
+  marketingInvoiceConfig,
+  saasInvoiceConfig,
+  enterpriseInvoiceConfig
 }

@@ -122,23 +122,57 @@ export function InvoiceExportModal({ invoiceId, initialTemplateId, templateData 
               <div 
                 key={t.id}
                 onClick={() => handleTemplateSelect(t.id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${
                   selectedTemplateId === t.id 
-                    ? 'border-blue-600 bg-blue-50/50 shadow-sm' 
-                    : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                    ? 'border-blue-600 bg-blue-50/30 shadow-md ring-1 ring-blue-600/20' 
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-sm">{t.name}</h4>
+                {/* CSS Thumbnail Mockup */}
+                <div className="h-24 mb-4 rounded border bg-white flex shadow-sm overflow-hidden select-none opacity-80 group-hover:opacity-100 transition-opacity">
+                  {t.id === 'consulting-invoice' /* Creative Studio */ && (
+                    <div className="w-2 h-full" style={{ backgroundColor: t.primaryColor }} />
+                  )}
+                  <div className="flex-1 p-2 flex flex-col gap-1.5">
+                    {/* Header Mock */}
+                    {t.id === 'executive-invoice' ? (
+                      <div className="flex flex-col items-center gap-1 border-b pb-1">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: t.primaryColor }} />
+                        <div className="w-12 h-1.5 rounded" style={{ backgroundColor: t.primaryColor }} />
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center pb-1">
+                        <div className="w-10 h-2 rounded" style={{ backgroundColor: t.primaryColor }} />
+                        <div className="w-8 h-1.5 bg-slate-200 rounded" />
+                      </div>
+                    )}
+                    
+                    {/* Body Mock */}
+                    <div className={`flex ${t.id === 'saas-invoice' ? 'flex-col gap-1' : 'justify-between gap-2'} mt-1`}>
+                      <div className={`w-8 h-6 rounded ${t.id === 'saas-invoice' ? 'w-full border' : 'bg-slate-100'}`} />
+                      <div className={`w-12 h-6 rounded ${t.id === 'saas-invoice' ? 'w-full border' : 'bg-slate-100'}`} />
+                    </div>
+                    
+                    {/* Table Mock */}
+                    <div className="mt-auto space-y-0.5">
+                      <div className="w-full h-1 bg-slate-200" />
+                      <div className="w-full h-1 bg-slate-100" />
+                      <div className="w-full h-1 bg-slate-100" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mb-1.5 relative z-10">
+                  <h4 className="font-bold text-slate-900">{t.name}</h4>
                   {isPending && selectedTemplateId === t.id && (
-                    <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
-                <div className="flex gap-2 mt-3">
-                  <span className="w-4 h-4 rounded-full border shadow-sm" style={{ backgroundColor: t.primaryColor }} />
-                  <span className="w-4 h-4 rounded-full border shadow-sm" style={{ backgroundColor: t.secondaryColor }} />
-                </div>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed relative z-10">{t.description}</p>
+                
+                {selectedTemplateId === t.id && (
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.8)]" />
+                )}
               </div>
             ))}
           </div>
