@@ -171,43 +171,26 @@ export function InvoiceForm({ invoice, clients, projects }: InvoiceFormProps) {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <select
-                  id="currency"
-                  name="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="INR">INR (₹)</option>
-                  <option value="AUD">AUD ($)</option>
-                  <option value="CAD">CAD ($)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="template_id">Template</Label>
-                <select
-                  id="template_id"
-                  name="template_id"
-                  defaultValue={invoice?.template_id || 'modern-business'}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                >
-                  <option value="modern-business">Modern Business</option>
-                  <option value="executive-invoice">Executive Invoice</option>
-                  <option value="consulting-invoice">Consulting Invoice</option>
-                  <option value="marketing-invoice">Marketing Agency</option>
-                  <option value="saas-invoice">SaaS Invoice</option>
-                  <option value="enterprise-invoice">Enterprise Invoice</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <select
+                id="currency"
+                name="currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+              >
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="AUD">AUD ($)</option>
+                <option value="CAD">CAD ($)</option>
+              </select>
             </div>
+
+            <input type="hidden" name="template_id" value={invoice?.template_id || 'modern-business'} />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
