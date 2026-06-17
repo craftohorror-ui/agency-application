@@ -43,7 +43,7 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
 
         <div className="mt-24 space-y-10 text-center">
           <p className="uppercase tracking-[0.4em] text-gray-500 font-bold text-sm">This Agreement is made on</p>
-          <p className="font-serif italic text-3xl">{data.date}</p>
+          <p className={`font-serif italic text-3xl ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
           <div className="w-16 h-px bg-black mx-auto my-12"></div>
           <p className="uppercase tracking-[0.4em] text-gray-500 font-bold text-sm">Between</p>
           <p className="font-bold text-3xl uppercase tracking-widest">{data.agencyName}</p>

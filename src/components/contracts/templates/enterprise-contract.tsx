@@ -56,7 +56,7 @@ export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
         </div>
         <div className="mt-8 font-sans bg-slate-50 p-8 rounded-xl border border-slate-200 inline-block w-full">
             <h3 className="text-xs font-bold text-sky-700 uppercase tracking-[0.2em] mb-4">Effective Date</h3>
-            <p className="text-xl font-bold text-slate-900">{data.date}</p>
+            <p className={`text-xl font-bold text-slate-900 ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
         </div>
       </div>
 

@@ -1,51 +1,87 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { Components } from 'react-markdown';
 
 import { contractDesignTokens } from '@/lib/contractDesignTokens';
 
+const wrapNumericValues = (text: string) => {
+  const regex = /(\$\d+(?:,\d{3})*(?:\.\d+)?|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b[A-Z]+-[A-Z0-9-]+\b|\b\d+\s+(?:Days|Months|Weeks|Years)\b|\b\d+(?:,\d{3})*(?:\.\d+)?\b)/;
+  const parts = text.split(regex);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      return <span key={i} className={contractDesignTokens.typography.numeric}>{part}</span>;
+    }
+    return part;
+  });
+};
+
+const formatChildren = (children: React.ReactNode): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (typeof child === 'string') {
+      return wrapNumericValues(child);
+    }
+    if (React.isValidElement(child)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const props = child.props as any;
+      return React.cloneElement(child, {
+        ...props,
+        children: formatChildren(props.children)
+      });
+    }
+    return child;
+  });
+};
+
 export const PremiumMarkdownComponents: Components = {
-  h1: ({ node, ...props }) => (
+  h1: ({ _node, ...props }: any) => (
     <h1 className={`${contractDesignTokens.typography.documentTitle} border-current`} {...props} />
   ),
-  h2: ({ node, ...props }) => (
+  h2: ({ _node, ...props }: any) => (
     <h2 className={`${contractDesignTokens.typography.sectionTitle} border-current opacity-80`} {...props} />
   ),
-  h3: ({ node, ...props }) => (
+  h3: ({ _node, ...props }: any) => (
     <h3 className={`${contractDesignTokens.typography.subsectionTitle} opacity-70`} {...props} />
   ),
-  p: ({ node, ...props }) => (
-    <p className={`${contractDesignTokens.typography.body} opacity-90`} {...props} />
+  p: ({ _node, ...props }: any) => (
+    <p className={`${contractDesignTokens.typography.body} opacity-90`} {...props}>
+      {formatChildren(props.children)}
+    </p>
   ),
-  ul: ({ node, ...props }) => (
+  ul: ({ _node, ...props }: any) => (
     <ul className="space-y-4 my-8" {...props} />
   ),
-  li: ({ node, ...props }) => (
+  li: ({ _node, ...props }: any) => (
     <li className="flex gap-5 items-start leading-relaxed text-lg opacity-90" {...props}>
       <span className="opacity-50 mt-1.5 font-bold">•</span>
-      <div className="flex-1">{props.children}</div>
+      <div className="flex-1">{formatChildren(props.children)}</div>
     </li>
   ),
-  table: ({ node, ...props }) => (
+  table: ({ _node, ...props }: any) => (
     <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} [&_strong]:text-2xl [&_strong]:font-black [&_strong]:tracking-tight`}>
       <table className="w-full text-left border-collapse" {...props} />
     </div>
   ),
-  thead: ({ node, ...props }) => (
+  thead: ({ _node, ...props }: any) => (
     <thead className="bg-black/5 border-b border-current/20" {...props} />
   ),
-  th: ({ node, ...props }) => (
+  th: ({ _node, ...props }: any) => (
     <th className="p-6 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0" {...props} />
   ),
-  tbody: ({ node, ...props }) => (
+  tbody: ({ _node, ...props }: any) => (
     <tbody className="divide-y divide-current/10" {...props} />
   ),
-  td: ({ node, ...props }) => (
-    <td className="p-8 align-top text-lg leading-relaxed border-r border-current/10 last:border-r-0" {...props} />
+  td: ({ _node, ...props }: any) => (
+    <td className={`p-8 align-top text-lg leading-relaxed border-r border-current/10 last:border-r-0 ${contractDesignTokens.typography.dataValue}`} {...props}>
+      {formatChildren(props.children)}
+    </td>
   ),
-  hr: ({ node, ...props }) => (
+  hr: ({ _node, ...props }: any) => (
     <hr className="my-20 border-t border-current/20" {...props} />
   ),
-  strong: ({ node, ...props }) => (
-    <strong className="font-bold opacity-100" {...props} />
+  strong: ({ _node, ...props }: any) => (
+    <strong className="font-bold opacity-100" {...props}>
+      {formatChildren(props.children)}
+    </strong>
   )
 };

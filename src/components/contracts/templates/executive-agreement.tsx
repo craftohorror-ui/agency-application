@@ -49,7 +49,7 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
             </div>
             <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-[0.3em] mb-4">Effective Date</h3>
-              <p className="text-2xl font-black text-slate-100">{data.date}</p>
+              <p className={`text-2xl font-black text-slate-100 ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
             </div>
           </div>
         </div>
