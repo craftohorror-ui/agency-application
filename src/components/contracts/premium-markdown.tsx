@@ -58,7 +58,7 @@ export const PremiumMarkdownComponents: Components = {
     </li>
   ),
   table: ({ _node, ...props }: any) => (
-    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} [&_strong]:text-2xl [&_strong]:font-black [&_strong]:tracking-tight`}>
+    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin}`}>
       <table className="w-full text-left border-collapse table-fixed" {...props} />
     </div>
   ),
@@ -94,7 +94,7 @@ export const PremiumMarkdownComponents: Components = {
     <tbody className="divide-y divide-current/10" {...props} />
   ),
   td: ({ _node, ...props }: any) => (
-    <td className={`p-8 align-top text-lg leading-relaxed border-r border-current/10 last:border-r-0 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
+    <td className={`p-6 align-top text-[15px] font-medium leading-relaxed border-r border-current/10 last:border-r-0 text-current/80 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
       {formatChildren(props.children)}
     </td>
   ),
@@ -102,7 +102,7 @@ export const PremiumMarkdownComponents: Components = {
     <hr className="my-20 border-t border-current/20" {...props} />
   ),
   strong: ({ _node, ...props }: any) => (
-    <strong className="font-bold opacity-100" {...props}>
+    <strong className="font-semibold text-base sm:text-[17px] text-current/90 opacity-100" {...props}>
       {formatChildren(props.children)}
     </strong>
   )
