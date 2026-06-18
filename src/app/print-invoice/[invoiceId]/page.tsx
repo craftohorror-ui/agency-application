@@ -10,6 +10,9 @@ interface PrintPageProps {
 }
 
 export default async function PrintInvoicePage({ params, searchParams }: PrintPageProps) {
+  // Auth guard — page-level protection in addition to middleware
+  const { profile, supabase } = await requireStaff()
+
   const resolvedParams = await params
   const invoice = await getInvoice(resolvedParams.invoiceId)
   
@@ -23,7 +26,6 @@ export default async function PrintInvoicePage({ params, searchParams }: PrintPa
   const templateId = templateParam || invoice.template_id || 'modern-business'
 
   // Fetch Agency & Payments
-  const { profile, supabase } = await requireStaff()
   const { data: agency } = await supabase
     .from('agencies')
     .select('*')

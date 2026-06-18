@@ -1,7 +1,6 @@
 import 'server-only'
 
 import { requireStaff } from '@/lib/auth'
-import { createClient } from '@/lib/clients'
 import type { Lead, LeadStage, Profile } from '@/lib/types'
 
 export const LEAD_STAGES = [
@@ -210,31 +209,6 @@ export async function updateLead(id: string, input: LeadUpdateInput): Promise<Le
     .single()
 
   if (error) throw new Error(error.message)
-
-  // Auto-convert to client if stage is won
-  if (input.stage === 'won' && !data.converted_client_id) {
-    const client = await createClient({
-      name: data.name,
-      company: data.company,
-      email: data.email,
-      phone: data.phone,
-      website: data.website,
-      industry: data.industry,
-      notes: data.notes,
-      lead_id: data.id,
-    })
-    
-    // Update the lead with the new client id
-    const { data: updatedLead, error: updateError } = await supabase
-      .from('leads')
-      .update({ converted_client_id: client.id })
-      .eq('id', id)
-      .select('*, owner:profiles(id, full_name, email, role, avatar_url)')
-      .single()
-      
-    if (updateError) throw new Error(updateError.message)
-    return updatedLead as LeadWithOwner
-  }
 
   return data as LeadWithOwner
 }

@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
   try {
+    // Auth guard — avatars are private; only authenticated staff can access
+    await requireStaff()
+
     const params = await props.params
-    // Only staff can access avatars natively, but clients can see them too.
-    // For now we allow any authenticated user to proxy. We can just use the admin client.
     const path = params.path.join('/')
     
     const adminSupabase = createAdminClient()
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ path:
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=3600'
+        // private: browser-only cache. Not cached by CDNs or shared proxies.
+        'Cache-Control': 'private, max-age=3600'
       }
     })
   } catch (err) {

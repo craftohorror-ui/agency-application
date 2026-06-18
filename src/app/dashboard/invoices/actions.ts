@@ -19,6 +19,7 @@ export type InvoiceFormState = {
 }
 
 export async function createInvoiceAction(prevState: InvoiceFormState, formData: FormData): Promise<InvoiceFormState> {
+  await requireStaff()
   const client_id = formData.get('client_id') as string
   const project_id = formData.get('project_id') as string || null
   const issue_date = formData.get('issue_date') as string
@@ -73,6 +74,9 @@ export async function createInvoiceAction(prevState: InvoiceFormState, formData:
 }
 
 export async function updateInvoiceAction(id: string, prevState: InvoiceFormState, formData: FormData): Promise<InvoiceFormState> {
+  // Auth FIRST — before any mutation
+  const { user } = await requireStaff()
+
   const client_id = formData.get('client_id') as string
   const project_id = formData.get('project_id') as string || null
   const issue_date = formData.get('issue_date') as string
@@ -114,7 +118,6 @@ export async function updateInvoiceAction(id: string, prevState: InvoiceFormStat
       status
     }, items)
 
-    const { user } = await requireStaff()
     await insertAuditLog(user.id, 'invoice.updated', 'invoice', id, { status, due_date })
 
     revalidatePath('/dashboard/invoices')
@@ -136,6 +139,7 @@ export async function deleteInvoiceAction(id: string) {
 }
 
 export async function recordPaymentAction(invoiceId: string, formData: FormData) {
+  await requireStaff()
   const amount = parseFloat(formData.get('amount') as string)
   const method = formData.get('method') as string
   const reference = formData.get('reference') as string
@@ -151,27 +155,32 @@ export async function recordPaymentAction(invoiceId: string, formData: FormData)
 }
 
 export async function deletePaymentAction(paymentId: string, invoiceId: string) {
+  await requireStaff()
   await deletePayment(paymentId, invoiceId)
   revalidatePath(`/dashboard/invoices/${invoiceId}`)
   revalidatePath('/dashboard/invoices')
 }
 
 export async function updateInvoiceStatusAction(id: string, status: InvoiceStatus) {
+  await requireStaff()
   await updateInvoice(id, { status })
   revalidatePath(`/dashboard/invoices/${id}`)
   revalidatePath('/dashboard/invoices')
 }
 
 export async function generateInvoiceFromProjectAction(projectId: string) {
+  await requireStaff()
   const invoiceId = await generateInvoiceFromProject(projectId)
   revalidatePath(`/dashboard/projects/${projectId}`)
   revalidatePath('/dashboard/invoices')
-  redirect(`/dashboard/invoices/${invoiceId}?success=Invoice+marked+as+paid`)
+  redirect(`/dashboard/invoices/${invoiceId}?success=Invoice+created+from+project`)
 }
 
 export async function updateInvoiceTemplateAction(id: string, templateId: string) {
+  await requireStaff()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await updateInvoice(id, { template_id: templateId } as any)
   revalidatePath(`/dashboard/invoices/${id}`)
   revalidatePath('/dashboard/invoices')
 }
+

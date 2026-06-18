@@ -132,6 +132,6 @@ export function mapInvoiceToTemplateData(
     paymentInstructions: snap.payment_instructions || ctx.payment_instructions || undefined,
     
     payments: invoice.payments || [],
-    showPaymentHistory: invoice.showPaymentHistory === true
+    showPaymentHistory: Array.isArray(invoice.payments) && invoice.payments.length > 0
   }
 }

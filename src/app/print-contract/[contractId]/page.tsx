@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getContract } from '@/lib/contracts'
+import { requireStaff } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getContractTemplate, mapContractToTemplateData } from '@/lib/contract-template-registry'
 import '@/app/globals.css' // Ensure Tailwind styles load for print
@@ -12,43 +12,34 @@ interface PageProps {
 }
 
 export default async function PrintContractPage({ params, searchParams }: PageProps) {
+  // Auth guard — page-level protection in addition to middleware
+  await requireStaff()
+
   const resolvedParams = await params
-  const contract = await getContract(resolvedParams.contractId)
+  const contractId = resolvedParams.contractId
 
-  if (!contract) {
-    notFound()
-  }
-
-  // We are bypassing RLS by fetching via admin or relying on getContract which uses staff context?
-  // Wait, the print route doesn't have an authenticated session if puppeteer hits it.
-  // We need to fetch via admin or pass a token. We'll use a token like public proposals,
-  // OR the export route injects an auth token. Actually, we can fetch the contract securely here.
-  // Wait, `getContract` calls `requireStaff()`. Puppeteer won't have cookies.
-  // I'll fetch via admin client directly.
-  
+  // Use admin client to fetch for Puppeteer rendering
+  // (Puppeteer hits this URL with forwarded session cookies, so requireStaff() above
+  //  already validated the session. Admin client is used only for the data fetch
+  //  to avoid RLS issues in the print rendering context.)
   const supabaseAdmin = createAdminClient()
   const { data: adminContract, error: contractErr } = await supabaseAdmin
     .from('contracts')
     .select('*, client:clients(id, name, company)')
-    .eq('id', resolvedParams.contractId)
+    .eq('id', contractId)
     .single()
 
   if (contractErr || !adminContract) {
     notFound()
   }
 
-  // Fetch Agency
+  // Fetch Agency via creator's profile
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('agency_id')
-    .eq('id', adminContract.created_by || '') // fallback, or we fetch the agency directly from client
+    .eq('id', adminContract.created_by || '')
     .maybeSingle()
 
-  // Alternatively, just grab the first admin's agency or rely on something else.
-  // Wait, contracts are scoped to client_id. Client has agency_id? No, clients don't explicitly have agency_id in this context, they belong to the agency.
-  // Actually, we can just grab agency context from the client.
-  // Let me check if clients have agency_id. If not, how do we get agency?
-  // I will just fetch agency via the creator's profile.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let agencyData: any = { name: 'Our Agency', logoUrl: undefined as string | undefined }
   

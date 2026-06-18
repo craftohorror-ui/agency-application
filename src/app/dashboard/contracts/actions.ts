@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { updateContract } from '@/lib/contracts'
+import { requireStaff } from '@/lib/auth'
 import type { ContractStatus } from '@/lib/types'
 
 export async function updateContractStatusAction(id: string, status: ContractStatus) {
+  await requireStaff()
   await updateContract(id, { status })
   revalidatePath(`/dashboard/contracts/${id}`)
   revalidatePath('/dashboard/contracts')
@@ -12,6 +14,7 @@ export async function updateContractStatusAction(id: string, status: ContractSta
 
 export async function updateContractBodyAction(id: string, formData: FormData) {
   try {
+    await requireStaff()
     const body = formData.get('body') as string
     if (!body) return { error: 'Body is required' }
     
@@ -25,6 +28,7 @@ export async function updateContractBodyAction(id: string, formData: FormData) {
 }
 
 export async function updateContractTemplateAction(id: string, templateId: string) {
+  await requireStaff()
   await updateContract(id, { template_id: templateId })
   revalidatePath(`/dashboard/contracts/${id}`)
 }

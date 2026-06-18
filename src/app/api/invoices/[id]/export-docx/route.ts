@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getInvoiceTemplate, mapInvoiceToTemplateData } from '@/lib/invoice-template-registry'
 import { generateInvoiceDocx } from '@/lib/docx-invoice'
+import { requireStaff } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Auth guard — must be before any data access
+    await requireStaff()
+
     const resolvedParams = await params
     const id = resolvedParams.id
     

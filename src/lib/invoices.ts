@@ -208,7 +208,12 @@ export async function createInvoice(input: CreateInvoiceInput, items: CreateInvo
   }
 
   const taxRate = input.tax_rate || 0
-  const { subtotal, taxAmount, total } = calculateTotals(items, taxRate)
+  const { subtotal, taxAmount, total } = calculateTotals(
+    items,
+    taxRate,
+    input.discount_type || 'fixed',
+    input.discount_value || 0
+  )
   
   // Use agency default notes/disclaimer if none provided
   const notes = input.notes || agencySettings.default_invoice_footer

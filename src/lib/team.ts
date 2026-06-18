@@ -123,10 +123,13 @@ export async function updateTeamMember(id: string, input: TeamUpdateInput): Prom
 }
 
 export async function createTeamMember(input: { full_name: string, email: string, password?: string, role: UserRole, agency_id: string }): Promise<Profile> {
+  if (!input.password || input.password.trim().length < 6) {
+    throw new Error('A password of at least 6 characters is required to create a team member.')
+  }
   const adminSupabase = createAdminClient()
   const { data: { user }, error: authError } = await adminSupabase.auth.admin.createUser({
     email: input.email,
-    password: input.password || 'Temporary123!',
+    password: input.password,
     email_confirm: true,
     user_metadata: {
       full_name: input.full_name,
@@ -157,9 +160,12 @@ export async function deleteTeamMember(id: string): Promise<void> {
 }
 
 export async function resetMemberPassword(id: string, newPassword?: string): Promise<void> {
+  if (!newPassword || newPassword.trim().length < 6) {
+    throw new Error('A new password of at least 6 characters is required.')
+  }
   const adminSupabase = createAdminClient()
   const { error } = await adminSupabase.auth.admin.updateUserById(id, {
-    password: newPassword || 'Temporary123!'
+    password: newPassword
   })
   if (error) throw new Error(error.message)
 }

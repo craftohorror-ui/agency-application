@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getContract } from '@/lib/contracts'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getContractTemplate, mapContractToTemplateData } from '@/lib/contract-template-registry'
 import { generateContractDocx } from '@/lib/docx-contract'
+import { requireStaff } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Auth guard — must be before any data access
+    await requireStaff()
+
     const resolvedParams = await params
     const id = resolvedParams.id
     
