@@ -22,7 +22,10 @@ type ClientFormProps = {
     address?: string | null
     website?: string | null
     notes?: string | null
+    owner_id?: string | null
   }
+  teamMembers?: Array<{ id: string; full_name: string }>
+  currentUserRole?: string
 }
 
 function FieldError({
@@ -49,7 +52,7 @@ function SubmitButton() {
   )
 }
 
-export function ClientForm({ client }: ClientFormProps) {
+export function ClientForm({ client, teamMembers, currentUserRole }: ClientFormProps) {
   const initialState: ClientFormState = {
     errors: {},
     values: {
@@ -137,6 +140,25 @@ export function ClientForm({ client }: ClientFormProps) {
           />
           <FieldError state={state} field='notes' />
         </div>
+
+        {currentUserRole === 'owner' && teamMembers && (
+          <div className='space-y-1 sm:col-span-2'>
+            <Label htmlFor='owner_id'>Account Owner</Label>
+            <select
+              id='owner_id'
+              name='owner_id'
+              defaultValue={client.owner_id || 'unassigned'}
+              className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              <option value="unassigned">Unassigned (Agency Owner only)</option>
+              {teamMembers.map(member => (
+                <option key={member.id} value={member.id}>
+                  {member.full_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className='flex justify-end'>

@@ -102,6 +102,7 @@ export interface Client {
   notes: string | null
   lead_id: string | null
   portal_user_id: string | null
+  owner_id: string | null
   created_at: string
   updated_at: string
 }

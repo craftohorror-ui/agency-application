@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { getClientQuery } from '@/app/dashboard/clients/queries'
 import { ClientForm } from '@/app/dashboard/clients/client-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { requireStaff } from '@/lib/auth'
+import { listTeam } from '@/lib/team'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -15,6 +17,10 @@ export default async function EditClientPage({ params }: PageProps) {
   if (!client) {
     notFound()
   }
+
+  const { profile } = await requireStaff()
+  const teamResult = profile.role === 'owner' ? await listTeam() : { members: [] }
+  const teamMembers = teamResult.members
 
   return (
     <div className='space-y-6'>
@@ -38,7 +44,11 @@ export default async function EditClientPage({ params }: PageProps) {
           <CardTitle>Client Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <ClientForm client={client} />
+          <ClientForm 
+            client={client} 
+            teamMembers={teamMembers} 
+            currentUserRole={profile.role} 
+          />
         </CardContent>
       </Card>
     </div>

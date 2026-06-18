@@ -40,7 +40,12 @@ export interface ClientFormState {
 }
 
 export async function deleteClientAction(id: string) {
-  const { user } = await requireStaff()
+  const { user, profile } = await requireStaff()
+  
+  if (profile.role !== 'owner') {
+    throw new Error('Unauthorized')
+  }
+
   await deleteClient(id)
   await insertAuditLog(user.id, 'client.deleted', 'client', id)
 
@@ -112,6 +117,7 @@ export async function updateClientFormAction(
       address: values.address || null,
       website: values.website || null,
       notes: values.notes || null,
+      owner_id: formData.get('owner_id') ? String(formData.get('owner_id')) : undefined,
     }
     
     await updateClient(clientId, input)

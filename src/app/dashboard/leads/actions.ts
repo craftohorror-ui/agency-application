@@ -242,6 +242,7 @@ export async function convertLeadToClientAction(leadId: string) {
     company: lead.company,
     notes: lead.notes,
     lead_id: lead.id,
+    owner_id: lead.owner_id,
   })
 
   await updateLead(leadId, {

@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { getClientsQuery } from '@/app/dashboard/clients/queries'
+import { requireStaff } from '@/lib/auth'
+import { listTeam } from '@/lib/team'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,6 +9,7 @@ import { Input } from '@/components/ui/input'
 
 type SearchParams = {
   search?: string | string[]
+  owner?: string | string[]
 }
 
 type ClientsPageProps = {
@@ -28,12 +31,18 @@ function formatDate(value: string) {
 export default async function ClientsPage({ searchParams }: ClientsPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {}
   const search = getSingleValue(resolvedSearchParams.search)?.trim() ?? ''
+  const owner = getSingleValue(resolvedSearchParams.owner) ?? ''
+
+  const { profile } = await requireStaff()
+  const teamResult = profile.role === 'owner' ? await listTeam() : { members: [] }
+  const teamMembers = teamResult.members
 
   const { clients, count } = await getClientsQuery({
     search: search || undefined,
+    ownerId: owner || undefined,
   })
 
-  const hasFilters = Boolean(search)
+  const hasFilters = Boolean(search || owner)
 
   return (
     <div className='space-y-6'>
@@ -52,15 +61,31 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
       <Card>
         <CardHeader className='gap-3'>
           <CardTitle>Client Directory</CardTitle>
-          <form className='grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]'>
-            <Input
-              type='search'
-              name='search'
-              defaultValue={search}
-              placeholder='Search name, email, or company'
-              aria-label='Search clients'
-            />
-            <div className='flex gap-2'>
+          <form className='grid gap-3 sm:grid-cols-1'>
+            <div className="flex flex-col sm:flex-row gap-3 sm:col-span-2">
+              <Input
+                type='search'
+                name='search'
+                defaultValue={search}
+                placeholder='Search name, email, or company'
+                aria-label='Search clients'
+                className="flex-1"
+              />
+              {profile.role === 'owner' && (
+                <select
+                  name="owner"
+                  defaultValue={owner}
+                  className="flex h-9 w-full sm:max-w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">All Clients</option>
+                  <option value="unassigned">Unassigned Clients</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.full_name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div className='flex gap-2 sm:col-span-2 justify-end'>
               <Button type='submit' className='flex-1 sm:flex-none'>
                 Apply
               </Button>

@@ -14,6 +14,7 @@ export interface ClientInput {
   notes?: string | null
   lead_id?: string | null
   portal_user_id?: string | null
+  owner_id?: string | null
 }
 
 function normalizeNullableText(value: string | null | undefined) {
@@ -39,6 +40,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
     notes: normalizeNullableText(input.notes),
     lead_id: input.lead_id ?? null,
     portal_user_id: input.portal_user_id ?? null,
+    owner_id: input.owner_id ?? null,
   }
 
   const { data, error } = await supabase
@@ -53,6 +55,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
 
 export interface ClientListFilters {
   search?: string
+  ownerId?: string | 'unassigned'
   limit?: number
   offset?: number
 }
@@ -79,6 +82,12 @@ export async function listClients(filters: ClientListFilters = {}): Promise<Clie
     query = query.or(
       `name.ilike.${pattern},company.ilike.${pattern},email.ilike.${pattern}`
     )
+  }
+
+  if (filters.ownerId === 'unassigned') {
+    query = query.is('owner_id', null)
+  } else if (filters.ownerId) {
+    query = query.eq('owner_id', filters.ownerId)
   }
 
   if (typeof filters.limit === 'number') {
@@ -110,7 +119,7 @@ export async function getClient(id: string) {
 export type ClientUpdateInput = Partial<ClientInput>
 
 export async function updateClient(id: string, input: ClientUpdateInput): Promise<Client> {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
   const payload: Record<string, unknown> = {}
 
   if (input.name !== undefined) {
@@ -127,6 +136,10 @@ export async function updateClient(id: string, input: ClientUpdateInput): Promis
   if (input.notes !== undefined) payload.notes = normalizeNullableText(input.notes)
   if (input.lead_id !== undefined) payload.lead_id = input.lead_id
   if (input.portal_user_id !== undefined) payload.portal_user_id = input.portal_user_id
+  if (input.owner_id !== undefined) {
+    if (profile.role !== 'owner') throw new Error('Only owners can reassign clients')
+    payload.owner_id = input.owner_id === 'unassigned' ? null : input.owner_id
+  }
 
   if (Object.keys(payload).length === 0) {
     throw new Error('No client fields provided')
