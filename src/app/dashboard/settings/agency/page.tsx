@@ -1,18 +1,15 @@
-import { requireStaff } from '@/lib/auth'
+import { requireOwner } from '@/lib/auth'
 import { getCurrentAgencySettings } from '@/lib/agencies'
 import { AgencyForm } from './agency-form'
-import { redirect } from 'next/navigation'
 
 export const metadata = {
   title: 'Agency Settings | AgencyOS'
 }
 
+// H-2 / H-10 FIX: requireOwner() replaces requireStaff() + manual role check.
+// This provides a clean, consistent defense-in-depth Layer 2+3 check for this page.
 export default async function AgencySettingsPage() {
-  const { profile } = await requireStaff()
-  
-  if (!['owner', 'manager'].includes(profile.role)) {
-    redirect('/dashboard/settings')
-  }
+  await requireOwner()
 
   const agency = await getCurrentAgencySettings()
   

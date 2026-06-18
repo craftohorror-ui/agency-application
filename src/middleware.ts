@@ -51,7 +51,9 @@ export async function middleware(req: NextRequest) {
     const ownerOnlyPaths = [
       '/dashboard/admin',
       '/dashboard/team',
-      '/dashboard/analytics'
+      '/dashboard/analytics',
+      // H-10 FIX: Agency settings must be owner-only at all three layers
+      '/dashboard/settings/agency'
     ]
     
     const isOwnerRoute = ownerOnlyPaths.some(p => path === p || path.startsWith(`${p}/`))

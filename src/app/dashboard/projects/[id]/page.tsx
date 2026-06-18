@@ -141,23 +141,6 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Workflows</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {project.client ? (
-                <form action={generateInvoiceFromProjectAction.bind(null, project.id)}>
-                  <Button type="submit" variant="outline" className="w-full">
-                    Generate Invoice
-                  </Button>
-                </form>
-              ) : (
-                <p className="text-sm text-muted-foreground">Attach a client to generate invoices.</p>
-              )}
-            </CardContent>
-          </Card>
         </div>
         
         <ProjectTasks 

@@ -1,13 +1,11 @@
 'use server'
 
-import { requireStaff } from '@/lib/auth'
+import { requireOwner, requireStaff } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { updateTeamMember, TeamUpdateInput } from '@/lib/team'
 import { updateAgencySettings, AgencyUpdateInput } from '@/lib/agencies'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 
-// Update Personal Profile
+// Update Personal Profile — any authenticated staff member can update their own profile
 export async function updateProfile(formData: FormData) {
   const { profile } = await requireStaff()
   
@@ -16,13 +14,9 @@ export async function updateProfile(formData: FormData) {
   const phone = formData.get('phone') as string
   const bio = formData.get('bio') as string
 
-  // We need to support avatar_url somehow. We can either do it via client-side upload and pass URL,
-  // or upload here. Usually client-side is better for progress bars, but we can accept `avatar_url` text for now.
   const avatar_url = formData.get('avatar_url') as string | null
 
   try {
-    // We will augment `updateTeamMember` to support `phone` and `bio` and `avatar_url` 
-    // but wait, `TeamUpdateInput` doesn't have them yet. Let's update `src/lib/team.ts` in a separate step.
     const input: TeamUpdateInput = {
       full_name,
       title,
@@ -41,9 +35,11 @@ export async function updateProfile(formData: FormData) {
   }
 }
 
-// Update Agency
+// Update Agency Settings — H-2 FIX: Owner-only.
+// Previously guarded by requireStaff() which allows any member.
+// Now uses requireOwner() so only owners can save agency configuration.
 export async function saveAgencySettings(formData: FormData) {
-  await requireStaff() // Ensure they are staff
+  await requireOwner()
 
   const keys = [
     'name', 'legal_name', 'registration_number', 'tax_id',

@@ -1,6 +1,27 @@
 'use server'
 
 import { requireStaff } from '@/lib/auth'
+import { getOrCreatePrivateChat } from '@/lib/messages'
+
+/**
+ * H-6 FIX: Validates the authenticated user is a participant of the conversation
+ * before any message operation (send, edit, delete, react).
+ */
+async function assertMessageParticipant(
+  supabase: Awaited<ReturnType<typeof requireStaff>>['supabase'],
+  conversationId: string,
+  userId: string
+): Promise<void> {
+  const { data, error } = await supabase
+    .from('conversation_participants')
+    .select('profile_id')
+    .eq('conversation_id', conversationId)
+    .eq('profile_id', userId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error('Access denied: you are not a participant of this conversation')
+}
 
 export async function sendAgencyMessageAction(conversationId: string, body: string, filePath?: string, duration?: number, replyToMessageId?: string, mentionedUserIds?: string[]) {
   const { supabase, profile } = await requireStaff()
@@ -8,6 +29,9 @@ export async function sendAgencyMessageAction(conversationId: string, body: stri
   if (!body.trim()) {
     throw new Error('Message body is required')
   }
+
+  // H-6 FIX: Verify user is a participant before inserting a message.
+  await assertMessageParticipant(supabase, conversationId, profile.id)
 
   const { data, error } = await supabase
     .from('messages')
@@ -85,9 +109,12 @@ export async function editAgencyMessageAction(messageId: string, newBody: string
   if (!newBody.trim()) throw new Error('Message body is required')
 
   // Enforce 15-minute window and ownership
-  const { data: msg } = await supabase.from('messages').select('created_at, sender_id').eq('id', messageId).single()
+  const { data: msg } = await supabase.from('messages').select('created_at, sender_id, conversation_id').eq('id', messageId).single()
   if (!msg) throw new Error('Message not found')
   if (msg.sender_id !== profile.id) throw new Error('Unauthorized')
+
+  // H-6 FIX: Also verify participant membership for the conversation this message belongs to
+  await assertMessageParticipant(supabase, msg.conversation_id, profile.id)
   
   const createdTime = new Date(msg.created_at).getTime()
   if (Date.now() - createdTime > 15 * 60 * 1000) throw new Error('Edit time window expired (15 minutes)')
@@ -105,9 +132,12 @@ export async function deleteAgencyMessageAction(messageId: string) {
   const { supabase, profile } = await requireStaff()
 
   // Enforce 30-minute window and ownership
-  const { data: msg } = await supabase.from('messages').select('created_at, sender_id').eq('id', messageId).single()
+  const { data: msg } = await supabase.from('messages').select('created_at, sender_id, conversation_id').eq('id', messageId).single()
   if (!msg) throw new Error('Message not found')
   if (msg.sender_id !== profile.id) throw new Error('Unauthorized')
+
+  // H-6 FIX: Verify participant membership
+  await assertMessageParticipant(supabase, msg.conversation_id, profile.id)
   
   const createdTime = new Date(msg.created_at).getTime()
   if (Date.now() - createdTime > 30 * 60 * 1000) throw new Error('Delete time window expired (30 minutes)')
@@ -120,8 +150,6 @@ export async function deleteAgencyMessageAction(messageId: string) {
   if (error) return { error: error.message }
   return { success: true }
 }
-
-import { getOrCreatePrivateChat } from '@/lib/messages'
 
 export async function startPrivateChatAction(memberId: string) {
   try {
@@ -142,6 +170,7 @@ export async function getAgencyMembersAction() {
     .select('id, full_name, avatar_url, role')
     .eq('agency_id', profile.agency_id)
     .neq('id', profile.id)
+    .in('role', ['owner', 'member'])
     .order('full_name')
     
   if (error) throw new Error(error.message)
@@ -150,6 +179,16 @@ export async function getAgencyMembersAction() {
 
 export async function toggleReactionAction(messageId: string, emoji: string) {
   const { supabase, profile } = await requireStaff()
+  
+  // H-6 FIX: Verify user is a participant in the conversation this message belongs to
+  const { data: msgData } = await supabase
+    .from('messages')
+    .select('conversation_id, sender_id')
+    .eq('id', messageId)
+    .single()
+  
+  if (!msgData) throw new Error('Message not found')
+  await assertMessageParticipant(supabase, msgData.conversation_id, profile.id)
   
   // Try to delete existing reaction
   const { data: existing, error: deleteError } = await supabase
@@ -180,11 +219,10 @@ export async function toggleReactionAction(messageId: string, emoji: string) {
     }
 
     try {
-      const { data: msg } = await supabase.from('messages').select('sender_id, conversation_id').eq('id', messageId).single()
-      if (msg && msg.sender_id !== profile.id) {
+      if (msgData.sender_id !== profile.id) {
         const { createMessageNotification } = await import('@/lib/notifications')
         await createMessageNotification({
-          supabase, agencyId: profile.agency_id, actorId: profile.id, userId: msg.sender_id, conversationId: msg.conversation_id || '', messageId,
+          supabase, agencyId: profile.agency_id, actorId: profile.id, userId: msgData.sender_id, conversationId: msgData.conversation_id || '', messageId,
           type: 'reaction', title: 'New Reaction', body: `${profile.full_name || 'Someone'} reacted ${emoji} to your message`
         })
       }
