@@ -154,7 +154,7 @@ export async function listLeadOwners(): Promise<LeadOwnerOption[]> {
   const { data, error } = await supabase
     .from('profiles')
     .select('id, full_name, email, role')
-    .in('role', ['owner', 'manager', 'member'])
+    .in('role', ['owner', 'member'])
     .eq('is_suspended', false)
     .order('full_name', { ascending: true })
 

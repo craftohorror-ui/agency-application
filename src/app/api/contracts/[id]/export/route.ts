@@ -13,11 +13,24 @@ export async function GET(
 ) {
   try {
     // Auth guard — must be before Puppeteer launch
-    await requireStaff()
+    const { supabase, profile } = await requireStaff()
 
     const resolvedParams = await params
     const id = resolvedParams.id
     
+    // V-1 IDOR FIX: Validate agency ownership through the RLS-scoped client before
+    // proceeding. While the print route itself is protected, this provides defense-in-depth
+    // and fails fast before spinning up Puppeteer.
+    const { data: authCheck, error: authErr } = await supabase
+      .from('contracts')
+      .select('agency_id')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (authErr || !authCheck || authCheck.agency_id !== profile.agency_id) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
     // Parse template ID from query params
     const searchParams = request.nextUrl.searchParams
     const templateId = searchParams.get('template') || 'modern-business'

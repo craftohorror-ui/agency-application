@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { requireStaff } from '@/lib/auth'
+import { assertProjectAccess } from '@/lib/authorization'
 import type { FileRecord, FileFolder } from '@/lib/types'
 
 export interface FileListFilters {
@@ -35,7 +36,7 @@ export async function getFileCounts() {
 }
 
 export async function listFiles(filters: FileListFilters = {}) {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
 
   let query = supabase
     .from('files')
@@ -47,7 +48,27 @@ export async function listFiles(filters: FileListFilters = {}) {
   if (filters.projectId) query = query.eq('project_id', filters.projectId)
   if (filters.clientId) query = query.eq('client_id', filters.clientId)
   if (filters.leadId) query = query.eq('lead_id', filters.leadId)
-  
+
+  // V-2 FIX: For Members viewing a general file list (not already filtered by projectId),
+  // restrict results to files belonging to assigned projects or files with no project.
+  // This prevents Members from discovering project files via the global /dashboard/files view.
+  if (profile.role === 'member' && !filters.projectId) {
+    const { data: memberRows } = await supabase
+      .from('project_members')
+      .select('project_id')
+      .eq('profile_id', profile.id)
+
+    const assignedProjectIds = (memberRows ?? []).map((r: { project_id: string }) => r.project_id)
+
+    if (assignedProjectIds.length > 0) {
+      // Allow files with no project OR files in an assigned project
+      query = query.or(`project_id.is.null,project_id.in.(${assignedProjectIds.join(',')})`)
+    } else {
+      // Member has no assigned projects — only show non-project files
+      query = query.is('project_id', null)
+    }
+  }
+
   if (filters.query) {
     query = query.or(`display_name.ilike.%${filters.query}%,name.ilike.%${filters.query}%`)
   }
@@ -105,17 +126,22 @@ export async function deleteFile(id: string) {
 }
 
 export async function getFileDownloadUrl(id: string, isView: boolean = false) {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
   
   // RLS strictly enforces that the user belongs to the agency
   const { data: file, error: fetchError } = await supabase
     .from('files')
-    .select('storage_path')
+    .select('storage_path, project_id')
     .eq('id', id)
     .single()
 
   if (fetchError || !file) {
     throw new Error('File not found or access denied')
+  }
+
+  // V-2 FIX: If file is linked to a project, validate the member has project access
+  if (file.project_id) {
+    await assertProjectAccess(supabase, profile, file.project_id)
   }
 
   const options = isView ? undefined : { download: true }

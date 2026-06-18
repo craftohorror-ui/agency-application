@@ -34,7 +34,7 @@ export async function listTeam(filters: TeamListFilters = {}): Promise<TeamListR
   let query = supabase
     .from('profiles')
     .select('*', { count: 'exact' })
-    .in('role', ['owner', 'manager', 'member'])
+    .in('role', ['owner', 'member'])
     .order('full_name', { ascending: true })
 
   if (filters.search?.trim()) {
@@ -72,7 +72,7 @@ export async function getTeamMember(id: string) {
     .from('profiles')
     .select('*, project_members(role_in_project, project:projects(*))')
     .eq('id', id)
-    .in('role', ['owner', 'manager', 'member'])
+    .in('role', ['owner', 'member'])
     .maybeSingle()
 
   if (error) throw new Error(error.message)

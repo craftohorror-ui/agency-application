@@ -1,4 +1,4 @@
-export type UserRole = 'owner' | 'manager' | 'member' | 'client'
+export type UserRole = 'owner' | 'member' | 'client'
 export type LeadStage =
   | 'new_lead'
   | 'contacted'

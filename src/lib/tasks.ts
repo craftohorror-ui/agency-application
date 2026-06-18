@@ -1,5 +1,6 @@
 import 'server-only'
 import { requireStaff } from '@/lib/auth'
+import { assertProjectAccess } from '@/lib/authorization'
 import type { Task, TaskStatus, TaskPriority, Profile } from '@/lib/types'
 
 export const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done'] as const satisfies readonly TaskStatus[]
@@ -37,8 +38,11 @@ export async function listProjectTasks(projectId: string): Promise<TaskWithAssig
 }
 
 export async function createTask(input: TaskInput): Promise<TaskWithAssignee> {
-  const { supabase } = await requireStaff()
-  
+  const { supabase, profile } = await requireStaff()
+
+  // V-3 FIX: Validate project membership before allowing task creation
+  await assertProjectAccess(supabase, profile, input.project_id)
+
   const title = input.title.trim()
   if (!title) throw new Error('Task title is required')
 
@@ -62,7 +66,17 @@ export async function createTask(input: TaskInput): Promise<TaskWithAssignee> {
 }
 
 export async function updateTask(id: string, input: TaskUpdateInput): Promise<TaskWithAssignee> {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
+
+  // V-3 FIX: Resolve the parent project and validate membership before allowing update
+  const { data: existingTask, error: fetchErr } = await supabase
+    .from('tasks')
+    .select('project_id')
+    .eq('id', id)
+    .maybeSingle()
+  if (fetchErr || !existingTask) throw new Error('Task not found')
+  await assertProjectAccess(supabase, profile, existingTask.project_id)
+
   const payload: Record<string, unknown> = {}
 
   if (input.title !== undefined) {
@@ -91,7 +105,17 @@ export async function updateTask(id: string, input: TaskUpdateInput): Promise<Ta
 }
 
 export async function deleteTask(id: string) {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
+
+  // V-3 FIX: Resolve the parent project and validate membership before allowing delete
+  const { data: existingTask, error: fetchErr } = await supabase
+    .from('tasks')
+    .select('project_id')
+    .eq('id', id)
+    .maybeSingle()
+  if (fetchErr || !existingTask) throw new Error('Task not found')
+  await assertProjectAccess(supabase, profile, existingTask.project_id)
+
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }

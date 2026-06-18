@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { requireStaff, requireClient } from '@/lib/auth'
+import { assertProjectAccess } from '@/lib/authorization'
 import { getCurrentAgencySettings } from '@/lib/agencies'
 import type { Invoice, InvoiceItem, InvoiceStatus } from '@/lib/types'
 
@@ -122,7 +123,7 @@ export async function recalculateInvoicePayments(id: string) {
 // -------------------------------------------------------------
 
 export async function listInvoices(search?: string, status?: InvoiceStatus) {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
 
   let query = supabase
     .from('invoices')
@@ -137,6 +138,24 @@ export async function listInvoices(search?: string, status?: InvoiceStatus) {
     query = query.eq('status', status)
   }
 
+  // V-2 FIX: Members can only see invoices linked to their assigned projects (or unlinked invoices).
+  if (profile.role === 'member') {
+    const { data: memberRows } = await supabase
+      .from('project_members')
+      .select('project_id')
+      .eq('profile_id', profile.id)
+
+    const assignedProjectIds = (memberRows ?? []).map((r: { project_id: string }) => r.project_id)
+
+    if (assignedProjectIds.length > 0) {
+      // Allow invoices with no project OR invoices in an assigned project
+      query = query.or(`project_id.is.null,project_id.in.(${assignedProjectIds.join(',')})`)
+    } else {
+      // Member has no assigned projects — only show non-project invoices
+      query = query.is('project_id', null)
+    }
+  }
+
   const { data, error, count } = await query
   if (error) throw new Error(error.message)
 
@@ -144,7 +163,7 @@ export async function listInvoices(search?: string, status?: InvoiceStatus) {
 }
 
 export async function getInvoice(id: string): Promise<InvoiceWithRelations | null> {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
   const { data, error } = await supabase
     .from('invoices')
     .select(`
@@ -157,6 +176,13 @@ export async function getInvoice(id: string): Promise<InvoiceWithRelations | nul
     .maybeSingle()
 
   if (error) throw new Error(error.message)
+  if (!data) return null
+
+  // V-2 FIX: If invoice is linked to a project, validate the member has project access
+  if (data.project_id) {
+    await assertProjectAccess(supabase, profile, data.project_id)
+  }
+
   return mapInvoiceEnhancements(data) as InvoiceWithRelations | null
 }
 

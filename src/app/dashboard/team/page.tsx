@@ -74,7 +74,6 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
             >
               <option value=''>All Roles</option>
               <option value='owner'>Owner</option>
-              <option value='manager'>Manager</option>
               <option value='member'>Member</option>
             </select>
             <select

@@ -13,15 +13,25 @@ interface PageProps {
 
 export default async function PrintContractPage({ params, searchParams }: PageProps) {
   // Auth guard — page-level protection in addition to middleware
-  await requireStaff()
+  const { supabase, profile } = await requireStaff()
 
   const resolvedParams = await params
   const contractId = resolvedParams.contractId
 
-  // Use admin client to fetch for Puppeteer rendering
-  // (Puppeteer hits this URL with forwarded session cookies, so requireStaff() above
-  //  already validated the session. Admin client is used only for the data fetch
-  //  to avoid RLS issues in the print rendering context.)
+  // V-1 IDOR FIX: Before using the admin client, validate that this contract belongs
+  // to the user's agency by fetching it through the authenticated (RLS-scoped) client.
+  // The admin client bypasses RLS — so this check is the authorization gate.
+  const { data: authCheck, error: authErr } = await supabase
+    .from('contracts')
+    .select('agency_id')
+    .eq('id', contractId)
+    .maybeSingle()
+
+  if (authErr || !authCheck || authCheck.agency_id !== profile.agency_id) {
+    notFound()
+  }
+
+  // Agency ownership confirmed — safe to use admin client for full render data
   const supabaseAdmin = createAdminClient()
   const { data: adminContract, error: contractErr } = await supabaseAdmin
     .from('contracts')
@@ -34,7 +44,7 @@ export default async function PrintContractPage({ params, searchParams }: PagePr
   }
 
   // Fetch Agency via creator's profile
-  const { data: profile } = await supabaseAdmin
+  const { data: creatorProfile } = await supabaseAdmin
     .from('profiles')
     .select('agency_id')
     .eq('id', adminContract.created_by || '')
@@ -43,11 +53,11 @@ export default async function PrintContractPage({ params, searchParams }: PagePr
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let agencyData: any = { name: 'Our Agency', logoUrl: undefined as string | undefined }
   
-  if (profile?.agency_id) {
+  if (creatorProfile?.agency_id) {
     const { data: agency } = await supabaseAdmin
       .from('agencies')
       .select('*')
-      .eq('id', profile.agency_id)
+      .eq('id', creatorProfile.agency_id)
       .single()
     if (agency) {
       agencyData = agency

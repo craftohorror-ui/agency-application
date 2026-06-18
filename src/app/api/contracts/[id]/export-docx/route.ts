@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     // Auth guard — must be before any data access
-    await requireStaff()
+    const { supabase, profile } = await requireStaff()
 
     const resolvedParams = await params
     const id = resolvedParams.id
@@ -19,6 +19,19 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams
     const templateId = searchParams.get('template') || 'modern-business'
 
+    // V-1 IDOR FIX: Validate agency ownership through the RLS-scoped client before
+    // using createAdminClient() which bypasses RLS entirely.
+    const { data: authCheck, error: authErr } = await supabase
+      .from('contracts')
+      .select('agency_id')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (authErr || !authCheck || authCheck.agency_id !== profile.agency_id) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    // Agency ownership confirmed — safe to use admin client for full export data
     const supabaseAdmin = createAdminClient()
     const { data: adminContract, error: contractErr } = await supabaseAdmin
       .from('contracts')
@@ -31,18 +44,18 @@ export async function GET(
     }
 
     // Fetch Agency
-    const { data: profile } = await supabaseAdmin
+    const { data: creatorProfile } = await supabaseAdmin
       .from('profiles')
       .select('agency_id')
       .eq('id', adminContract.created_by || '')
       .maybeSingle()
 
     let agencyData = { name: 'Our Agency', logoUrl: undefined as string | undefined }
-    if (profile?.agency_id) {
+    if (creatorProfile?.agency_id) {
       const { data: agency } = await supabaseAdmin
         .from('agencies')
         .select('name, logo_url')
-        .eq('id', profile.agency_id)
+        .eq('id', creatorProfile.agency_id)
         .single()
       if (agency) {
         agencyData = { name: agency.name, logoUrl: agency.logo_url }

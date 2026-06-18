@@ -17,7 +17,7 @@ export default async function SettingsLayout({ children }: { children: ReactNode
           <Link href="/dashboard/settings" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-muted bg-transparent transition-colors">
             My Profile
           </Link>
-          {['owner', 'manager'].includes(profile.role) && (
+          {profile.role === 'owner' && (
             <Link href="/dashboard/settings/agency" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-muted bg-transparent transition-colors">
               Agency Settings
             </Link>
