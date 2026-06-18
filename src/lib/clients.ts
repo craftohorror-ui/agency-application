@@ -99,7 +99,7 @@ export async function getClient(id: string) {
   const { supabase } = await requireStaff()
   const { data, error } = await supabase
     .from('clients')
-    .select('*, lead:leads(id, name, stage, created_at)')
+    .select('*, lead:leads!clients_lead_id_fkey(id, name, stage, created_at)')
     .eq('id', id)
     .maybeSingle()
 
