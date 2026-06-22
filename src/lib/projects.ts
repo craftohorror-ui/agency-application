@@ -51,7 +51,7 @@ function normalizeSearch(value: string) {
 }
 
 export async function createProject(input: ProjectInput): Promise<Project> {
-  const { supabase, user } = await requireStaff()
+  const { supabase, user, profile } = await requireStaff()
   
   const name = input.name.trim()
   if (!name) throw new Error('Project name is required')
@@ -67,13 +67,24 @@ export async function createProject(input: ProjectInput): Promise<Project> {
     created_by: user.id,
   }
 
+  console.log('--- BEFORE PROJECT INSERT ---')
+  console.log('user.id:', user.id)
+  console.log('profile.role:', profile.role)
+  console.log('profile.agency_id:', profile.agency_id)
+  console.log('payload:', JSON.stringify(payload, null, 2))
+
   const { data, error } = await supabase
     .from('projects')
     .insert(payload)
     .select('*')
     .single()
 
-  if (error) throw new Error(error.message)
+  console.log('--- AFTER PROJECT INSERT ---')
+  if (error) {
+    console.error('Supabase Error:', JSON.stringify(error, null, 2))
+    throw new Error(error.message)
+  }
+
   return data as Project
 }
 
