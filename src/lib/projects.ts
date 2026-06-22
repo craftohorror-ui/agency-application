@@ -64,6 +64,7 @@ export async function createProject(input: ProjectInput): Promise<Project> {
     budget: input.budget ?? null,
     deadline: normalizeNullableText(input.deadline),
     notes: normalizeNullableText(input.notes),
+    agency_id: profile.agency_id,
     created_by: user.id,
   }
 
@@ -71,6 +72,7 @@ export async function createProject(input: ProjectInput): Promise<Project> {
   console.log('user.id:', user.id)
   console.log('profile.role:', profile.role)
   console.log('profile.agency_id:', profile.agency_id)
+  console.log('payload.agency_id:', profile.agency_id)
   console.log('payload:', JSON.stringify(payload, null, 2))
 
   const { data, error } = await supabase
