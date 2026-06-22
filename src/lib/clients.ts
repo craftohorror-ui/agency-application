@@ -24,7 +24,7 @@ function normalizeNullableText(value: string | null | undefined) {
 }
 
 export async function createClient(input: ClientInput): Promise<Client> {
-  const { supabase } = await requireStaff()
+  const { supabase, profile } = await requireStaff()
   
   const name = input.name.trim()
   if (!name) throw new Error('Client name is required')
@@ -41,6 +41,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
     lead_id: input.lead_id ?? null,
     portal_user_id: input.portal_user_id ?? null,
     owner_id: input.owner_id ?? null,
+    agency_id: profile.agency_id,
   }
 
   const { data, error } = await supabase

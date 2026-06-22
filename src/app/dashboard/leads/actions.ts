@@ -229,6 +229,7 @@ export async function deleteLeadAction(id: string) {
 }
 
 export async function convertLeadToClientAction(leadId: string) {
+  const { user } = await requireStaff()
   const lead = await getLead(leadId)
   if (!lead) throw new Error('Lead not found')
   if (lead.converted_client_id) {
@@ -242,7 +243,7 @@ export async function convertLeadToClientAction(leadId: string) {
     company: lead.company,
     notes: lead.notes,
     lead_id: lead.id,
-    owner_id: lead.owner_id,
+    owner_id: user.id,
   })
 
   await updateLead(leadId, {
