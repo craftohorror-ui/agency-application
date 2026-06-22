@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { generateInvoiceFromProjectAction } from '@/app/dashboard/invoices/actions'
+import { requireStaff } from '@/lib/auth'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -23,6 +24,7 @@ function formatStage(stage: string) {
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const resolvedParams = await params
+  const { profile } = await requireStaff()
   const [project, projectMembers, { members: allTeamMembers }, tasks] = await Promise.all([
     getProjectQuery(resolvedParams.id),
     getProjectMembersQuery(resolvedParams.id),
@@ -112,35 +114,39 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AssignMemberForm 
-                projectId={project.id} 
-                assignedProfiles={projectMembers || []}
-                availableProfiles={allTeamMembers}
-              />
-            </CardContent>
-          </Card>
+          {profile.role === 'owner' && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Members</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AssignMemberForm 
+                    projectId={project.id} 
+                    assignedProfiles={projectMembers || []}
+                    availableProfiles={allTeamMembers}
+                  />
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Workflows</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {project.client ? (
-                <form action={generateInvoiceFromProjectAction.bind(null, project.id)}>
-                  <Button type="submit" variant="outline" className="w-full">
-                    Generate Invoice
-                  </Button>
-                </form>
-              ) : (
-                <p className="text-sm text-muted-foreground">Attach a client to generate invoices.</p>
-              )}
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflows</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {project.client ? (
+                    <form action={generateInvoiceFromProjectAction.bind(null, project.id)}>
+                      <Button type="submit" variant="outline" className="w-full">
+                        Generate Invoice
+                      </Button>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Attach a client to generate invoices.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
         
         <ProjectTasks 

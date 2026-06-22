@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect, unstable_rethrow } from 'next/navigation'
 import { createInvoice, updateInvoice, deleteInvoice, generateInvoiceFromProject } from '@/lib/invoices'
-import { requireStaff } from '@/lib/auth'
+import { requireStaff, requireOwner } from '@/lib/auth'
 import { insertAuditLog } from '@/lib/audit'
 import { recordPayment, deletePayment } from '@/lib/payments'
 import type { InvoiceStatus } from '@/lib/types'
@@ -169,7 +169,7 @@ export async function updateInvoiceStatusAction(id: string, status: InvoiceStatu
 }
 
 export async function generateInvoiceFromProjectAction(projectId: string) {
-  await requireStaff()
+  await requireOwner()
   const invoiceId = await generateInvoiceFromProject(projectId)
   revalidatePath(`/dashboard/projects/${projectId}`)
   revalidatePath('/dashboard/invoices')
