@@ -81,8 +81,7 @@ export function mapInvoiceToTemplateData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   invoice: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  agencyContext: any = {},
-  options: { isExport?: boolean } = {}
+  agencyContext: any = {}
 ): InvoiceTemplateData {
   // Default parameters don't apply to null, so we must enforce a safe fallback
   const ctx = agencyContext || {}
@@ -133,6 +132,6 @@ export function mapInvoiceToTemplateData(
     paymentInstructions: snap.payment_instructions || ctx.payment_instructions || undefined,
     
     payments: invoice.payments || [],
-    showPaymentHistory: !options.isExport && Array.isArray(invoice.payments) && invoice.payments.length > 0
+    showPaymentHistory: Array.isArray(invoice.payments) && invoice.payments.length > 0
   }
 }

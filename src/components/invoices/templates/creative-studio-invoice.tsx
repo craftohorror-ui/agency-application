@@ -184,36 +184,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
             )}
           </div>
         </div>
-
-        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
-          <div className="mt-8">
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-slate-400 border-l-4 pl-3" style={{ borderColor: primaryColor }}>Payment History</h4>
-            <div className="border border-slate-200">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Date</th>
-                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Method</th>
-                    <th className="py-3 px-6 font-bold uppercase tracking-widest">Reference</th>
-                    <th className="py-3 px-6 font-bold uppercase tracking-widest text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {data.payments.map((p, i) => (
-                     <tr key={i} className="bg-white">
-                      <td className="py-3 px-6 text-slate-800 font-medium">{formatDate(p.paid_at)}</td>
-                      <td className="py-3 px-6 text-slate-600 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
-                      <td className="py-3 px-6 text-slate-600">{p.reference || '-'}</td>
-                      <td className="py-3 px-6 text-slate-900 font-bold text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-      </div>
+</div>
     </div>
   )
 }

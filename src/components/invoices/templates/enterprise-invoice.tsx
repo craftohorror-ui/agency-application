@@ -157,36 +157,7 @@ function EnterpriseInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
             </div>
           </div>
         </div>
-
-        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
-          <div className="mb-12 flex-1 border-l-4" style={{ borderColor: primaryColor }}>
-            <h3 className="text-xl font-bold text-slate-900 uppercase tracking-wide mb-6 pl-4 border-b border-slate-200 pb-4">Payment Record</h3>
-            <div className="pl-4">
-              <table className="w-full text-left text-sm border border-slate-300">
-                <thead className="bg-slate-100 text-slate-700">
-                  <tr>
-                    <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs border-b border-r border-slate-300">Date</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs border-b border-r border-slate-300">Method</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs border-b border-r border-slate-300">Reference</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right border-b border-slate-300">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-300 bg-white">
-                  {data.payments.map((p, i) => (
-                    <tr key={i}>
-                      <td className="px-6 py-4 text-slate-900 font-medium border-r border-slate-300">{formatDate(p.paid_at)}</td>
-                      <td className="px-6 py-4 text-slate-600 capitalize border-r border-slate-300">{p.method?.replace('_', ' ') || '-'}</td>
-                      <td className="px-6 py-4 text-slate-600 border-r border-slate-300">{p.reference || '-'}</td>
-                      <td className="px-6 py-4 text-slate-900 font-bold text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Footer info */}
+{/* Footer info */}
         <div className="grid grid-cols-2 gap-12 mt-auto pt-8 border-t-2 border-slate-900">
           <div>
             {data.paymentInstructions && (

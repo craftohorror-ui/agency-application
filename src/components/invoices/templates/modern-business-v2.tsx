@@ -180,36 +180,7 @@ function ModernBusinessV2Template({ data }: { data: InvoiceTemplateData }) {
             )}
           </div>
         </div>
-
-        {data.showPaymentHistory && data.payments && data.payments.length > 0 && (
-          <div className="mt-8">
-            <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-[10px]">Payment History</h4>
-            <div className="border border-slate-200 rounded overflow-hidden">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="py-2 px-4 font-semibold text-slate-600">Date</th>
-                    <th className="py-2 px-4 font-semibold text-slate-600">Method</th>
-                    <th className="py-2 px-4 font-semibold text-slate-600">Reference</th>
-                    <th className="py-2 px-4 font-semibold text-slate-600 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {data.payments.map((p, i) => (
-                    <tr key={i} className="bg-white">
-                      <td className="py-2 px-4 text-slate-700">{formatDate(p.paid_at)}</td>
-                      <td className="py-2 px-4 text-slate-700 capitalize">{p.method?.replace('_', ' ') || '-'}</td>
-                      <td className="py-2 px-4 text-slate-700">{p.reference || '-'}</td>
-                      <td className="py-2 px-4 text-slate-900 font-medium text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(p.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-      </div>
+</div>
     </div>
   )
 }

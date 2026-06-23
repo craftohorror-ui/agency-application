@@ -62,11 +62,7 @@ export async function GET(
       }
     }
 
-    // Fetch payments just in case they are needed
-    const payments = await listPayments(invoice.id)
-    invoice.payments = payments
-
-    const templateData = mapInvoiceToTemplateData(invoice, agencyData, { isExport: true })
+    const templateData = mapInvoiceToTemplateData(invoice, agencyData)
     const selectedTemplate = getInvoiceTemplate(templateId) || getInvoiceTemplate('modern-business')
 
     if (!selectedTemplate) {
