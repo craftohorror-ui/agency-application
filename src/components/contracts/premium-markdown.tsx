@@ -49,7 +49,7 @@ export const PremiumMarkdownComponents: Components = {
     </p>
   ),
   ul: ({ _node, ...props }: any) => (
-    <ul className="space-y-4 my-8" {...props} />
+    <ul className="space-y-4 print:space-y-2 my-8 print:my-4" {...props} />
   ),
   li: ({ _node, ...props }: any) => (
     <li className="flex gap-5 items-start leading-relaxed text-lg opacity-90" {...props}>
@@ -87,19 +87,19 @@ export const PremiumMarkdownComponents: Components = {
     }
 
     return (
-      <th className={`p-6 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0 ${widthClass}`} {...props} />
+      <th className={`p-6 print:p-3 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0 ${widthClass}`} {...props} />
     );
   },
   tbody: ({ _node, ...props }: any) => (
     <tbody className="divide-y divide-current/10" {...props} />
   ),
   td: ({ _node, ...props }: any) => (
-    <td className={`p-6 align-top text-[15px] font-medium leading-relaxed border-r border-current/10 last:border-r-0 text-current/80 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
+    <td className={`p-6 print:p-3 align-top text-[15px] font-medium leading-relaxed border-r border-current/10 last:border-r-0 text-current/80 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
       {formatChildren(props.children)}
     </td>
   ),
   hr: ({ _node, ...props }: any) => (
-    <hr className="my-20 border-t border-current/20" {...props} />
+    <hr className="my-20 print:my-10 border-t border-current/20" {...props} />
   ),
   strong: ({ _node, ...props }: any) => (
     <strong className="font-semibold text-base sm:text-[17px] text-current/90 opacity-100" {...props}>

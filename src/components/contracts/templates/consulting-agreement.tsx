@@ -28,8 +28,8 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
       <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600 print:hidden"></div>
 
       {/* Header */}
-      <div className="pt-24 px-20 pb-16">
-        <div className="flex justify-between items-start pb-8 mb-16">
+      <div className="pt-24 px-20 pb-16 print:pb-8">
+        <div className="flex justify-between items-start pb-8 mb-16 print:mb-8">
           <div>
             <h2 className="text-sm font-bold tracking-[0.2em] uppercase text-indigo-600 mb-6 bg-indigo-50 inline-block px-4 py-2 rounded-full border border-indigo-100">Consulting Agreement</h2>
           </div>
@@ -43,13 +43,13 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
           </div>
         </div>
 
-        <div className="mb-24">
+        <div className="mb-24 print:mb-12">
           <h1 className={`${contractDesignTokens.typography.coverTitle} font-serif`}>
             {data.title}
           </h1>
         </div>
 
-        <div className="grid grid-cols-2 gap-16 font-sans bg-indigo-50/50 p-12 rounded-tr-[3rem] rounded-bl-[3rem] border border-indigo-100/50">
+        <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans bg-indigo-50/50 p-12 rounded-tr-[3rem] rounded-bl-[3rem] border border-indigo-100/50">
           <div>
             <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-[0.2em] mb-4">Consultant</h3>
             <p className="text-2xl font-black text-slate-900">{data.agencyName}</p>
@@ -63,13 +63,13 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Content */}
-      <div className="px-20 pb-16 space-y-8">
+      <div className="px-20 pb-16 print:pb-8 space-y-8 print:space-y-4">
         <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-indigo-900 prose-h2:border-b prose-h2:border-indigo-100 prose-h2:pb-2 prose-p:font-sans prose-p:text-slate-600 prose-p:leading-relaxed">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -84,10 +84,10 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="px-20 py-20 mt-16 bg-slate-50 print:break-inside-avoid border-t border-slate-200">
-        <h3 className="text-3xl font-black text-indigo-900 mb-12 tracking-tight">Signatures</h3>
+      <div className="px-20 py-20 mt-16 print:mt-8 bg-slate-50 print:break-inside-avoid border-t border-slate-200">
+        <h3 className="text-3xl font-black text-indigo-900 mb-12 print:mb-6 tracking-tight">Signatures</h3>
         
-        <div className="grid grid-cols-2 gap-20 font-sans">
+        <div className="grid grid-cols-2 gap-20 print:gap-10 font-sans">
           <div className="space-y-6">
             <h4 className="text-xs font-bold text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 border border-indigo-100 inline-block px-3 py-1 rounded">Client</h4>
             <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">

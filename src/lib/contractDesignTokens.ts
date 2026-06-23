@@ -1,10 +1,10 @@
 export const contractDesignTokens = {
   typography: {
     coverTitle: "text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter leading-tight",
-    documentTitle: "text-4xl sm:text-5xl font-black tracking-tight mt-8 mb-16 pb-8 border-b-2",
-    sectionTitle: "text-xl font-bold uppercase tracking-[0.2em] mt-24 mb-10 pb-4 border-b",
-    subsectionTitle: "text-sm font-bold uppercase tracking-widest mt-12 mb-6",
-    body: "text-lg leading-loose mb-8",
+    documentTitle: "text-4xl sm:text-5xl font-black tracking-tight mt-8 mb-16 print:mb-8 pb-8 print:pb-4 border-b-2",
+    sectionTitle: "text-xl font-bold uppercase tracking-[0.2em] mt-24 print:mt-12 mb-10 print:mb-6 pb-4 print:pb-2 border-b",
+    subsectionTitle: "text-sm font-bold uppercase tracking-widest mt-12 print:mt-6 mb-6 print:mb-3",
+    body: "text-lg leading-loose mb-8 print:mb-4",
     metadata: "text-xs font-bold uppercase tracking-widest",
     legal: "text-sm leading-relaxed",
     signatureTitle: "text-sm font-bold uppercase tracking-widest mb-2",
@@ -14,10 +14,10 @@ export const contractDesignTokens = {
     tableIdentifier: "break-words [overflow-wrap:anywhere] min-w-0"
   },
   spacing: {
-    sectionTop: "mt-24",
-    sectionBottom: "mb-24",
-    cardPadding: "p-8",
-    cardMargin: "my-12",
+    sectionTop: "mt-24 print:mt-12",
+    sectionBottom: "mb-24 print:mb-12",
+    cardPadding: "p-8 print:p-4",
+    cardMargin: "my-12 print:my-6",
   },
   borders: {
     light: "border-slate-100",

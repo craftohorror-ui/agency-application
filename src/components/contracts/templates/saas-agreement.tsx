@@ -25,7 +25,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-slate-900 min-h-[1000px] print:min-h-0 text-slate-300 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-slate-900">
       {/* Cover Page */}
-      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 border-t-4 border-violet-500 relative overflow-hidden print:break-after-page">
+      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 print:p-8 border-t-4 border-violet-500 relative overflow-hidden print:break-after-page">
         {/* Decorative Grid */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 print:hidden"></div>
         
@@ -43,7 +43,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
           </div>
         </div>
 
-        <div className="relative z-10 space-y-8 max-w-3xl mt-20">
+        <div className="relative z-10 space-y-8 print:space-y-4 max-w-3xl mt-20 print:mt-10">
           <div className="inline-block px-4 py-1.5 bg-slate-800 text-slate-300 text-xs font-mono mb-4 rounded border border-slate-700 tracking-widest uppercase">
             Terms of Service / MSA
           </div>
@@ -53,7 +53,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
           <p className="text-xl text-slate-400 font-mono tracking-wider mt-4">v{data.version} — <span className="text-violet-400">Generated on {data.date}</span></p>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-12 pt-16 mt-auto print:mt-16 border-t border-slate-800">
+        <div className="relative z-10 grid grid-cols-2 gap-12 pt-16 print:pt-8 mt-auto print:mt-16 border-t border-slate-800">
           <div className="bg-slate-800/40 p-10 rounded-2xl border border-slate-700/50">
             <h3 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Customer Entity</h3>
             <p className="text-3xl font-black text-white tracking-tight">{data.clientName}</p>
@@ -67,13 +67,13 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Main Content */}
-      <div className="p-16 space-y-8 bg-slate-50 text-slate-800">
+      <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-slate-50 text-slate-800">
         <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-violet-600">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -88,11 +88,11 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 pt-12 mt-0 bg-slate-900 border-t border-slate-800 print:break-inside-avoid text-slate-300">
+      <div className="p-16 print:p-8 pt-12 mt-0 bg-slate-900 border-t border-slate-800 print:break-inside-avoid text-slate-300">
         <h3 className="text-3xl font-black text-white tracking-tight mb-4">Digital Authorization</h3>
-        <p className="text-lg text-slate-500 mb-16 text-sm max-w-2xl leading-relaxed">This agreement constitutes a binding legal contract when signed by authorized representatives. All digital signatures are recorded securely.</p>
+        <p className="text-lg text-slate-500 mb-16 print:mb-8 text-sm max-w-2xl leading-relaxed">This agreement constitutes a binding legal contract when signed by authorized representatives. All digital signatures are recorded securely.</p>
         
-        <div className="grid grid-cols-2 gap-16 font-sans">
+        <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans">
           <div className="bg-slate-800/30 p-10 border border-slate-700/50 rounded-2xl shadow-sm">
             <h4 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Customer Signature</h4>
             <div className="h-24 border-b border-slate-700 flex items-end pb-3 mb-6">

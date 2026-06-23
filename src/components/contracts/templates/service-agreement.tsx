@@ -23,8 +23,8 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Header Page */}
-      <div className="p-16 border-t-[16px] border-emerald-600 bg-emerald-50/30 print:break-after-page">
-        <div className="flex justify-between items-start mb-16">
+      <div className="p-16 print:p-8 border-t-[16px] border-emerald-600 bg-emerald-50/30 print:break-after-page">
+        <div className="flex justify-between items-start mb-16 print:mb-8">
           <div className="mt-4">
             {data.agencyLogo ? (
               <img src={data.agencyLogo} alt="Logo" className="h-16" />
@@ -37,15 +37,15 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
           </div>
         </div>
 
-        <div className="space-y-8 mb-24 mt-24">
+        <div className="space-y-8 print:space-y-4 mb-24 print:mb-12 mt-24 print:mt-12">
           <h1 className={`${contractDesignTokens.typography.coverTitle} text-emerald-950 border-l-8 border-emerald-600 pl-8`}>
             {data.title}
           </h1>
           <p className="text-2xl text-emerald-700 font-bold uppercase tracking-[0.2em] pl-8">Contract Reference: MSA-{new Date(data.date).getFullYear()}-{data.version}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-12 bg-white p-12 rounded-[2rem] shadow-sm border-[3px] border-emerald-100 mt-20">
-          <div className="space-y-8">
+        <div className="grid grid-cols-2 gap-12 bg-white p-12 rounded-[2rem] shadow-sm border-[3px] border-emerald-100 mt-20 print:mt-10">
+          <div className="space-y-8 print:space-y-4">
             <div>
               <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] mb-2">Service Provider</h3>
               <p className="text-2xl font-black text-slate-900">{data.agencyName}</p>
@@ -56,7 +56,7 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
             </div>
           </div>
           
-          <div className="space-y-8">
+          <div className="space-y-8 print:space-y-4">
             <div>
               <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] mb-2">Client</h3>
               <p className="text-2xl font-black text-slate-900">{data.clientName}</p>
@@ -71,13 +71,13 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Content */}
-      <div className="p-16 space-y-8 bg-white">
+      <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-white">
         <div className="prose prose-slate max-w-none prose-headings:text-emerald-900 prose-p:text-slate-700 prose-p:leading-relaxed">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -92,11 +92,11 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 pt-16 mt-16 border-t-4 border-emerald-100 bg-emerald-50/20 print:break-inside-avoid">
+      <div className="p-16 print:p-8 pt-16 print:pt-8 mt-16 print:mt-8 border-t-4 border-emerald-100 bg-emerald-50/20 print:break-inside-avoid">
         <h3 className="text-4xl font-black text-emerald-900 mb-4 tracking-tight">Authorization</h3>
-        <p className="text-slate-500 mb-16 text-xl max-w-2xl leading-relaxed">This agreement is executed by the authorized representatives of both parties.</p>
+        <p className="text-slate-500 mb-16 print:mb-8 text-xl max-w-2xl leading-relaxed">This agreement is executed by the authorized representatives of both parties.</p>
         
-        <div className="grid grid-cols-2 gap-16">
+        <div className="grid grid-cols-2 gap-16 print:gap-8">
           <div className="bg-white p-10 rounded-2xl border-2 border-emerald-100 shadow-sm space-y-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
             <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-[0.2em] bg-emerald-50 inline-block px-3 py-1 rounded">Client</h4>

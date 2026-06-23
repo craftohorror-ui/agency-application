@@ -23,8 +23,8 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-black font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Formal Header */}
-      <div className="p-16 border-b-2 border-black print:break-after-page">
-        <div className="flex justify-between items-center mb-16">
+      <div className="p-16 print:p-8 border-b-2 border-black print:break-after-page">
+        <div className="flex justify-between items-center mb-16 print:mb-8">
           <div className="text-sm font-bold uppercase tracking-[0.3em] text-gray-500 border border-gray-200 px-4 py-2">
             Confidential Legal Document
           </div>
@@ -35,13 +35,13 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
           )}
         </div>
 
-        <div className="text-center space-y-8 my-32">
+        <div className="text-center space-y-8 print:space-y-4 my-32">
           <h1 className={`${contractDesignTokens.typography.coverTitle} uppercase text-black border-y-[3px] border-black py-12 px-8 leading-tight mx-auto max-w-4xl`}>
             {data.title}
           </h1>
         </div>
 
-        <div className="mt-24 space-y-10 text-center">
+        <div className="mt-24 print:mt-12 space-y-10 text-center">
           <p className="uppercase tracking-[0.4em] text-gray-500 font-bold text-sm">This Agreement is made on</p>
           <p className={`font-serif italic text-3xl ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
           <div className="w-16 h-px bg-black mx-auto my-12"></div>
@@ -54,13 +54,13 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Content */}
-      <div className="p-16 space-y-8 bg-white text-justify leading-relaxed">
+      <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-white text-justify leading-relaxed">
         <div className="prose prose-gray max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:uppercase prose-headings:text-black prose-p:font-serif prose-p:text-black prose-p:leading-loose">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -75,13 +75,13 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 pt-20 mt-16 print:break-inside-avoid border-t-[3px] border-black bg-gray-50">
-        <h3 className="text-3xl font-black uppercase tracking-[0.3em] text-black mb-12 text-center">Execution</h3>
-        <p className="text-black mb-16 text-center font-serif text-xl max-w-2xl mx-auto leading-relaxed italic">IN WITNESS WHEREOF, the Parties hereto have executed this Agreement as of the date first above written.</p>
+      <div className="p-16 print:p-8 pt-20 print:pt-10 mt-16 print:mt-8 print:break-inside-avoid border-t-[3px] border-black bg-gray-50">
+        <h3 className="text-3xl font-black uppercase tracking-[0.3em] text-black mb-12 print:mb-6 text-center">Execution</h3>
+        <p className="text-black mb-16 print:mb-8 text-center font-serif text-xl max-w-2xl mx-auto leading-relaxed italic">IN WITNESS WHEREOF, the Parties hereto have executed this Agreement as of the date first above written.</p>
         
-        <div className="grid grid-cols-2 gap-20 font-serif">
+        <div className="grid grid-cols-2 gap-20 print:gap-10 font-serif">
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500 text-center mb-12 border border-gray-300 py-2 bg-white">Client</h4>
+            <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500 text-center mb-12 print:mb-6 border border-gray-300 py-2 bg-white">Client</h4>
             <div className="h-24 border-b-2 border-black flex items-end justify-center pb-3">
               {data.signedByName ? (
                 <span className="italic text-4xl text-black">{data.signedByName}</span>
@@ -95,7 +95,7 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
           </div>
           
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500 text-center mb-12 border border-gray-300 py-2 bg-white">Agency</h4>
+            <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500 text-center mb-12 print:mb-6 border border-gray-300 py-2 bg-white">Agency</h4>
             <div className="h-24 border-b-2 border-black flex items-end justify-center pb-3">
             </div>
             <div className="text-center pt-6">

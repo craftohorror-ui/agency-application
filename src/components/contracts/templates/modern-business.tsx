@@ -23,7 +23,7 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
   return (
     <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none">
       {/* Cover Page */}
-      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 border-b-8 border-blue-600 print:break-after-page">
+      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 print:p-8 border-b-8 border-blue-600 print:break-after-page">
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">{data.agencyName}</h2>
@@ -39,14 +39,14 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
           </div>
         </div>
 
-        <div className="space-y-8 max-w-3xl mt-20">
+        <div className="space-y-8 print:space-y-4 max-w-3xl mt-20 print:mt-10">
           <h1 className={contractDesignTokens.typography.coverTitle}>
             {data.title}
           </h1>
           <div className={`w-32 h-2 ${contractDesignTokens.colors.modernBusiness.accent.split(' ')[0]} rounded-full`}></div>
         </div>
 
-        <div className="grid grid-cols-2 gap-16 pt-16 mt-auto print:mt-16 border-t border-slate-200">
+        <div className="grid grid-cols-2 gap-16 print:gap-8 pt-16 print:pt-8 mt-auto print:mt-16 border-t border-slate-200">
           <div>
             <h3 className={contractDesignTokens.typography.metadata}>Prepared For</h3>
             <p className="text-2xl font-bold text-slate-900 mt-3">{data.clientName}</p>
@@ -60,13 +60,13 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
       </div>
 
       {/* Main Content */}
-      <div className="p-16 space-y-8">
+      <div className="p-16 print:p-8 space-y-8 print:space-y-4">
         <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-blue-600">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -81,11 +81,11 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
       </div>
 
       {/* Signatures */}
-      <div className="p-16 pt-12 mt-24 border-t-2 border-slate-100 print:break-inside-avoid">
+      <div className="p-16 print:p-8 pt-12 mt-24 print:mt-12 border-t-2 border-slate-100 print:break-inside-avoid">
         <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-4">Acceptance & Signatures</h3>
-        <p className="text-lg text-slate-500 mb-16 max-w-2xl leading-relaxed">By signing below, the parties agree to the terms and conditions outlined in this contract, acknowledging full understanding and mutual consent.</p>
+        <p className="text-lg text-slate-500 mb-16 print:mb-8 max-w-2xl leading-relaxed">By signing below, the parties agree to the terms and conditions outlined in this contract, acknowledging full understanding and mutual consent.</p>
         
-        <div className="grid grid-cols-2 gap-20">
+        <div className="grid grid-cols-2 gap-20 print:gap-10">
           <div className="space-y-6">
             <div className="h-24 border-b-2 border-slate-300 flex items-end pb-3">
               {data.signedByName ? (

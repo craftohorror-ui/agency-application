@@ -23,8 +23,8 @@ export function FreelancerContract({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-[#FFFAF0] min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-[#FFFAF0]">
       {/* Playful Header */}
-      <div className="p-16 border-t-[12px] border-amber-500 bg-white shadow-sm print:break-after-page rounded-b-[40px] mb-8 mx-4 mt-0 border-x border-b border-amber-100">
-        <div className="flex justify-between items-start mb-12">
+      <div className="p-16 print:p-8 border-t-[12px] border-amber-500 bg-white shadow-sm print:break-after-page rounded-b-[40px] mb-8 mx-4 mt-0 border-x border-b border-amber-100">
+        <div className="flex justify-between items-start mb-12 print:mb-6">
           <div className="mt-4">
             {data.agencyLogo ? (
               <img src={data.agencyLogo} alt="Logo" className="h-16" />
@@ -37,7 +37,7 @@ export function FreelancerContract({ data }: { data: ContractTemplateData }) {
           </div>
         </div>
 
-        <div className="space-y-8 mb-24 mt-20 text-center">
+        <div className="space-y-8 print:space-y-4 mb-24 print:mb-12 mt-20 print:mt-10 text-center">
           <h1 className={`${contractDesignTokens.typography.coverTitle} text-slate-900 mx-auto max-w-4xl`}>
             {data.title}
           </h1>
@@ -64,13 +64,13 @@ export function FreelancerContract({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Content */}
-      <div className="p-16 py-8 space-y-8 bg-transparent">
+      <div className="p-16 print:p-8 py-8 space-y-8 print:space-y-4 bg-transparent">
         <div className="prose prose-amber max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-lg">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
               {data.termsConditions && (
-                <div className="mt-12 pt-8 border-t border-slate-200">
+                <div className="mt-12 print:mt-6 pt-8 border-t border-slate-200">
                   <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Agency Terms & Conditions</h4>
                   <div className="whitespace-pre-wrap">{data.termsConditions}</div>
                 </div>
@@ -85,11 +85,11 @@ export function FreelancerContract({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 mt-8 border-t-2 border-dashed border-amber-200 print:break-inside-avoid">
+      <div className="p-16 print:p-8 mt-8 border-t-2 border-dashed border-amber-200 print:break-inside-avoid">
         <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">The Handshake</h3>
-        <p className="text-slate-500 mb-16 text-xl max-w-2xl leading-relaxed">By signing below, we agree to the terms outlined above and are ready to start working together.</p>
+        <p className="text-slate-500 mb-16 print:mb-8 text-xl max-w-2xl leading-relaxed">By signing below, we agree to the terms outlined above and are ready to start working together.</p>
         
-        <div className="grid grid-cols-2 gap-16 font-sans">
+        <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans">
           <div className="bg-white p-10 rounded-[2rem] border-[3px] border-amber-100 shadow-sm relative overflow-hidden">
             <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-100 rounded-full opacity-50"></div>
             <h4 className="text-xs font-bold text-amber-600 uppercase tracking-[0.2em] mb-6 relative z-10 bg-amber-50 inline-block px-3 py-1 rounded-full border border-amber-200">Client</h4>
