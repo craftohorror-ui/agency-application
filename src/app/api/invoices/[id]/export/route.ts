@@ -48,8 +48,8 @@ export async function GET(
       cookie: cookieString
     })
 
-    // Emulate screen rendering to bypass any native print layout shifts we don't want
-    await page.emulateMediaType("screen")
+    // Emulate print rendering to allow native browser pagination to work
+    await page.emulateMediaType("print")
 
     // Go to the print route and wait for all network requests (images, fonts, etc.) to settle
     await page.goto(url, {
@@ -68,10 +68,10 @@ export async function GET(
       printBackground: true,
       preferCSSPageSize: true,
       margin: {
-        top: '0',
-        right: '0',
-        bottom: '0',
-        left: '0'
+        top: '12mm',
+        right: '10mm',
+        bottom: '12mm',
+        left: '10mm'
       }
     })
 
