@@ -15,6 +15,10 @@ export default {
         destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
       },
       borderRadius: { lg: '0.5rem', md: '0.375rem', sm: '0.25rem' },
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        serif: ['var(--font-serif)'],
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],

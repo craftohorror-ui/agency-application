@@ -40,14 +40,14 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
           <p className="text-2xl text-slate-400 font-sans tracking-[0.4em] uppercase mt-8 border-l-2 border-[#D4AF37] pl-6">Confidential Agreement</p>
         </div>
 
-        <div className="border-t border-slate-700/50 pt-12 mt-12 print:mt-6">
+        <div className="border-t border-slate-700/50 print:border-slate-700 pt-12 mt-12 print:mt-6">
           <div className="flex flex-wrap gap-8 font-sans">
-            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30 flex-1 min-w-[280px]">
+            <div className="bg-slate-800/50 print:bg-slate-800 p-10 rounded border border-slate-700/30 print:border-slate-700 flex-1 min-w-[280px]">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-[0.3em] mb-4">Prepared For</h3>
               <p className="text-2xl font-black text-slate-100 break-words">{data.clientName}</p>
               {data.clientCompany && <p className="text-lg text-slate-400 mt-2 break-words">{data.clientCompany}</p>}
             </div>
-            <div className="bg-slate-800/50 p-10 rounded border border-slate-700/30 flex-1 min-w-[280px]">
+            <div className="bg-slate-800/50 print:bg-slate-800 p-10 rounded border border-slate-700/30 print:border-slate-700 flex-1 min-w-[280px]">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-[0.3em] mb-4">Effective Date</h3>
               <p className={`text-2xl font-black text-slate-100 break-words ${contractDesignTokens.typography.numeric}`}>{data.date}</p>
             </div>

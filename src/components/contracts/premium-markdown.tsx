@@ -38,13 +38,13 @@ export const PremiumMarkdownComponents: Components = {
     <h1 className={`${contractDesignTokens.typography.documentTitle} border-current print:break-after-avoid`} {...props} />
   ),
   h2: ({ _node, ...props }: any) => (
-    <h2 className={`${contractDesignTokens.typography.sectionTitle} border-current opacity-80 print:break-after-avoid`} {...props} />
+    <h2 className={`${contractDesignTokens.typography.sectionTitle} border-current opacity-80 print:opacity-100 print:text-slate-800 print:border-slate-300 print:break-after-avoid`} {...props} />
   ),
   h3: ({ _node, ...props }: any) => (
-    <h3 className={`${contractDesignTokens.typography.subsectionTitle} opacity-70 print:break-after-avoid`} {...props} />
+    <h3 className={`${contractDesignTokens.typography.subsectionTitle} opacity-70 print:opacity-100 print:text-slate-700 print:break-after-avoid`} {...props} />
   ),
   p: ({ _node, ...props }: any) => (
-    <p className={`${contractDesignTokens.typography.body} opacity-90`} {...props}>
+    <p className={`${contractDesignTokens.typography.body} opacity-90 print:opacity-100 print:text-slate-800`} {...props}>
       {formatChildren(props.children)}
     </p>
   ),
@@ -52,18 +52,18 @@ export const PremiumMarkdownComponents: Components = {
     <ul className="space-y-4 print:space-y-2 my-8 print:my-4" {...props} />
   ),
   li: ({ _node, ...props }: any) => (
-    <li className="flex gap-5 items-start leading-relaxed text-lg opacity-90" {...props}>
-      <span className="opacity-50 mt-1.5 font-bold">•</span>
+    <li className="flex gap-5 items-start leading-relaxed text-lg opacity-90 print:opacity-100 print:text-slate-800" {...props}>
+      <span className="opacity-50 print:opacity-100 print:text-slate-400 mt-1.5 font-bold">•</span>
       <div className="flex-1">{formatChildren(props.children)}</div>
     </li>
   ),
   table: ({ _node, ...props }: any) => (
-    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} print:break-inside-avoid`}>
+    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 print:bg-slate-50 border border-current/20 print:border-slate-200 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} print:break-inside-avoid`}>
       <table className="w-full text-left border-collapse table-fixed" {...props} />
     </div>
   ),
   thead: ({ _node, ...props }: any) => (
-    <thead className="bg-black/5 border-b border-current/20" {...props} />
+    <thead className="bg-black/5 print:bg-slate-100 border-b border-current/20 print:border-slate-300" {...props} />
   ),
   th: ({ _node, ...props }: any) => {
     const getText = (children: any): string => {
@@ -87,19 +87,19 @@ export const PremiumMarkdownComponents: Components = {
     }
 
     return (
-      <th className={`p-6 print:p-3 font-bold uppercase text-[11px] tracking-widest opacity-70 border-r border-current/10 last:border-r-0 ${widthClass}`} {...props} />
+      <th className={`p-6 print:p-3 font-bold uppercase text-[11px] tracking-widest opacity-70 print:opacity-100 print:text-slate-600 border-r border-current/10 print:border-slate-200 last:border-r-0 ${widthClass}`} {...props} />
     );
   },
   tbody: ({ _node, ...props }: any) => (
-    <tbody className="divide-y divide-current/10" {...props} />
+    <tbody className="divide-y divide-current/10 print:divide-slate-200" {...props} />
   ),
   td: ({ _node, ...props }: any) => (
-    <td className={`p-6 print:p-3 align-top text-[15px] font-medium leading-relaxed border-r border-current/10 last:border-r-0 text-current/80 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
+    <td className={`p-6 print:p-3 align-top text-[15px] font-medium leading-relaxed border-r border-current/10 print:border-slate-200 last:border-r-0 text-current/80 print:text-slate-800 print:opacity-100 ${contractDesignTokens.typography.tableHumanContent}`} {...props}>
       {formatChildren(props.children)}
     </td>
   ),
   hr: ({ _node, ...props }: any) => (
-    <hr className="my-20 print:my-10 border-t border-current/20" {...props} />
+    <hr className="my-20 print:my-10 border-t border-current/20 print:border-slate-300" {...props} />
   ),
   strong: ({ _node, ...props }: any) => (
     <strong className="font-semibold text-base sm:text-[17px] text-current/90 opacity-100" {...props}>

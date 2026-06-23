@@ -23,7 +23,7 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
   return (
     <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Header Page */}
-      <div className="p-16 print:p-8 border-t-[16px] border-emerald-600 bg-emerald-50/30 print:break-after-page">
+      <div className="p-16 print:p-8 border-t-[16px] border-emerald-600 bg-emerald-50/30 print:bg-emerald-50 print:break-after-page">
         <div className="flex justify-between items-start mb-16 print:mb-8">
           <div className="mt-4">
             {data.agencyLogo ? (
@@ -92,7 +92,7 @@ export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
       </div>
 
       {/* Signatures */}
-      <div className="p-16 print:p-8 pt-16 print:pt-8 mt-16 print:mt-8 border-t-4 border-emerald-100 bg-emerald-50/20 print:break-inside-avoid">
+      <div className="p-16 print:p-8 pt-16 print:pt-8 mt-16 print:mt-8 border-t-4 border-emerald-100 bg-emerald-50/20 print:bg-white print:break-inside-avoid">
         <h3 className="text-4xl font-black text-emerald-900 mb-4 tracking-tight">Authorization</h3>
         <p className="text-slate-500 mb-16 print:mb-8 text-xl max-w-2xl leading-relaxed">This agreement is executed by the authorized representatives of both parties.</p>
         

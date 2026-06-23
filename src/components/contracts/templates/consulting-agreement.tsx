@@ -49,7 +49,7 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
           </h1>
         </div>
 
-        <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans bg-indigo-50/50 p-12 rounded-tr-[3rem] rounded-bl-[3rem] border border-indigo-100/50">
+        <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans bg-indigo-50/50 print:bg-slate-50 p-12 rounded-tr-[3rem] rounded-bl-[3rem] border border-indigo-100/50 print:border-indigo-200">
           <div>
             <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-[0.2em] mb-4">Consultant</h3>
             <p className="text-2xl font-black text-slate-900">{data.agencyName}</p>

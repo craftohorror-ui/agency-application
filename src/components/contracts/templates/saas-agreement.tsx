@@ -37,7 +37,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
             <h2 className="text-2xl font-black tracking-widest uppercase text-white">{data.agencyName}</h2>
           </div>
           <div className="text-right">
-            <span className="inline-block px-5 py-2.5 bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs font-mono tracking-widest uppercase rounded">
+            <span className="inline-block px-5 py-2.5 bg-violet-500/20 print:bg-violet-900 border border-violet-500/30 print:border-violet-500 text-violet-300 text-xs font-mono tracking-widest uppercase rounded">
               Software as a Service
             </span>
           </div>
@@ -54,12 +54,12 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
         </div>
 
         <div className="relative z-10 grid grid-cols-2 gap-12 pt-16 print:pt-8 mt-auto print:mt-16 border-t border-slate-800">
-          <div className="bg-slate-800/40 p-10 rounded-2xl border border-slate-700/50">
+          <div className="bg-slate-800/40 print:bg-slate-800 p-10 rounded-2xl border border-slate-700/50 print:border-slate-700">
             <h3 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Customer Entity</h3>
             <p className="text-3xl font-black text-white tracking-tight">{data.clientName}</p>
             {data.clientCompany && <p className="text-lg text-slate-400 mt-2">{data.clientCompany}</p>}
           </div>
-          <div className="bg-slate-800/40 p-10 rounded-2xl border border-slate-700/50">
+          <div className="bg-slate-800/40 print:bg-slate-800 p-10 rounded-2xl border border-slate-700/50 print:border-slate-700">
             <h3 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Provider Entity</h3>
             <p className="text-3xl font-black text-white tracking-tight">{data.agencyName}</p>
           </div>
@@ -93,7 +93,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
         <p className="text-lg text-slate-500 mb-16 print:mb-8 text-sm max-w-2xl leading-relaxed">This agreement constitutes a binding legal contract when signed by authorized representatives. All digital signatures are recorded securely.</p>
         
         <div className="grid grid-cols-2 gap-16 print:gap-8 font-sans">
-          <div className="bg-slate-800/30 p-10 border border-slate-700/50 rounded-2xl shadow-sm">
+          <div className="bg-slate-800/30 print:bg-slate-800 p-10 border border-slate-700/50 print:border-slate-700 rounded-2xl shadow-sm">
             <h4 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Customer Signature</h4>
             <div className="h-24 border-b border-slate-700 flex items-end pb-3 mb-6">
               {data.signedByName ? (
@@ -107,7 +107,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
             </div>
           </div>
           
-          <div className="bg-slate-800/30 p-10 border border-slate-700/50 rounded-2xl shadow-sm">
+          <div className="bg-slate-800/30 print:bg-slate-800 p-10 border border-slate-700/50 print:border-slate-700 rounded-2xl shadow-sm">
             <h4 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Provider Signature</h4>
             <div className="h-24 border-b border-slate-700 flex items-end pb-3 mb-6">
             </div>

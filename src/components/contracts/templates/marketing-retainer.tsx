@@ -37,7 +37,7 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
               <h2 className="text-4xl font-black tracking-tighter text-rose-600">{data.agencyName}</h2>
             )}
           </div>
-          <span className="font-bold text-rose-900 tracking-[0.2em] text-sm uppercase bg-rose-100/50 px-4 py-2 rounded-full border border-rose-200/50 mt-8">Retainer Agreement</span>
+          <span className="font-bold text-rose-900 tracking-[0.2em] text-sm uppercase bg-rose-100/50 print:bg-rose-50 px-4 py-2 rounded-full border border-rose-200/50 print:border-rose-200 mt-8">Retainer Agreement</span>
         </div>
 
         <div className="relative z-10 space-y-10 max-w-3xl mt-24 print:mt-12 mb-24 print:mb-12">
@@ -88,7 +88,7 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
         
         <div className="grid grid-cols-2 gap-20 print:gap-10 font-sans">
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 inline-block px-3 py-1 rounded-full border border-rose-800">Client Approval</h4>
+            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 print:bg-rose-900 inline-block px-3 py-1 rounded-full border border-rose-800">Client Approval</h4>
             <div className="h-24 border-b-2 border-rose-800 flex items-end pb-3">
               {data.signedByName ? (
                 <span className="font-serif italic text-4xl text-white">{data.signedByName}</span>
@@ -101,7 +101,7 @@ export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
           </div>
           
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 inline-block px-3 py-1 rounded-full border border-rose-800">Agency Approval</h4>
+            <h4 className="text-xs font-bold text-rose-400 uppercase tracking-[0.2em] bg-rose-900/50 print:bg-rose-900 inline-block px-3 py-1 rounded-full border border-rose-800">Agency Approval</h4>
             <div className="h-24 border-b-2 border-rose-800 flex items-end pb-3">
             </div>
             <div>

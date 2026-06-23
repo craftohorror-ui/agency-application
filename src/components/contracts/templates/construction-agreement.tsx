@@ -31,7 +31,7 @@ export function ConstructionAgreement({ data }: { data: ContractTemplateData }) 
             ) : (
               <h2 className="text-4xl font-black tracking-tighter text-orange-950 uppercase mt-4">{data.agencyName}</h2>
             )}
-            <p className="text-orange-700 font-black tracking-[0.2em] text-sm uppercase bg-orange-100/50 inline-block px-3 py-1">General Contracting Agreement</p>
+            <p className="text-orange-700 font-black tracking-[0.2em] text-sm uppercase bg-orange-100/50 print:bg-orange-50 inline-block px-3 py-1">General Contracting Agreement</p>
           </div>
           <div className="text-right">
             <div className="bg-orange-500 text-white font-black tracking-widest text-xs uppercase px-5 py-3 border-2 border-orange-950 shadow-[4px_4px_0_0_#431407]">
