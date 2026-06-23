@@ -2,6 +2,7 @@
 
 import { requireStaff } from '@/lib/auth'
 import { getOrCreatePrivateChat } from '@/lib/messages'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * H-6 FIX: Validates the authenticated user is a participant of the conversation
@@ -241,8 +242,11 @@ export async function repairDefaultTeamChatAction() {
     return { error: 'Only owners can repair team chats' }
   }
 
+  // Use the admin client to bypass RLS for conversation creation
+  const adminClient = createAdminClient()
+
   // 1. Check if default chat exists
-  const { data: existingChat } = await supabase
+  const { data: existingChat } = await adminClient
     .from('conversations')
     .select('id')
     .eq('agency_id', profile.agency_id)
@@ -254,13 +258,13 @@ export async function repairDefaultTeamChatAction() {
 
   // 2. Create if missing
   if (!convId) {
-    const { data: agency } = await supabase
+    const { data: agency } = await adminClient
       .from('agencies')
       .select('name')
       .eq('id', profile.agency_id)
       .single()
 
-    const { data: newChat, error: createError } = await supabase
+    const { data: newChat, error: createError } = await adminClient
       .from('conversations')
       .insert({
         agency_id: profile.agency_id,
@@ -280,7 +284,7 @@ export async function repairDefaultTeamChatAction() {
   }
 
   // 3. Add all agency profiles as participants
-  const { data: profiles } = await supabase
+  const { data: profiles } = await adminClient
     .from('profiles')
     .select('id')
     .eq('agency_id', profile.agency_id)
@@ -292,8 +296,7 @@ export async function repairDefaultTeamChatAction() {
       profile_id: p.id
     }))
 
-    // ON CONFLICT DO NOTHING is native to Supabase JS if using upsert, but insert handles it via postgres error if we ignore it, or we can just upsert.
-    const { error: partError } = await supabase
+    const { error: partError } = await adminClient
       .from('conversation_participants')
       .upsert(participants, { onConflict: 'conversation_id,profile_id', ignoreDuplicates: true })
 
