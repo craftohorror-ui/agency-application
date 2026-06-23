@@ -6,6 +6,7 @@ import { requireStaff } from '@/lib/auth'
 
 // Vercel max duration limit might be an issue. PDF gen can be slow.
 export const maxDuration = 60; // 60 seconds (max for Hobby is 10, Pro is 300)
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
