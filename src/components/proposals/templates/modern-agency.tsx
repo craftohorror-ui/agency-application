@@ -26,10 +26,10 @@ export function ModernAgencyTemplate({ data }: ModernAgencyTemplateProps) {
   const slateDark = '#0f172a'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white overflow-hidden font-sans text-slate-800" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white overflow-hidden font-sans text-slate-800" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative flex flex-col justify-between p-16 print-avoid-break" style={{ backgroundColor: slateDark, color: 'white', minHeight: '1100px', pageBreakAfter: 'always' }}>
+      <div className="relative flex flex-col justify-between p-16 print-avoid-break" style={{ backgroundColor: slateDark, color: 'white', minHeight: '1000px', pageBreakAfter: 'always' }}>
         {/* Background diagonal styling (Modern aesthetic) */}
         <div 
           className="absolute top-0 right-0 w-3/4 h-full opacity-20 print:opacity-10" 

@@ -21,10 +21,10 @@ export function SaaSStartupTemplate({ data }: { data: TemplateData }) {
   const lightBg = '#f8fafc'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-20 print-avoid-break bg-slate-50 border-t-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-20 print-avoid-break bg-slate-50 border-t-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
         
         {/* Soft SaaS Gradients */}
         <div className="absolute top-0 right-0 w-full h-[500px] opacity-20" style={{ background: `linear-gradient(to bottom right, ${brandColor}40, transparent)` }} />

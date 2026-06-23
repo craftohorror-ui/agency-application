@@ -26,10 +26,10 @@ export function ConsultingTemplate({ data }: ConsultingTemplateProps) {
   const textDark = '#0f172a'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-2xl print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-2xl print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-20 print-avoid-break bg-slate-50 border-t-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-20 print-avoid-break bg-slate-50 border-t-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
         
         {/* Subtle dot matrix background */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '32px 32px' }} />

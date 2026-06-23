@@ -20,10 +20,10 @@ export function MarketingGrowthTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#f43f5e'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-20 print-avoid-break overflow-hidden" style={{ backgroundColor: brandColor, pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-20 print-avoid-break overflow-hidden" style={{ backgroundColor: brandColor, pageBreakAfter: 'always' }}>
         
         {/* Dynamic Marketing Graphic */}
         <div className="absolute top-0 right-0 w-full h-full opacity-20 mix-blend-overlay" style={{ background: 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent)', backgroundSize: '100px 100px' }} />

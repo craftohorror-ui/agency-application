@@ -21,10 +21,10 @@ export function TechEnterpriseTemplate({ data }: { data: TemplateData }) {
   const darkBg = '#020617' // Very dark slate
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-slate-50 font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-slate-50 font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-20 print-avoid-break text-white overflow-hidden" style={{ backgroundColor: darkBg, pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-20 print-avoid-break text-white overflow-hidden" style={{ backgroundColor: darkBg, pageBreakAfter: 'always' }}>
         
         {/* Cyber Grid Background */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(${brandColor} 1px, transparent 1px), linear-gradient(90deg, ${brandColor} 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />

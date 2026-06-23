@@ -21,10 +21,10 @@ export function FinancialAdvisoryTemplate({ data }: { data: TemplateData }) {
   const accentColor = '#d1fae5' // Light emerald
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#f8fafc] border-l-[16px]" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
+      <div className="relative min-h-[1000px] flex flex-col p-20 print-avoid-break bg-[#f8fafc] border-l-[16px]" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
         
         {/* Subtle Financial Background */}
         <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 26%, transparent 27%, transparent 74%, rgba(0,0,0,1) 75%, rgba(0,0,0,1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 26%, transparent 27%, transparent 74%, rgba(0,0,0,1) 75%, rgba(0,0,0,1) 76%, transparent 77%, transparent)', backgroundSize: '50px 50px' }} />

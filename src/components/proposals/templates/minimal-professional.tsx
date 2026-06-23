@@ -20,10 +20,10 @@ export function MinimalProfessionalTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#64748b'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-100 print:border-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-100 print:border-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-24 print-avoid-break bg-white" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-24 print-avoid-break bg-white" style={{ pageBreakAfter: 'always' }}>
         
         <div className="flex justify-between items-start">
           {data.agencyLogo ? (

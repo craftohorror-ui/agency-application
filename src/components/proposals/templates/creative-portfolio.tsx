@@ -20,10 +20,10 @@ export function CreativePortfolioTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#8b5cf6'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-[#fafafa] font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-[#fafafa] font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#f3f4f6]" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col p-20 print-avoid-break bg-[#f3f4f6]" style={{ pageBreakAfter: 'always' }}>
         
         {/* Abstract typography background */}
         <div className="absolute top-10 -left-20 text-[200px] font-black opacity-[0.03] text-slate-900 leading-none break-all w-[120%] overflow-hidden pointer-events-none">

@@ -20,10 +20,10 @@ export function ConstructionPremiumTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#b45309'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-[#f8fafc] font-sans text-slate-900 border border-slate-300 shadow-xl overflow-hidden print:shadow-none print:border-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-[#f8fafc] font-sans text-slate-900 border border-slate-300 shadow-xl overflow-hidden print:shadow-none print:border-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#0f172a] text-white" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col p-20 print-avoid-break bg-[#0f172a] text-white" style={{ pageBreakAfter: 'always' }}>
         
         {/* Blueprint Grid Overlay */}
         <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '25px 25px' }} />

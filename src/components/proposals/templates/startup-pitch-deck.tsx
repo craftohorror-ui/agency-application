@@ -20,10 +20,10 @@ export function StartupPitchDeckTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#f97316'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-slate-900 font-sans text-white shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-slate-900 font-sans text-white shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-center p-24 print-avoid-break bg-slate-900 overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-center p-24 print-avoid-break bg-slate-900 overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Massive vibrant gradient orb */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] opacity-40 mix-blend-screen" style={{ backgroundColor: brandColor }} />

@@ -20,10 +20,10 @@ export function RealEstateDevelopmentTemplate({ data }: { data: TemplateData }) 
   const brandColor = data.brandColor || '#0f766e'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-[#fdfdfd] font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none print:border-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-[#fdfdfd] font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none print:border-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#f0f4f8]" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col p-20 print-avoid-break bg-[#f0f4f8]" style={{ pageBreakAfter: 'always' }}>
         
         {/* Architectural Background Pattern */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `repeating-linear-gradient(45deg, ${brandColor} 0, ${brandColor} 1px, transparent 1px, transparent 20px)` }} />

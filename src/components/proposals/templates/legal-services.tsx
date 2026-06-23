@@ -20,10 +20,10 @@ export function LegalServicesTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#1e3a8a'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-serif text-slate-900 border border-slate-300 shadow-xl print:shadow-none print:border-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-serif text-slate-900 border border-slate-300 shadow-xl print:shadow-none print:border-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col items-center justify-center p-24 print-avoid-break text-center border-[12px] border-double m-8" style={{ pageBreakAfter: 'always', borderColor: `${brandColor}20` }}>
+      <div className="relative min-h-[1000px] flex flex-col items-center justify-center p-24 print-avoid-break text-center border-[12px] border-double m-8" style={{ pageBreakAfter: 'always', borderColor: `${brandColor}20` }}>
         
         <div className="absolute top-16 left-0 w-full flex justify-center">
           {data.agencyLogo ? (

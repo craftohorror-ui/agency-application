@@ -21,10 +21,10 @@ export function DarkExecutiveTemplate({ data }: { data: TemplateData }) {
   const bgDark = '#09090b' // Zinc 950
 
   return (
-    <div className="w-full max-w-[850px] mx-auto font-serif text-slate-300 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px', backgroundColor: bgDark }}>
+    <div className="w-full max-w-[850px] mx-auto font-serif text-slate-300 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px', backgroundColor: bgDark }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-24 print-avoid-break overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-24 print-avoid-break overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Subtle radial metallic gradient */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.04]" style={{ background: `radial-gradient(circle, ${brandColor} 0%, transparent 70%)` }} />

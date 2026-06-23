@@ -24,13 +24,13 @@ export function OnePageTemplate({ data }: OnePageTemplateProps) {
   const brandColor = data.brandColor || '#8b5cf6'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-200 shadow-xl print:shadow-none print:border-none relative overflow-hidden" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-200 shadow-xl print:shadow-none print:border-none relative overflow-hidden" style={{ minHeight: '1000px' }}>
       
       {/* Abstract background graphics */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] -translate-y-1/2 translate-x-1/4" style={{ backgroundColor: brandColor }} />
       <div className="absolute bottom-0 left-0 w-[800px] h-[800px] rounded-full opacity-[0.02] translate-y-1/3 -translate-x-1/4" style={{ backgroundColor: brandColor }} />
 
-      <div className="p-12 relative z-10 flex flex-col h-full min-h-[1100px]">
+      <div className="p-12 relative z-10 flex flex-col h-full min-h-[1000px]">
         
         {/* HEADER BLOCK */}
         <div className="flex justify-between items-center mb-12 pb-8 border-b-2" style={{ borderColor: `${brandColor}20` }}>

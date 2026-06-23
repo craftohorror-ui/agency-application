@@ -24,10 +24,10 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
   const brandColor = data.brandColor || '#111827'
   
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-serif text-slate-900 border-x border-slate-200" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-serif text-slate-900 border-x border-slate-200" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-20 print-avoid-break overflow-hidden text-white" style={{ backgroundColor: brandColor, pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-20 print-avoid-break overflow-hidden text-white" style={{ backgroundColor: brandColor, pageBreakAfter: 'always' }}>
         
         {/* Subtle Luxury Gradient Overlay */}
         <div className="absolute inset-0 opacity-50" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.5) 100%)' }} />

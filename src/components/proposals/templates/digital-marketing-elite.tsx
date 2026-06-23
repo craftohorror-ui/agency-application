@@ -20,10 +20,10 @@ export function DigitalMarketingEliteTemplate({ data }: { data: TemplateData }) 
   const brandColor = data.brandColor || '#8b5cf6'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-center p-20 print-avoid-break bg-slate-900 text-white overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-center p-20 print-avoid-break bg-slate-900 text-white overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Dynamic mesh gradient background */}
         <div className="absolute inset-0 opacity-40 mix-blend-screen" style={{ background: `radial-gradient(circle at 0% 0%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 100% 100%, #3b82f6 0%, transparent 50%)` }} />

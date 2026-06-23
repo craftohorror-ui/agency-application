@@ -20,10 +20,10 @@ export function EnterpriseConsultingTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#0284c7'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-300 shadow-xl print:shadow-none print:border-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 border border-slate-300 shadow-xl print:shadow-none print:border-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col p-20 print-avoid-break bg-[#f8fafc] border-b-[20px]" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
+      <div className="relative min-h-[1000px] flex flex-col p-20 print-avoid-break bg-[#f8fafc] border-b-[20px]" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
         
         {/* Architectural Grid Background */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />

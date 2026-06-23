@@ -20,10 +20,10 @@ export function CreativeAgencyTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#ec4899'
   
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-white font-sans text-slate-800 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-center p-20 print-avoid-break bg-slate-900 text-white overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-center p-20 print-avoid-break bg-slate-900 text-white overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Creative overlapping circles */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full mix-blend-multiply opacity-80 blur-3xl translate-x-1/3 -translate-y-1/3" style={{ backgroundColor: brandColor }} />

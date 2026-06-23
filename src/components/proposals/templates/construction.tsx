@@ -26,10 +26,10 @@ export function ConstructionTemplate({ data }: ConstructionTemplateProps) {
   const darkSlate = '#1c1917'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-stone-50 font-sans text-stone-900 border-x border-stone-200" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-stone-50 font-sans text-stone-900 border-x border-stone-200" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-16 print-avoid-break bg-stone-100 overflow-hidden border-b-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-16 print-avoid-break bg-stone-100 overflow-hidden border-b-8" style={{ pageBreakAfter: 'always', borderColor: brandColor }}>
         
         {/* Construction Stripe Background */}
         <div className="absolute top-0 right-0 w-1/2 h-[300px] opacity-[0.03]" 

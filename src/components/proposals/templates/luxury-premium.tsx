@@ -20,10 +20,10 @@ export function LuxuryPremiumTemplate({ data }: { data: TemplateData }) {
   const brandColor = data.brandColor || '#d4af37'
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-[#faf9f6] font-serif text-slate-900 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1100px' }}>
+    <div className="w-full max-w-[850px] mx-auto bg-[#faf9f6] font-serif text-slate-900 shadow-xl overflow-hidden print:shadow-none" style={{ minHeight: '1000px' }}>
       
       {/* --- COVER PAGE --- */}
-      <div className="relative min-h-[1100px] flex flex-col justify-between p-24 print-avoid-break text-center overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="relative min-h-[1000px] flex flex-col justify-between p-24 print-avoid-break text-center overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Luxury Border Frame */}
         <div className="absolute inset-8 border border-slate-200 pointer-events-none" />
