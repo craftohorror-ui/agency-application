@@ -233,8 +233,24 @@ export function ChatInterface({ conversations: initialConversations, initialMess
       .channel('reactions_listener')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_reactions' }, (payload) => {
         setReactions(prev => {
-          if (prev.find(r => r.id === payload.new.id)) return prev
-          return [...prev, payload.new as Reaction]
+          const newReaction = payload.new as Reaction
+          
+          // Deduplicate by the unique constraint: message_id + user_id + emoji
+          const isDuplicate = prev.some(r => 
+            r.message_id === newReaction.message_id && 
+            r.user_id === newReaction.user_id && 
+            r.emoji === newReaction.emoji
+          )
+          
+          if (isDuplicate) {
+            // Replace the optimistic (fake UUID) reaction with the real one from DB
+            return prev.map(r => 
+              (r.message_id === newReaction.message_id && r.user_id === newReaction.user_id && r.emoji === newReaction.emoji) 
+                ? newReaction 
+                : r
+            )
+          }
+          return [...prev, newReaction]
         })
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'message_reactions' }, (payload) => {
