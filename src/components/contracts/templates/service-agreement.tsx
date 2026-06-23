@@ -21,7 +21,7 @@ export const serviceAgreementConfig: ContractTemplateConfig = {
 
 export function ServiceAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Header Page */}
       <div className="p-16 border-t-[16px] border-emerald-600 bg-emerald-50/30 print:break-after-page">
         <div className="flex justify-between items-start mb-16">

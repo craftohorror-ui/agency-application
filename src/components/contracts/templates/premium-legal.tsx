@@ -21,7 +21,7 @@ export const premiumLegalConfig: ContractTemplateConfig = {
 
 export function PremiumLegal({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-black font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-black font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Formal Header */}
       <div className="p-16 border-b-2 border-black print:break-after-page">
         <div className="flex justify-between items-center mb-16">

@@ -23,7 +23,7 @@ export const consultingAgreementConfig: ContractTemplateConfig = {
 
 export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white relative">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white relative">
       {/* Decorative Sidebar */}
       <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600 print:hidden"></div>
 

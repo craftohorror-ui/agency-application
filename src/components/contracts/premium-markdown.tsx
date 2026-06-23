@@ -35,13 +35,13 @@ const formatChildren = (children: React.ReactNode): React.ReactNode => {
 
 export const PremiumMarkdownComponents: Components = {
   h1: ({ _node, ...props }: any) => (
-    <h1 className={`${contractDesignTokens.typography.documentTitle} border-current`} {...props} />
+    <h1 className={`${contractDesignTokens.typography.documentTitle} border-current print:break-after-avoid`} {...props} />
   ),
   h2: ({ _node, ...props }: any) => (
-    <h2 className={`${contractDesignTokens.typography.sectionTitle} border-current opacity-80`} {...props} />
+    <h2 className={`${contractDesignTokens.typography.sectionTitle} border-current opacity-80 print:break-after-avoid`} {...props} />
   ),
   h3: ({ _node, ...props }: any) => (
-    <h3 className={`${contractDesignTokens.typography.subsectionTitle} opacity-70`} {...props} />
+    <h3 className={`${contractDesignTokens.typography.subsectionTitle} opacity-70 print:break-after-avoid`} {...props} />
   ),
   p: ({ _node, ...props }: any) => (
     <p className={`${contractDesignTokens.typography.body} opacity-90`} {...props}>
@@ -58,7 +58,7 @@ export const PremiumMarkdownComponents: Components = {
     </li>
   ),
   table: ({ _node, ...props }: any) => (
-    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin}`}>
+    <div className={`w-full overflow-hidden ${contractDesignTokens.radius.xl} bg-white/5 border border-current/20 ${contractDesignTokens.shadows.minimal} ${contractDesignTokens.spacing.cardMargin} print:break-inside-avoid`}>
       <table className="w-full text-left border-collapse table-fixed" {...props} />
     </div>
   ),

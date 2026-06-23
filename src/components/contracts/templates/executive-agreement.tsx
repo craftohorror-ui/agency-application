@@ -22,7 +22,7 @@ export const executiveAgreementConfig: ContractTemplateConfig = {
 
 export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-slate-50 min-h-[1056px] text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
+    <div className="w-[800px] mx-auto bg-slate-50 min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Cover Page */}
       <div className="flex flex-col p-16 bg-slate-900 text-slate-100 print:bg-slate-900 print:break-after-page print:color-adjust-exact">
         <div className="flex justify-between items-start mt-4">

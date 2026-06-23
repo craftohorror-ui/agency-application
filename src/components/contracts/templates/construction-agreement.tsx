@@ -21,7 +21,7 @@ export const constructionAgreementConfig: ContractTemplateConfig = {
 
 export function ConstructionAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-900 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-x-[16px] border-orange-500">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-900 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-x-[16px] border-orange-500">
       {/* Structural Header */}
       <div className="p-16 border-b-4 border-orange-950 bg-stone-50 print:break-after-page">
         <div className="flex justify-between items-start mb-16">

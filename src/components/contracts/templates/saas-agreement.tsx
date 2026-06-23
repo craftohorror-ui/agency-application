@@ -23,9 +23,9 @@ export const saasAgreementConfig: ContractTemplateConfig = {
 
 export function SaasAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-slate-900 min-h-[1056px] text-slate-300 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-slate-900">
+    <div className="w-[800px] mx-auto bg-slate-900 min-h-[1000px] print:min-h-0 text-slate-300 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-slate-900">
       {/* Cover Page */}
-      <div className="h-[1056px] flex flex-col justify-between p-16 border-t-4 border-violet-500 relative overflow-hidden print:break-after-page">
+      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 border-t-4 border-violet-500 relative overflow-hidden print:break-after-page">
         {/* Decorative Grid */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 print:hidden"></div>
         
@@ -53,7 +53,7 @@ export function SaasAgreement({ data }: { data: ContractTemplateData }) {
           <p className="text-xl text-slate-400 font-mono tracking-wider mt-4">v{data.version} — <span className="text-violet-400">Generated on {data.date}</span></p>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-12 pt-16 mt-auto border-t border-slate-800">
+        <div className="relative z-10 grid grid-cols-2 gap-12 pt-16 mt-auto print:mt-16 border-t border-slate-800">
           <div className="bg-slate-800/40 p-10 rounded-2xl border border-slate-700/50">
             <h3 className="text-xs font-bold text-violet-400 uppercase tracking-[0.2em] mb-4 font-mono">Customer Entity</h3>
             <p className="text-3xl font-black text-white tracking-tight">{data.clientName}</p>

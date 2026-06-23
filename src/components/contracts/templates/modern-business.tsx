@@ -21,9 +21,9 @@ export const modernBusinessContractConfig: ContractTemplateConfig = {
 
 export function ModernBusinessContract({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none">
       {/* Cover Page */}
-      <div className="h-[1056px] flex flex-col justify-between p-16 border-b-8 border-blue-600 print:break-after-page">
+      <div className="min-h-[1000px] print:min-h-0 flex flex-col justify-between print:block p-16 border-b-8 border-blue-600 print:break-after-page">
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">{data.agencyName}</h2>
@@ -46,7 +46,7 @@ export function ModernBusinessContract({ data }: { data: ContractTemplateData })
           <div className={`w-32 h-2 ${contractDesignTokens.colors.modernBusiness.accent.split(' ')[0]} rounded-full`}></div>
         </div>
 
-        <div className="grid grid-cols-2 gap-16 pt-16 mt-auto border-t border-slate-200">
+        <div className="grid grid-cols-2 gap-16 pt-16 mt-auto print:mt-16 border-t border-slate-200">
           <div>
             <h3 className={contractDesignTokens.typography.metadata}>Prepared For</h3>
             <p className="text-2xl font-bold text-slate-900 mt-3">{data.clientName}</p>

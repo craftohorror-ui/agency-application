@@ -21,7 +21,7 @@ export const freelancerContractConfig: ContractTemplateConfig = {
 
 export function FreelancerContract({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-[#FFFAF0] min-h-[1056px] text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-[#FFFAF0]">
+    <div className="w-[800px] mx-auto bg-[#FFFAF0] min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-[#FFFAF0]">
       {/* Playful Header */}
       <div className="p-16 border-t-[12px] border-amber-500 bg-white shadow-sm print:break-after-page rounded-b-[40px] mb-8 mx-4 mt-0 border-x border-b border-amber-100">
         <div className="flex justify-between items-start mb-12">

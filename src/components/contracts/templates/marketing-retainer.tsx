@@ -23,7 +23,7 @@ export const marketingRetainerConfig: ContractTemplateConfig = {
 
 export function MarketingRetainer({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-[#FFF5F6] min-h-[1056px] text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-[#FFF5F6]">
+    <div className="w-[800px] mx-auto bg-[#FFF5F6] min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-[#FFF5F6]">
       {/* Dynamic Header */}
       <div className="p-16 pb-12 relative overflow-hidden print:break-after-page">
         <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-bl-[100%] opacity-10"></div>

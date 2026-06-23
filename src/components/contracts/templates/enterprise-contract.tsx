@@ -21,7 +21,7 @@ export const enterpriseContractConfig: ContractTemplateConfig = {
 
 export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1056px] text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-l-2 border-slate-200">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-l-2 border-slate-200">
       {/* Formal Header */}
       <div className="p-16 border-b-2 border-sky-900 print:break-after-page">
         <div className="flex justify-between items-center mb-16 mt-6">
