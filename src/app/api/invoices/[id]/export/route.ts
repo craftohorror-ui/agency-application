@@ -63,16 +63,50 @@ export async function GET(
       await document.fonts.ready
     })
 
+    // --- Dynamic Single-Page Scaling Logic ---
+    const pdfConfig = {
+      format: 'A4' as const,
+      margin: {
+        top: 12, // mm
+        right: 10,
+        bottom: 12,
+        left: 10
+      }
+    };
+
+    const A4_HEIGHT_MM = 297;
+    const PX_PER_MM = 96 / 25.4;
+    // Calculate precise printable pixel height available on one page
+    const availableHeightPx = (A4_HEIGHT_MM - pdfConfig.margin.top - pdfConfig.margin.bottom) * PX_PER_MM;
+
+    const scaleFactor = await page.evaluate((availableHeight) => {
+      // document.documentElement.scrollHeight reliably captures the full rendered height
+      const renderedHeight = document.documentElement.scrollHeight;
+      
+      if (renderedHeight > availableHeight) {
+        return availableHeight / renderedHeight;
+      }
+      return 1;
+    }, availableHeightPx);
+
+    // Apply minimum readability threshold (85%)
+    // If it requires scaling below 85% to fit on one page, allow it to overflow to multiple pages
+    // to preserve human readability.
+    const MIN_SCALE = 0.85;
+    const finalScale = scaleFactor >= MIN_SCALE ? scaleFactor : 1;
+    // ------------------------------------------
+
     // Generate the PDF buffer
     const pdfBuffer = await page.pdf({
-      format: 'A4',
+      format: pdfConfig.format,
       printBackground: true,
       preferCSSPageSize: true,
+      scale: finalScale,
       margin: {
-        top: '12mm',
-        right: '10mm',
-        bottom: '12mm',
-        left: '10mm'
+        top: `${pdfConfig.margin.top}mm`,
+        right: `${pdfConfig.margin.right}mm`,
+        bottom: `${pdfConfig.margin.bottom}mm`,
+        left: `${pdfConfig.margin.left}mm`
       }
     })
 
