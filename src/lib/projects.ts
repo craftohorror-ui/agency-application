@@ -121,15 +121,16 @@ export async function updateProject(id: string, input: ProjectUpdateInput): Prom
     throw new Error('No project fields provided')
   }
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from('projects')
     .update(payload)
     .eq('id', id)
     .select('*')
-    .single()
 
-  if (error) throw new Error(error.message)
-  return data as Project
+  console.log('UPDATE RESULT:', JSON.stringify(result, null, 2))
+
+  if (result.error) throw new Error(result.error.message)
+  return result.data?.[0] as Project
 }
 
 export async function listProjects(filters: ProjectListFilters = {}): Promise<ProjectListResult> {
