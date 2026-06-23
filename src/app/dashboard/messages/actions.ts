@@ -233,3 +233,75 @@ export async function toggleReactionAction(messageId: string, emoji: string) {
 
   return { success: true }
 }
+
+export async function repairDefaultTeamChatAction() {
+  const { supabase, profile } = await requireStaff()
+  
+  if (profile.role !== 'owner') {
+    return { error: 'Only owners can repair team chats' }
+  }
+
+  // 1. Check if default chat exists
+  const { data: existingChat } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('agency_id', profile.agency_id)
+    .eq('is_default', true)
+    .limit(1)
+    .maybeSingle()
+
+  let convId = existingChat?.id
+
+  // 2. Create if missing
+  if (!convId) {
+    const { data: agency } = await supabase
+      .from('agencies')
+      .select('name')
+      .eq('id', profile.agency_id)
+      .single()
+
+    const { data: newChat, error: createError } = await supabase
+      .from('conversations')
+      .insert({
+        agency_id: profile.agency_id,
+        type: 'group',
+        title: `${agency?.name || 'Agency'} Team`,
+        is_default: true
+      })
+      .select('id')
+      .single()
+
+    if (createError) {
+      console.error('Failed to create default chat:', createError)
+      return { error: createError.message }
+    }
+    
+    convId = newChat.id
+  }
+
+  // 3. Add all agency profiles as participants
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('agency_id', profile.agency_id)
+
+  if (profiles && profiles.length > 0) {
+    const participants = profiles.map(p => ({
+      agency_id: profile.agency_id,
+      conversation_id: convId,
+      profile_id: p.id
+    }))
+
+    // ON CONFLICT DO NOTHING is native to Supabase JS if using upsert, but insert handles it via postgres error if we ignore it, or we can just upsert.
+    const { error: partError } = await supabase
+      .from('conversation_participants')
+      .upsert(participants, { onConflict: 'conversation_id,profile_id', ignoreDuplicates: true })
+
+    if (partError) {
+      console.error('Failed to add participants:', partError)
+      return { error: partError.message }
+    }
+  }
+
+  return { success: true, conversationId: convId }
+}
