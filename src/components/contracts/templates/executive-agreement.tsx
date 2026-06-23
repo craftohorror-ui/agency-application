@@ -22,7 +22,7 @@ export const executiveAgreementConfig: ContractTemplateConfig = {
 
 export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-slate-50 min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
+    <div className="w-[800px] mx-auto bg-slate-50 min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Cover Page */}
       <div className="flex flex-col p-16 print:p-8 bg-slate-900 text-slate-100 print:bg-slate-900 print:break-after-page print:color-adjust-exact">
         <div className="flex justify-between items-start mt-4">
@@ -34,7 +34,7 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
 
         <div className="space-y-10 max-w-3xl mt-24 print:mt-12 mb-16 print:mb-8">
           <div className="w-24 h-1 bg-[#D4AF37] mb-8"></div>
-          <h1 className={`${contractDesignTokens.typography.coverTitle} tracking-wide uppercase break-words`}>
+          <h1 className={`${contractDesignTokens.typography.coverTitle} tracking-wide uppercase break-words font-serif`}>
             {data.title}
           </h1>
           <p className="text-2xl text-slate-400 font-sans tracking-[0.4em] uppercase mt-8 border-l-2 border-[#D4AF37] pl-6">Confidential Agreement</p>
@@ -57,7 +57,7 @@ export function ExecutiveAgreement({ data }: { data: ContractTemplateData }) {
 
       {/* Main Content */}
       <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-white">
-        <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-slate-900 prose-headings:font-normal prose-p:font-sans prose-p:text-slate-600 prose-p:leading-loose">
+        <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-normal prose-p:font-sans prose-p:text-slate-600 prose-p:leading-loose">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>

@@ -23,7 +23,7 @@ export const consultingAgreementConfig: ContractTemplateConfig = {
 
 export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white relative">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white relative">
       {/* Decorative Sidebar */}
       <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600 print:hidden"></div>
 
@@ -64,7 +64,7 @@ export function ConsultingAgreement({ data }: { data: ContractTemplateData }) {
 
       {/* Content */}
       <div className="px-20 pb-16 print:pb-8 space-y-8 print:space-y-4">
-        <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-indigo-900 prose-h2:border-b prose-h2:border-indigo-100 prose-h2:pb-2 prose-p:font-sans prose-p:text-slate-600 prose-p:leading-relaxed">
+        <div className="prose prose-slate max-w-none prose-headings:text-indigo-900 prose-h2:border-b prose-h2:border-indigo-100 prose-h2:pb-2 prose-p:font-sans prose-p:text-slate-600 prose-p:leading-relaxed">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>

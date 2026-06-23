@@ -21,7 +21,7 @@ export const enterpriseContractConfig: ContractTemplateConfig = {
 
 export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-l-2 border-slate-200">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-slate-800 font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white border-l-2 border-slate-200">
       {/* Formal Header */}
       <div className="p-16 print:p-8 border-b-2 border-sky-900 print:break-after-page">
         <div className="flex justify-between items-center mb-16 print:mb-8 mt-6">
@@ -62,7 +62,7 @@ export function EnterpriseContract({ data }: { data: ContractTemplateData }) {
 
       {/* Content */}
       <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-white text-justify">
-        <div className="prose prose-slate max-w-none prose-headings:font-serif prose-headings:text-sky-900 prose-headings:font-normal prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-2 prose-p:font-serif prose-p:text-slate-800 prose-p:leading-loose">
+        <div className="prose prose-slate max-w-none prose-headings:text-sky-900 prose-headings:font-normal prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-2 prose-p:font-sans prose-p:text-slate-800 prose-p:leading-loose">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>

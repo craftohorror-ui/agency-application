@@ -21,7 +21,7 @@ export const premiumLegalConfig: ContractTemplateConfig = {
 
 export function PremiumLegal({ data }: { data: ContractTemplateData }) {
   return (
-    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-black font-serif shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
+    <div className="w-[800px] mx-auto bg-white min-h-[1000px] print:min-h-0 text-black font-sans shadow-sm print:shadow-none print:w-full print:max-w-none print:bg-white">
       {/* Formal Header */}
       <div className="p-16 print:p-8 border-b-2 border-black print:break-after-page">
         <div className="flex justify-between items-center mb-16 print:mb-8">
@@ -36,7 +36,7 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
         </div>
 
         <div className="text-center space-y-8 print:space-y-4 my-32">
-          <h1 className={`${contractDesignTokens.typography.coverTitle} uppercase text-black border-y-[3px] border-black py-12 px-8 leading-tight mx-auto max-w-4xl`}>
+          <h1 className={`${contractDesignTokens.typography.coverTitle} uppercase text-black border-y-[3px] border-black py-12 px-8 leading-tight mx-auto max-w-4xl font-serif`}>
             {data.title}
           </h1>
         </div>
@@ -55,7 +55,7 @@ export function PremiumLegal({ data }: { data: ContractTemplateData }) {
 
       {/* Content */}
       <div className="p-16 print:p-8 space-y-8 print:space-y-4 bg-white text-justify leading-relaxed">
-        <div className="prose prose-gray max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:uppercase prose-headings:text-black prose-p:font-serif prose-p:text-black prose-p:leading-loose">
+        <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:uppercase prose-headings:text-black prose-p:font-sans prose-p:text-black prose-p:leading-loose">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={PremiumMarkdownComponents}>
             {data.body}
           </ReactMarkdown>
