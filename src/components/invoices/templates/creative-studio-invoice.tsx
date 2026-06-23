@@ -13,7 +13,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
   }
 
   return (
-    <div className="bg-white text-slate-800 max-w-[850px] mx-auto font-sans shadow-xl print:shadow-none min-h-[1100px] print:min-h-0 flex flex-col border border-slate-100 relative overflow-hidden">
+    <div className="bg-white text-slate-800 max-w-[850px] mx-auto font-sans shadow-xl print:shadow-none min-h-[1100px] print:min-h-0 flex flex-col print:block border border-slate-100 relative overflow-hidden">
       
       {/* --- HEADER PAGE-LIKE STRUCTURE --- */}
       <div className="bg-[#f3f4f6] px-16 py-20 flex justify-between items-start border-b border-slate-200 relative overflow-hidden">
@@ -69,7 +69,7 @@ function CreativeStudioInvoiceTemplate({ data }: { data: InvoiceTemplateData }) 
         </div>
       </div>
 
-      <div className="p-16 flex-1 flex flex-col bg-white">
+      <div className="p-16 flex-1 flex flex-col print:block bg-white">
         
         {/* Bill To */}
         <div className="mb-16">

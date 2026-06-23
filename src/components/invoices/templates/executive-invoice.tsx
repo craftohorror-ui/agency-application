@@ -13,7 +13,7 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
   }
 
   return (
-    <div className="bg-white text-slate-900 max-w-[850px] mx-auto font-serif shadow-sm min-h-[1100px] print:min-h-0 flex flex-col border-x border-slate-200">
+    <div className="bg-white text-slate-900 max-w-[850px] mx-auto font-serif shadow-sm min-h-[1100px] print:min-h-0 flex flex-col print:block border-x border-slate-200">
       
       {/* Luxury Dark Header */}
       <div className="text-white p-16 flex flex-col justify-between" style={{ backgroundColor: primaryColor }}>
@@ -57,7 +57,7 @@ function ExecutiveInvoiceTemplate({ data }: { data: InvoiceTemplateData }) {
         </div>
       </div>
 
-      <div className="p-16 flex-1 flex flex-col bg-white">
+      <div className="p-16 flex-1 flex flex-col print:block bg-white">
         
         {/* Status & Due Date */}
         <div className="flex justify-between items-center mb-16 pb-8 border-b border-slate-200">
