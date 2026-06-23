@@ -9,9 +9,12 @@ export async function GET(request: NextRequest, props: { params: Promise<{ path:
 
     const params = await props.params
     const path = params.path.join('/')
-    const targetUserId = params.path[0]
+    
+    // The filename is formatted as `${profile.id}-${timestamp}.${ext}`
+    // We must extract the 36-character UUID prefix to properly check the database.
+    const targetUserId = params.path[0]?.substring(0, 36)
 
-    if (!targetUserId) {
+    if (!targetUserId || targetUserId.length !== 36) {
       return new NextResponse('Not found', { status: 404 })
     }
 
