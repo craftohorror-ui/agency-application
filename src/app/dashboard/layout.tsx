@@ -10,12 +10,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className='flex min-h-screen'>
       <aside className='hidden w-60 shrink-0 border-r bg-card md:flex md:flex-col'>
-        <div className='border-b p-4 text-lg font-bold tracking-tight'>AgencyOS</div>
+        <div className='border-b p-4'>
+          <div className='text-lg font-bold tracking-tight leading-none'>AgencyOS</div>
+          <div className='text-[11px] font-medium text-muted-foreground/80 mt-1'>by Ayan</div>
+        </div>
         <Sidebar role={profile.role} />
       </aside>
       <div className='flex flex-1 flex-col'>
         <header className='flex h-14 items-center justify-between border-b bg-card px-4'>
-          <div className='text-lg font-bold md:hidden'>AgencyOS</div>
+          <div className='md:hidden flex flex-col justify-center'>
+            <div className='text-lg font-bold leading-none'>AgencyOS</div>
+            <div className='text-[10px] font-medium text-muted-foreground/80 mt-0.5'>by Ayan</div>
+          </div>
           
           <div className="flex-1 px-4 md:px-8 max-w-2xl">
             <GlobalSearch />
