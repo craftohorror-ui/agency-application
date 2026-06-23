@@ -33,7 +33,7 @@ export default async function PrintInvoicePage({ params, searchParams }: PrintPa
     .single()
 
   const payments = await listPayments(invoice.id)
-  const templateData = mapInvoiceToTemplateData({ ...invoice, payments }, agency)
+  const templateData = mapInvoiceToTemplateData({ ...invoice, payments }, agency, { isExport: true })
   const selectedTemplate = getInvoiceTemplate(templateId) || getInvoiceTemplate('modern-business')
 
   if (!selectedTemplate) {
